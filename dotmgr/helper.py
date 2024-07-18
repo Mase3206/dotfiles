@@ -9,7 +9,8 @@ import argparse
 
 def sync(files: list[str] = []):
 	allFiles = fdtools.lsAll(DOTFILES_DIR)
-	print(allFiles.find('.bashrc'))
+	# print(allFiles)
+	print(allFiles.findFile(relativePath='files/.oh-my-zsh/themes/terse.zsh-theme'))
 
 
 

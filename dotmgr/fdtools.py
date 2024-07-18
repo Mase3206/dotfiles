@@ -14,13 +14,14 @@ class File:
 
 	
 	def __repr__(self):
-		return f"File(path='{self.path}')"
+		return f"File(path='{self.path}', basename='{self.basename}')"
 
 
 
 class Directory:
 	def __init__(self, path: str):
 		self.path = path
+		self.basename = os.path.basename(self.path)
 		self.files: list[File] = self._lsFiles()
 		self.dirs: list[Directory] = self._lsDirs()
 
@@ -28,7 +29,7 @@ class Directory:
 	def _lsFiles(self) -> list[File]:
 		try:
 			# return a list of all FILES in the given path
-			filePaths = [entry for entry in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, entry))]
+			filePaths = [os.path.join(self.path, entry) for entry in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, entry))]
 
 			return [File(fp) for fp in filePaths]
 		
@@ -50,10 +51,11 @@ class Directory:
 		return directories
 
 	
-	def find(self, basename: str = '', relativePath: str = '') -> File | None:
-		if len(self.dirs) == 0:
+	def findFile(self, basename: str = '', relativePath: str = '') -> File | None:
+		if len(self.dirs) == 0 and len(self.files) == 0:
 			return None
-		elif basename != '':
+		
+		elif basename != '' and relativePath == '':
 			# search in this directory first
 			for f in self.files:
 				if f.basename == basename:
@@ -61,12 +63,34 @@ class Directory:
 			
 			# the search recursively in subdirectories
 			for d in self.dirs:
-				result = d.find(basename=basename, relativePath=relativePath)
+				result = d.findFile(basename=basename)
 				if result == None:
 					continue
 				else:
 					return result
+				
+			# will only be run if nothing is found recursively
+			return None
+				
+		elif basename == '' and relativePath != '':
+			pathParts = relativePath.split('/')
 
+			for d in self.dirs:
+				if d.basename == pathParts[0]:
+					if len(pathParts) <= 2:
+						result = d.findFile(basename=pathParts[1])
+					else:
+						result = d.findFile(relativePath='/'.join(pathParts[1:]))
+
+					if result == None:
+						continue
+					else:
+						return result
+				# else:
+				# 	return self.findFile(relativePath=relativePath)
+					
+			# will only be run if nothing is found recursively
+			return None
 
 
 
