@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
 import os
 
 
@@ -100,12 +101,64 @@ class Directory:
 					
 			# will only be run if nothing is found recursively
 			return None
+		
 
+	def findDir(self, path_or_basename: str) ->  Directory | None:
+		"""
+		Recursively find the specified directory.
+		"""
+
+		# autodetect if path or basename
+		if '/' in list(path_or_basename):
+			relativePath = path_or_basename
+			basename = ''
+		else:
+			relativePath = ''
+			basename = path_or_basename
+
+		# probably un-necessary
+		if len(self.dirs) == 0:
+			return None
+		
+		elif basename != '' and relativePath == '':
+			# search in this directory first
+			for d in self.dirs:
+				if d.basename == basename:
+					return d
+			
+			# the search recursively in subdirectories
+			for d in self.dirs:
+				result = d.findDir(basename)
+				if result == None:
+					continue
+				else:
+					return result
+				
+			# will only be run if nothing is found recursively
+			return None
+				
+		elif basename == '' and relativePath != '':
+			pathParts = relativePath.split('/')
+
+			for d in self.dirs:
+				if d.basename == pathParts[0]:
+					if len(pathParts) <= 2:
+						result = d.findDir(pathParts[1])
+					else:
+						result = d.findDir('/'.join(pathParts[1:]))
+
+					if result == None:
+						continue
+					else:
+						return result
+					
+			# will only be run if nothing is found recursively
+			return None
 
 
 	# special methods
 	def __repr__(self):
-		return f"\nDirectory(path='{self.path}', files={self.files}, dirs={self.dirs})"
+		return f"Directory(path='{self.path}', files={self.files}, dirs={self.dirs})"
 		
 
 
@@ -146,25 +199,27 @@ def lsAll(path: str):
 
 
 
-def ln(source: str, dest: str, symbolic: bool = True):
+def ln(source: File, dest: File, symbolic: bool = True):
 	"""
 	Create a link (default symbolic) from the source path to the destination path. All paths must be absolute!
 	"""
-
-	if source[0] != '/' or dest[0] != '/':
-		raise NonAbsolutePathException(f'Given source or destination path is not an absolute path.')
 	
 	if symbolic:
-		os.symlink(source, dest)
+		os.symlink(source.path, dest.path)
 	else:
-		os.link(source, dest)
+		os.link(source.path, dest.path)
+
+
 
 
 
 
 def _tc():
 	d = lsAll('/Users/noahroberts/Github/dotfiles')
-	print(d)
+	print(d.findFile('.zshrc'))
+	print(d.findFile('files/.oh-my-zsh/themes/terse.zsh-theme'))
+	print(d.findDir('.oh-my-zsh'))
+	print(d.findDir('files/.oh-my-zsh/themes'))
 
 if __name__ == '__main__':
 	_tc()
