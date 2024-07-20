@@ -28,7 +28,7 @@ def setup(homedir: Directory):
 
 		subprocess.run("curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh > ~/install.sh", shell=True)
 		subprocess.run('sh ~/install.sh --unattended', shell=True)
-		subprocess.run('chsh -s /bin/zsh $(id -un)', shell=True)
+		subprocess.run('chsh -s $(which zsh) $(id -un)', shell=True)
 	
 
 
