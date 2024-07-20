@@ -51,7 +51,16 @@ class Directory:
 		return directories
 
 	
-	def findFile(self, basename: str = '', relativePath: str = '') -> File | None:
+	def findFile(self, path_or_basename: str, basename: str = '', relativePath: str = '') -> File | None:
+		# autodetect if path or basename
+		if '/' in list(path_or_basename):
+			relativePath = path_or_basename
+			basename = ''
+		else:
+			relativePath = ''
+			basename = path_or_basename
+
+		# probably un-necessary
 		if len(self.dirs) == 0 and len(self.files) == 0:
 			return None
 		
@@ -63,7 +72,7 @@ class Directory:
 			
 			# the search recursively in subdirectories
 			for d in self.dirs:
-				result = d.findFile(basename=basename)
+				result = d.findFile(basename)
 				if result == None:
 					continue
 				else:
@@ -78,9 +87,9 @@ class Directory:
 			for d in self.dirs:
 				if d.basename == pathParts[0]:
 					if len(pathParts) <= 2:
-						result = d.findFile(basename=pathParts[1])
+						result = d.findFile(pathParts[1])
 					else:
-						result = d.findFile(relativePath='/'.join(pathParts[1:]))
+						result = d.findFile('/'.join(pathParts[1:]))
 
 					if result == None:
 						continue
