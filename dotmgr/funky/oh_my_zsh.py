@@ -18,14 +18,17 @@ def isInstalled(homedir: Directory) -> bool:
 
 
 def setup(homedir: Directory):
-	from funky import zsh
+	if isInstalled(homedir):
+		return
+	else:
+		from funky import zsh
 
-	if not zsh.isInstalled():
-		zsh.setup(homedir)
+		if not zsh.isInstalled():
+			zsh.setup(homedir)
 
-	subprocess.run("curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh > ~/install.sh", shell=True)
-	subprocess.run('sh ~/install.sh --unattended', shell=True)
-	subprocess.run('chsh -s /bin/zsh $(id -un)', shell=True)
+		subprocess.run("curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh > ~/install.sh", shell=True)
+		subprocess.run('sh ~/install.sh --unattended', shell=True)
+		subprocess.run('chsh -s /bin/zsh $(id -un)', shell=True)
 	
 
 
