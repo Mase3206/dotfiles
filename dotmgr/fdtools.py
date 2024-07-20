@@ -199,11 +199,14 @@ def lsAll(path: str):
 
 
 
-def ln(source: File, dest: File, symbolic: bool = True):
+def ln(source: File, dest: File, symbolic: bool = True, rmIfExists: bool = True):
 	"""
 	Create a link (default symbolic) from the source path to the destination path. All paths must be absolute!
 	"""
 	
+	if os.path.isfile(dest.path):
+		os.remove(dest.path)
+
 	if symbolic:
 		os.symlink(source.path, dest.path)
 	else:
