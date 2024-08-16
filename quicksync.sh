@@ -136,7 +136,12 @@ function do_help () {
 	cat << EOF
 $SHELL_SCRIPT_FILE_NAME subcommand args
 
-Subcommands: ln, rm
+Subcommands: 
+	\`ln\`: Link file or directory from dotfiles repo to home directory
+	\`rm\`: Remove file or symlink from home directory
+
+Global Options:
+	\`--from\`: Use newline-separated file names listed in a text file
 
 Required environment variables:
 	DOTFILES_DIR - absolute path to the dotfiles directory
@@ -144,44 +149,91 @@ EOF
 }
 
 
+function parse_subcommand () {
+	case $1 in
+		rm) 
+			# remove file in $2
+			# do_rm $2
 
+			# use `eval` to expand brace expressions
+			eval "files=($2)"
+
+			# iterate over expanded files
+			for file in "${files[@]}"; do
+				do_rm "$file"
+			done
+			;;
+
+		ln | sync)
+			# link file/dir from $2 to $3 (if $3 is given)
+			# do_ln $2 $3
+
+			# Use `eval` to expand brace expressions
+			eval "sources=($2)"
+			eval "destinations=($3)"
+
+			# verify that len(sources) == len(destinations)
+			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
+				echo "The number of sources and destinations given do not match. Cancelling"
+				exit 1
+			elif [[ ${#destinations[@]} -eq 0 ]]; then
+				destinations=$sources
+			else
+				echo "fuck"
+				exit 49
+			fi
+			
+			# iterate over expanded items
+			for i in "${!sources[@]}"; do
+				do_ln "${sources[$i]}" "${destinations[$i]}"
+			done
+			;;
+		
+		*)
+			# doesn't match any of the above
+			echo "Unknown or missing subcommand."
+			do_help
+			;;
+	esac
+}
+
+
+# check global options
 case $1 in
 	-h | help) 
 		# display help
 		do_help
 		;;
+
 	
-	rm) 
-		# remove file in $2
-		# do_rm $2
-		for file in $2; do
-			do_rm "$file"
-		done
-		;;
+	--from)
+		# check if given file exists and process it
+		# $2 = file name
+		if [ -f $2 ]; then
+			# initialize empty array
+			known_files=()
 
-	ln | sync)
-		# link file/dir from $2 to $3 (if $3 is given)
-		# do_ln $2 $3
+			# read each line from file and add it to array
+			while IFS= read -r line; do
+				known_files+=("$line")
+			done < "$2"
+			echo "Found: ${known_files[@]}"
+			echo
 
-		# Use `eval` to expand brace expressions
-		eval "sources=($2)"
-		eval "destinations=($3)"
-
-		# verify that len(sources) == len(destinations)
-		if [ ${#sources[@]} -ne ${#destinations[@]} ]; then
-			echo "The number of sources and destinations given do not match. Cancelling"
+			# $3 = subcommand
+			for i in "${!known_files[@]}"; do
+				# echo "Running $3 with ${known_files[$i]}"
+				parse_subcommand $3 "${known_files[$i]}"
+			done
+		else
+			echo "Given file $2 does not exist. Cancelling"
 			exit 1
 		fi
-		
-		# iterate over expanded items
-		for i in "${!sources[@]}"; do
-			do_ln "${sources[$i]}" "${destinations[$i]}"
-		done
 		;;
-	
+
+
 	*)
-		# doesn't match any of the above
-		echo "Missing subcommand."
-		do_help
+		# send all other things to parse_subcommand
+		parse_subcommand $2 $3
 		;;
 esac
