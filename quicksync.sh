@@ -5,7 +5,7 @@ SHELL_SCRIPT_FILE_NAME="quicksync.sh"
 
 function do_rm () {
 	# abort if no arguments are given
-	[ -z $1 ] && echo "Missing required argument: file. Run with \`-h\` for usage." && exit 1
+	[ -z $1 ] && echo "Missing required argument: file. Run with \`-h\` for usage." >&2 && exit 1
 
 	# USAGE
 	if [[ $1 == "-h" ]]; then
@@ -45,11 +45,11 @@ EOF
 		echo "done."
 	
 	elif [[ $type == "directory" ]]; then
-		echo "I will not remove a directory. Cancelling"
+		echo "I will not remove a directory. Cancelling" >&2
 		exit 1
 	
 	else
-		echo "File $HOME/$1 has an unknown type. Cancelling"
+		echo "File $HOME/$1 has an unknown type. Cancelling" >&2
 		exit 1
 	fi
 }
@@ -58,7 +58,7 @@ EOF
 
 function do_ln () {
 	# abort if no arguments are given
-	[ -z $1 ] && echo "Missing required argument: src_file. Run with \`-h\` for usage." && exit 1
+	[ -z $1 ] && echo "Missing required argument: src_file. Run with \`-h\` for usage." >&2 && exit 1
 
 	# USAGE
 	if [[ $1 == "-h" ]]; then
@@ -94,24 +94,24 @@ EOF
 	# DEST PATH TYPE CHECKS
 	# regular file -> fail
 	if [ -f $dest ] && ! [ -L $dest ]; then
-		echo "Destination file $dest already exists and is a regular file. You can remove it with \`$SHELL_SCRIPT_FILE_NAME rm\`."
+		echo "Destination file $dest already exists and is a regular file. You can remove it with \`$SHELL_SCRIPT_FILE_NAME rm\`." >&2
 		exit 2
 
 	# already linked -> fail
 	elif [ -L $dest ]; then
-		echo "Destination file is already symlinked to $(readlink $dest). You can remove it with \`$SHELL_SCRIPT_FILE_NAME rm\`."
+		echo "Destination file is already symlinked to $(readlink $dest). You can remove it with \`$SHELL_SCRIPT_FILE_NAME rm\`." >&2
 		exit 2
 	
 	# directory -> fail
 	elif [ -d $dest ]; then
-		echo "Destination $dest is an existing directory. You'll need to delete it manually before continuing. Be 100% sure you're doing this right first though!"
+		echo "Destination $dest is an existing directory. You'll need to delete it manually before continuing. Be 100% sure you're doing this right first though!" >&2
 		exit 2
 	fi
 
 	# SOURCE PATH TYPE CHECKS
 	# symlink -> fail
 	if [[ $type == "symlink" ]]; then
-		echo "I will not link from a symlink. Canceling"
+		echo "I will not link from a symlink. Canceling" >&2
 		exit 1
 
 	# regular file
@@ -133,7 +133,7 @@ EOF
 		fi
 	
 	else
-		echo "File $source has an unknown type. Cancelling"
+		echo "File $source has an unknown type. Cancelling" >&2
 		exit 1
 	fi
 }
@@ -186,13 +186,13 @@ function parse_subcommand () {
 
 			# verify that len(sources) == len(destinations) or that destinations is empty
 			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
-				echo "The number of sources and destinations given do not match. Cancelling"
+				echo "The number of sources and destinations given do not match. Cancelling" >&2
 				exit 1
 			elif [[ ${#destinations[@]} -eq 0 ]]; then
-				destinations=$sources
+				destinations=("${sources[@]}")
 			else
-				echo "fuck"
-				exit 49
+				echo "Brace expressions need to be enclosed in double-quotes." >&2
+				exit 1
 			fi
 			
 			# iterate over expanded items
@@ -227,7 +227,7 @@ EOF
 				sync_help
 				exit 0
 			elif [[ "$2" == "" ]]; then
-				echo "Missing required argument: src_file. Run with \`-h\` for usage."
+				echo "Missing required argument: src_file. Run with \`-h\` for usage." >&2
 				# sync_help
 				exit 1
 			fi
@@ -238,13 +238,13 @@ EOF
 
 			# verify that len(sources) == len(destinations) or that destinations is empty
 			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
-				echo "The number of sources and destinations given do not match. Cancelling"
+				echo "The number of sources and destinations given do not match. Cancelling" >&2
 				exit 1
 			elif [[ ${#destinations[@]} -eq 0 ]]; then
-				destinations=$sources
+				destinations=("${sources[@]}")
 			else
-				echo "fuck"
-				exit 49
+				echo "Brace expressions need to be enclosed in double-quotes." >&2
+				exit 1
 			fi
 
 			# iterate over expanded items
@@ -258,7 +258,7 @@ EOF
 		
 		*)
 			# doesn't match any of the above
-			echo "Unknown or missing subcommand."
+			echo "Unknown or missing subcommand." >&2
 			do_help
 			;;
 	esac
@@ -293,7 +293,7 @@ case $1 in
 				parse_subcommand $3 "${known_files[$i]}"
 			done
 		else
-			echo "Given file $2 does not exist. Cancelling"
+			echo "Given file $2 does not exist. Cancelling" >&2
 			exit 1
 		fi
 		;;
