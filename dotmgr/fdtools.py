@@ -20,11 +20,15 @@ class File:
 
 
 class Directory:
-	def __init__(self, path: str):
+	def __init__(self, path: str, leaveEmpty = False):
 		self.path = path
 		self.basename = os.path.basename(self.path)
-		self.files: list[File] = self._lsFiles()
-		self.dirs: list[Directory] = self._lsDirs()
+		if not leaveEmpty:
+			self.files: list[File] = self._lsFiles()
+			self.dirs: list[Directory] = self._lsDirs()
+		else:
+			self.files: list[File] = []
+			self.dirs: list[Directory] = []
 
 
 	def _lsFiles(self) -> list[File]:
@@ -220,9 +224,9 @@ def ln(source: File, dest: File, symbolic: bool = True, rmIfExists: bool = True)
 def _tc():
 	d = lsAll('/Users/noahroberts/Github/dotfiles')
 	print(d.findFile('.zshrc'))
-	print(d.findFile('files/.oh-my-zsh/themes/terse.zsh-theme'))
+	print(d.findFile('.oh-my-zsh/themes/terse.zsh-theme'))
 	print(d.findDir('.oh-my-zsh'))
-	print(d.findDir('files/.oh-my-zsh/themes'))
+	print(d.findDir('.oh-my-zsh/themes'))
 
 if __name__ == '__main__':
 	_tc()

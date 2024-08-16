@@ -2,10 +2,31 @@
 
 import fdtools
 import argparse
-import funky
 import os
 
-import funky.oh_my_zsh
+import oh_my_zsh
+
+# directory constants
+HOME_DIR = fdtools.home()
+
+# define the dotfiles directory based on the current working directory by default, but allow overrides.
+DOTFILES_DIR = fdtools.pwd() if (overrideDotfilesDir := input(f'Dotfiles directory: [{fdtools.pwd()}] ')) == '' else overrideDotfilesDir
+
+if not fdtools.isDir(DOTFILES_DIR):
+	print('Dotfiles folder path is not a directory.')
+	exit(1)
+
+
+def fileSyncTuple(repoDir: fdtools.Directory, homeDir: fdtools.Directory, fileName: str) -> tuple[fdtools.File, fdtools.File]: 
+	t: tuple[fdtools.File, fdtools.File]
+	r = repoDir.findFile(fileName)
+	if type(r) == None:
+		raise FileNotFoundError(f'File "{fileName} not found in dotfiles repo.')
+	else:
+		h = fdtools.File(os.path.join(homeDir.path, fileName))
+		t = (r, h) # type: ignore
+
+	return t
 
 
 
@@ -15,41 +36,20 @@ def sync(files: list[str] = []):
 	home = fdtools.lsAll(HOME_DIR)
 	
 	# link .bashrc
-	bashrc = (
-		repo.findFile('.bashrc'),
-		fdtools.File(os.path.join(home.path, '.bashrc'))
-	)
+	bashrc = fileSyncTuple(repo, home, '.bashrc')
 	fdtools.ln(bashrc[0], bashrc[1])
 
 	# set up oh my zsh
-	funky.oh_my_zsh.setup(home)
+	oh_my_zsh.setup(home)
 	# link .zshrc and terse.zsh-theme
-	zshrc = (
-		repo.findFile('.zshrc'),
-		fdtools.File(os.path.join(home.path, '.zshrc'))
-	)
-	terseZshTheme = (
-		repo.findFile('files/.oh-my-zsh/themes/terse.zsh-theme'),
-		fdtools.File(os.path.join(home.path, '.oh-my-zsh', 'themes', 'terse.zsh-theme'))
-	)
+	zshrc = fileSyncTuple(repo, home, '.zshrc')
+	terseZshTheme = fileSyncTuple(repo, home, '.oh-my-zsh/themes/terse.zsh-theme')
+
 	fdtools.ln(zshrc[0], zshrc[1])
 	fdtools.ln(terseZshTheme[0], terseZshTheme[1])
 
+	return
 
-
-
-
-def init():
-	global HOME_DIR, DOTFILES_DIR
-	# directory constants
-	HOME_DIR = fdtools.home()
-
-	# define the dotfiles directory based on the current working directory by default, but allow overrides.
-	DOTFILES_DIR = fdtools.pwd() if (overrideDotfilesDir := input(f'Dotfiles directory: [{fdtools.pwd()}] ')) == '' else overrideDotfilesDir
-
-	if not fdtools.isDir(DOTFILES_DIR):
-		print('Dotfiles folder path is not a directory.')
-		exit(1)
 
 
 
@@ -70,11 +70,21 @@ def getArgs():
 
 
 def main():
-	init()
 	a = getArgs()
 	# execute the default function associated with the subparser
 	a.func(a)
 
 
+def _tc():
+	repo = fdtools.lsAll(DOTFILES_DIR)
+	# home = fdtools.lsAll(HOME_DIR)
+	home = fdtools.Directory(HOME_DIR, leaveEmpty=True)
+	
+	# link .bashrc
+	terseZshTheme = fileSyncTuple(repo, home, '.oh-my-zsh/themes/terse.zsh-theme')
+	print(terseZshTheme)
+
+
 if __name__ == '__main__':
-	main()
+	# main()
+	_tc()
