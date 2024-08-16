@@ -5,7 +5,7 @@ SHELL_SCRIPT_FILE_NAME="quicksync.sh"
 
 function do_rm () {
 	# abort if no arguments are given
-	[ -z $1 ] && echo "Missing required argument: file. Run with \`-h\` for usage." >&2 && exit 1
+	[ -z $1 ] && echo "error rm: Missing required argument: file. Run with \`-h\` for usage." >&2 && exit 1
 
 	# USAGE
 	if [[ $1 == "-h" ]]; then
@@ -52,22 +52,22 @@ EOF
 	
 	# directory -> fail
 	elif [[ $type == "directory" ]]; then
-		echo "I will not remove a directory. Cancelling" >&2
+		echo "error rm: I will not remove a directory. Cancelling" >&2
 		exit 1
 
 	# nonexistent -> skip
 	elif ! [[ $type == "exists" ]]; then
-		echo "File $HOME/$1 doesn't exist or may have already been removed. Skipping"
+		echo "error rm: File $HOME/$1 doesn't exist or may have already been removed. Skipping"
 	
 	# unknown/nonexistent
 	else
 		# nonexistent -> skip
 		if ! [ -e $HOME/$1 ]; then
-			echo "File $HOME/$1 doesn't exist or may have already been removed. Skipping"
+			echo "error rm: File $HOME/$1 doesn't exist or may have already been removed. Skipping"
 
 		# unknown -> fail
 		else
-			echo "File $HOME/$1 has an unknown type. Cancelling" >&2
+			echo "error rm: File $HOME/$1 has an unknown type. Cancelling" >&2
 			exit 1
 		fi
 	fi
@@ -77,7 +77,7 @@ EOF
 
 function do_ln () {
 	# abort if no arguments are given
-	[ -z $1 ] && echo "Missing required argument: src_file. Run with \`-h\` for usage." >&2 && exit 1
+	[ -z $1 ] && echo "error ln: Missing required argument: src_file. Run with \`-h\` for usage." >&2 && exit 1
 
 	# USAGE
 	if [[ $1 == "-h" ]]; then
@@ -113,29 +113,29 @@ EOF
 	# DEST PATH TYPE CHECKS
 	# regular file -> fail
 	if [ -f $dest ] && ! [ -L $dest ]; then
-		echo "Destination file $dest already exists and is a regular file. You can remove it with \`$SHELL_SCRIPT_FILE_NAME rm\`." >&2
+		echo "error ln: Destination file $dest already exists and is a regular file. You can remove it with \`$SHELL_SCRIPT_FILE_NAME rm\`." >&2
 		exit 2
 
 	# already linked -> fail
 	elif [ -L $dest ]; then
-		echo "Destination file is already symlinked to $(readlink $dest). You can remove it with \`$SHELL_SCRIPT_FILE_NAME rm\`." >&2
+		echo "error ln: Destination file is already symlinked to $(readlink $dest). You can remove it with \`$SHELL_SCRIPT_FILE_NAME rm\`." >&2
 		exit 2
 	
 	# directory -> fail
 	elif [ -d $dest ]; then
-		echo "Destination $dest is an existing directory. You'll need to delete it manually before continuing. Be 100% sure you're doing this right first though!" >&2
+		echo "error ln: Destination $dest is an existing directory. You'll need to delete it manually before continuing. Be 100% sure you're doing this right first though!" >&2
 		exit 2
 	fi
 
 	# SOURCE PATH TYPE CHECKS
 	# symlink -> fail
 	if [[ $type == "symlink" ]]; then
-		echo "I will not link from a symlink. Canceling" >&2
+		echo "error ln: I will not link from a symlink. Canceling" >&2
 		exit 1
 
 	# regular file
 	elif [[ $type == "regular file" ]]; then
-		echo -n "Creating symlink: $source -> $dest... "
+		echo -n "error ln: Creating symlink: $source -> $dest... "
 		ln -s $source $dest
 		echo "done."
 
@@ -154,7 +154,7 @@ EOF
 	
 	# unknown -> fail
 	else
-		echo "File $source has an unknown type. Cancelling" >&2
+		echo "error ln: Source file $source has an unknown type. Cancelling" >&2
 		exit 1
 	fi
 }
@@ -207,7 +207,7 @@ function parse_subcommand () {
 
 			# verify that len(sources) == len(destinations)
 			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
-				echo "The number of sources and destinations given do not match. Cancelling" >&2
+				echo "error ln: The number of sources and destinations given do not match. Cancelling" >&2
 				exit 1
 			
 			# OR destinations is empty
@@ -216,7 +216,7 @@ function parse_subcommand () {
 			
 			# otherwise, the brace expressions probably weren't in quotes
 			else
-				echo "Brace expressions need to be enclosed in double-quotes." >&2
+				echo "error ln: Brace expressions need to be enclosed in double-quotes." >&2
 				exit 1
 			fi
 			
@@ -252,7 +252,7 @@ EOF
 				sync_help
 				exit 0
 			elif [[ "$2" == "" ]]; then
-				echo "Missing required argument: src_file. Run with \`-h\` for usage." >&2
+				echo "error sync: Missing required argument: src_file. Run with \`-h\` for usage." >&2
 				# sync_help
 				exit 1
 			fi
@@ -263,7 +263,7 @@ EOF
 
 			# verify that len(sources) == len(destinations) or that destinations is empty
 			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
-				echo "The number of sources and destinations given do not match. Cancelling" >&2
+				echo "error sync: The number of sources and destinations given do not match. Cancelling" >&2
 				exit 1
 			
 			# OR destinations is empty
@@ -272,25 +272,26 @@ EOF
 
 			# otherwise, the brace expressions probably weren't in quotes
 			else
-				echo "Brace expressions need to be enclosed in double-quotes." >&2
+				echo "error sync: Brace expressions need to be enclosed in double-quotes." >&2
 				exit 1
 			fi
 
 			# iterate over expanded items
 			for i in "${!sources[@]}"; do
-				echo -n "Removing and re-linking ${sources[$i]} to ${destinations[$i]}... "
+				echo "Removing and re-linking ${sources[$i]} to ${destinations[$i]}... "
 
-				# run `rm` and `ln` while supressing stdout
-				do_rm "${destinations[$i]}" > /dev/null
-				do_ln "${sources[$i]}" "${destinations[$i]}" > /dev/null
+				# run `rm` and `ln`
+				do_rm "${destinations[$i]}"
+				do_ln "${sources[$i]}" "${destinations[$i]}"
 
 				echo "done."
+				echo
 			done
 			;;
 		
 		*)
 			# doesn't match any of the above
-			echo "Unknown or missing subcommand." >&2
+			echo "error: Unknown or missing subcommand." >&2
 			do_help
 			;;
 	esac
@@ -325,7 +326,7 @@ case $1 in
 				parse_subcommand $3 "${known_files[$i]}"
 			done
 		else
-			echo "Given file $2 does not exist. Cancelling" >&2
+			echo "error: Given file $2 does not exist. Cancelling" >&2
 			exit 1
 		fi
 		;;
