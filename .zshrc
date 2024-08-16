@@ -114,6 +114,6 @@ source $ZSH/oh-my-zsh.sh
 # 	fi
 # }
 
-[ -f ~/.aliases ] && source .aliases
+[ -f ~/.aliases ] && source ~/.aliases
 
 alias vrun="vrun && terse_theme_prompt"
