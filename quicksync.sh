@@ -12,8 +12,12 @@ function do_rm () {
 		cat << EOF
 $SHELL_SCRIPT_FILE_NAME rm [-h] file
 
-	file: relative path to file in home directory
+Arguments:
+	\`file\`: Relative path to file in home directory
 		MUST not be a directory
+
+Options:
+	\`-h\`: Display this help text
 EOF
 		exit 0
 	fi
@@ -61,12 +65,16 @@ function do_ln () {
 		cat << EOF
 usage: $SHELL_SCRIPT_FILE_NAME ln [-h] src_file [dst_file]
 
-	src_file: relative path to source file in dotfiles repo
+Arguments:
+	\`src_file\`: Relative path to source file in dotfiles repo
 		MUST be regular file or directory
 	
-	dst_file (optional): relative path to destination file in home directory
+	\`dst_file\` (optional): Relative path to destination file in home directory
 		DEFAULTS to relative path of src_file if empty
 		MUST not already exist
+
+Options:
+	\`-h\`: Display this help text
 EOF
 		exit 0
 	fi
@@ -142,14 +150,17 @@ Subcommands:
 
 Global Options:
 	\`--from\`: Use newline-separated file names listed in a text file
+	\`-h\`: Display this help text
 
 Required environment variables:
 	DOTFILES_DIR - absolute path to the dotfiles directory
+		CAN be set via \`export\` or in-line. Separate declaration and command with a space.
 EOF
 }
 
 
 function parse_subcommand () {
+	# echo $1 $2 $3 $4 $5
 	case $1 in
 		rm) 
 			# remove file in $2
@@ -234,6 +245,6 @@ case $1 in
 
 	*)
 		# send all other things to parse_subcommand
-		parse_subcommand $2 $3
+		parse_subcommand $1 $2 $3
 		;;
 esac
