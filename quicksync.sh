@@ -28,7 +28,7 @@ EOF
 	[ -f $HOME/$1 ] && ! [ -L $HOME/$1 ] && type="regular file"
 	[ -L $HOME/$1 ] && type="symlink"
 	[ -d $HOME/$1 ] && type="directory"
-	! [ -e $HOME/$1 ] && type="nonexistent"
+	echo $type
 
 	# TYPE CHECKS
 	# regular file -> warning
@@ -56,13 +56,20 @@ EOF
 		exit 1
 
 	# nonexistent -> skip
-	elif [[ $type == "nonexistent" ]]; then
+	elif ! [[ $type == "exists" ]]; then
 		echo "File $HOME/$1 doesn't exist or may have already been removed. Skipping"
 	
-	# unknown -> fail
+	# unknown/nonexistent
 	else
-		echo "File $HOME/$1 has an unknown type. Cancelling" >&2
-		exit 1
+		# nonexistent -> skip
+		if ! [ -e $HOME/$1 ]; then
+			echo "File $HOME/$1 doesn't exist or may have already been removed. Skipping"
+
+		# unknown -> fail
+		else
+			echo "File $HOME/$1 has an unknown type. Cancelling" >&2
+			exit 1
+		fi
 	fi
 }
 
