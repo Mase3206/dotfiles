@@ -5,7 +5,7 @@ SHELL_SCRIPT_FILE_NAME="quicksync.sh"
 
 function do_rm () {
 	# abort if no arguments are given
-	[ -z $1 ] && echo "No file given. Run with \`-h\` for usage." && exit 1
+	[ -z $1 ] && echo "Missing required argument: file. Run with \`-h\` for usage." && exit 1
 
 	# USAGE
 	if [[ $1 == "-h" ]]; then
@@ -58,7 +58,7 @@ EOF
 
 function do_ln () {
 	# abort if no arguments are given
-	[ -z $1 ] && echo "No file(s) given. Run with \`-h\` for usage." && exit 1
+	[ -z $1 ] && echo "Missing required argument: src_file. Run with \`-h\` for usage." && exit 1
 
 	# USAGE
 	if [[ $1 == "-h" ]]; then
@@ -228,7 +228,7 @@ EOF
 				exit 0
 			elif [[ "$2" == "" ]]; then
 				echo "Missing required argument: src_file. Run with \`-h\` for usage."
-				sync_help
+				# sync_help
 				exit 1
 			fi
 			
