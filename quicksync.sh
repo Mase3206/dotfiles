@@ -57,13 +57,13 @@ EOF
 
 	# nonexistent -> skip
 	elif ! [[ $type == "exists" ]]; then
-		echo "error rm: File $HOME/$1 doesn't exist or may have already been removed. Skipping"
+		echo "error rm: File $HOME/$1 doesn't exist or may have already been removed. Skipping" >&2
 	
 	# unknown/nonexistent
 	else
 		# nonexistent -> skip
 		if ! [ -e $HOME/$1 ]; then
-			echo "error rm: File $HOME/$1 doesn't exist or may have already been removed. Skipping"
+			echo "error rm: File $HOME/$1 doesn't exist or may have already been removed. Skipping" >&2
 
 		# unknown -> fail
 		else
