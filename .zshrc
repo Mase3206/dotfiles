@@ -118,5 +118,14 @@ source $ZSH/oh-my-zsh.sh
 
 alias vrun="vrun && terse_theme_prompt"
 
-# quickly sync dotfiles
-alias dotsync="$DOTFILES_DIR/quicksync.sh --from $DOTFILES_DIR/known.txt sync"
+# quickly run `git pull` on dotfile repo and sync all dotfiles
+function dotsync () {
+	if [[ "$DOTFILES_DIR" == "" ]]; then
+		echo "DOTFILES_DIR environment variable is not set. Setting it in your ~/.aliases file is recommended."
+		exit 1
+	else
+		cd $DOTFILES_DIR
+		git pull
+		$DOTFILES_DIR/quicksync.sh --from $DOTFILES_DIR/known.txt sync
+	fi
+}
