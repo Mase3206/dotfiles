@@ -28,6 +28,7 @@ EOF
 	[ -f $HOME/$1 ] && ! [ -L $HOME/$1 ] && type="regular file"
 	[ -L $HOME/$1 ] && type="symlink"
 	[ -d $HOME/$1 ] && type="directory"
+	! [ -e $HOME/$1 ] && type="nonexistent"
 
 	# TYPE CHECKS
 	# regular file -> warning
@@ -53,6 +54,10 @@ EOF
 	elif [[ $type == "directory" ]]; then
 		echo "I will not remove a directory. Cancelling" >&2
 		exit 1
+
+	# nonexistent -> skip
+	elif [[ $type == "nonexistent" ]]; then
+		echo "File $HOME/$1 doesn't exist or may have already been removed. Skipping"
 	
 	# unknown -> fail
 	else
