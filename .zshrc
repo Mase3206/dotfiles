@@ -124,8 +124,11 @@ function dotsync () {
 		echo "DOTFILES_DIR environment variable is not set. Setting it in your ~/.aliases file is recommended."
 		exit 1
 	else
+		local currdir 
+		currdir=$(pwd)
 		cd $DOTFILES_DIR
 		git pull
+		cd $currdir
 		$DOTFILES_DIR/quicksync.sh --from $DOTFILES_DIR/known.txt sync
 	fi
 }
