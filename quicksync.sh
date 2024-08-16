@@ -10,7 +10,7 @@ function do_rm () {
 	# USAGE
 	if [[ $1 == "-h" ]]; then
 		cat << EOF
-$SHELL_SCRIPT_FILE_NAME rm [-h] file
+$SHELL_SCRIPT_FILE_NAME rm [-h] <file>
 
 Arguments:
 	\`file\`: Relative path to file in home directory
@@ -63,7 +63,7 @@ function do_ln () {
 	# USAGE
 	if [[ $1 == "-h" ]]; then
 		cat << EOF
-usage: $SHELL_SCRIPT_FILE_NAME ln [-h] src_file [dst_file]
+usage: $SHELL_SCRIPT_FILE_NAME ln [-h] <src_file> [dst_file]
 
 Arguments:
 	\`src_file\`: Relative path to source file in dotfiles repo
@@ -147,6 +147,7 @@ $SHELL_SCRIPT_FILE_NAME subcommand args
 Subcommands: 
 	\`ln\`: Link file or directory from dotfiles repo to home directory
 	\`rm\`: Remove file or symlink from home directory
+	\`sync\`: Remove and re-link file or directory (helpful if source file path changed)
 
 Global Options:
 	\`--from\`: Use newline-separated file names listed in a text file
@@ -175,7 +176,7 @@ function parse_subcommand () {
 			done
 			;;
 
-		ln | sync)
+		ln)
 			# link file/dir from $2 to $3 (if $3 is given)
 			# do_ln $2 $3
 
@@ -183,7 +184,7 @@ function parse_subcommand () {
 			eval "sources=($2)"
 			eval "destinations=($3)"
 
-			# verify that len(sources) == len(destinations)
+			# verify that len(sources) == len(destinations) or that destinations is empty
 			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
 				echo "The number of sources and destinations given do not match. Cancelling"
 				exit 1
@@ -197,6 +198,61 @@ function parse_subcommand () {
 			# iterate over expanded items
 			for i in "${!sources[@]}"; do
 				do_ln "${sources[$i]}" "${destinations[$i]}"
+			done
+			;;
+
+		sync) 
+			# remove and re-link file/dir from $2 to $3
+
+			local sync_help
+			function sync_help () {
+				cat << EOF
+$SHELL_SCRIPT_FILE_NAME sync <src_file> [dst_file]
+
+Arguments:
+	\`src_file\`: Relative path to source file in dotfiles repo
+		MUST be regular file or directory
+	
+	\`dst_file\` (optional): Relative path to destination file in home directory
+		DEFAULTS to relative path of src_file if empty
+		MUST not already exist
+
+Options: 
+	\`-h\`: Display this help text
+EOF
+			}
+
+			# help text
+			if [[ "$2" == "-h" ]]; then
+				sync_help
+				exit 0
+			elif [[ "$2" == "" ]]; then
+				echo "Missing required argument: src_file. Run with \`-h\` for usage."
+				sync_help
+				exit 1
+			fi
+			
+			# use `eval` to expand brace expressions
+			eval "sources=($2)"
+			eval "destinations=($3)"
+
+			# verify that len(sources) == len(destinations) or that destinations is empty
+			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
+				echo "The number of sources and destinations given do not match. Cancelling"
+				exit 1
+			elif [[ ${#destinations[@]} -eq 0 ]]; then
+				destinations=$sources
+			else
+				echo "fuck"
+				exit 49
+			fi
+
+			# iterate over expanded items
+			for i in "${!sources[@]}"; do
+				echo -n "Removing and re-linking ${sources[$i]} to ${destinations[$i]}... "
+				do_rm "${destinations[$i]}" > /dev/null
+				do_ln "${sources[$i]}" "${destinations[$i]}" > /dev/null
+				echo "done."
 			done
 			;;
 		
