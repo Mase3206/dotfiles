@@ -33,14 +33,14 @@ EOF
 	# TYPE CHECKS
 	# regular file -> warning
 	if [[ $type == "regular file" ]]; then
-		echo -n "File $HOME/$1 is a regular file. Are you sure you want to remove it? [y/N] " >&2
+		echo -n "File $HOME/$1 is a regular file. Are you sure you want to remove it? [y/N] "
 		read continue
 		if [[ $continue == "y" ]] || [[ $continue == "Y" ]]; then
 			echo -n "Removing regular file $HOME/$1... "
 			rm $HOME/$1
 			echo "done."
 		else
-			echo "Cancelling" >&2
+			echo "Cancelling"
 			exit 0
 		fi
 	
@@ -141,14 +141,14 @@ EOF
 
 	# directory -> warn
 	elif [[ $type == "directory" ]]; then
-		echo -n "Source $source is a directory. Are you sure you want to link this? [y/N] " >&2
+		echo -n "Source $source is a directory. Are you sure you want to link this? [y/N] "
 		read continue
 		if [[ $continue == "y" ]] || [[ $continue == "Y" ]]; then
 			echo "Creating symlink: $source -> $dest... "
 			ln -s $source $dest
 			echo "done."
 		else
-			echo "Cancelling" >&2
+			echo "Cancelling"
 			0
 		fi
 	
