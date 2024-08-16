@@ -23,31 +23,38 @@ EOF
 	fi
 
 	local type continue
+
+	# get file type
 	[ -f $HOME/$1 ] && ! [ -L $HOME/$1 ] && type="regular file"
 	[ -L $HOME/$1 ] && type="symlink"
 	[ -d $HOME/$1 ] && type="directory"
 
+	# TYPE CHECKS
+	# regular file -> warning
 	if [[ $type == "regular file" ]]; then
-		echo -n "File $HOME/$1 is a regular file. Are you sure you want to remove it? [y/N] "
+		echo -n "File $HOME/$1 is a regular file. Are you sure you want to remove it? [y/N] " >&2
 		read continue
 		if [[ $continue == "y" ]] || [[ $continue == "Y" ]]; then
 			echo -n "Removing regular file $HOME/$1... "
 			rm $HOME/$1
 			echo "done."
 		else
-			echo "Cancelling"
+			echo "Cancelling" >&2
 			exit 0
 		fi
 	
+	# symlink
 	elif [[ $type == "symlink" ]]; then
 		echo -n "Removing symlink $HOME/$1... "
 		rm $HOME/$1
 		echo "done."
 	
+	# directory -> fail
 	elif [[ $type == "directory" ]]; then
 		echo "I will not remove a directory. Cancelling" >&2
 		exit 1
 	
+	# unknown -> fail
 	else
 		echo "File $HOME/$1 has an unknown type. Cancelling" >&2
 		exit 1
@@ -120,18 +127,20 @@ EOF
 		ln -s $source $dest
 		echo "done."
 
+	# directory -> warn
 	elif [[ $type == "directory" ]]; then
-		echo -n "Source $source is a directory. Are you sure you want to link this? [y/N] "
+		echo -n "Source $source is a directory. Are you sure you want to link this? [y/N] " >&2
 		read continue
 		if [[ $continue == "y" ]] || [[ $continue == "Y" ]]; then
 			echo "Creating symlink: $source -> $dest... "
 			ln -s $source $dest
 			echo "done."
 		else
-			echo "Cancelling"
+			echo "Cancelling" >&2
 			0
 		fi
 	
+	# unknown -> fail
 	else
 		echo "File $source has an unknown type. Cancelling" >&2
 		exit 1
@@ -184,12 +193,16 @@ function parse_subcommand () {
 			eval "sources=($2)"
 			eval "destinations=($3)"
 
-			# verify that len(sources) == len(destinations) or that destinations is empty
+			# verify that len(sources) == len(destinations)
 			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
 				echo "The number of sources and destinations given do not match. Cancelling" >&2
 				exit 1
+			
+			# OR destinations is empty
 			elif [[ ${#destinations[@]} -eq 0 ]]; then
 				destinations=("${sources[@]}")
+			
+			# otherwise, the brace expressions probably weren't in quotes
 			else
 				echo "Brace expressions need to be enclosed in double-quotes." >&2
 				exit 1
@@ -240,8 +253,12 @@ EOF
 			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
 				echo "The number of sources and destinations given do not match. Cancelling" >&2
 				exit 1
+			
+			# OR destinations is empty
 			elif [[ ${#destinations[@]} -eq 0 ]]; then
 				destinations=("${sources[@]}")
+
+			# otherwise, the brace expressions probably weren't in quotes
 			else
 				echo "Brace expressions need to be enclosed in double-quotes." >&2
 				exit 1
@@ -250,8 +267,11 @@ EOF
 			# iterate over expanded items
 			for i in "${!sources[@]}"; do
 				echo -n "Removing and re-linking ${sources[$i]} to ${destinations[$i]}... "
+
+				# run `rm` and `ln` while supressing stdout
 				do_rm "${destinations[$i]}" > /dev/null
 				do_ln "${sources[$i]}" "${destinations[$i]}" > /dev/null
+
 				echo "done."
 			done
 			;;
@@ -300,7 +320,7 @@ case $1 in
 
 
 	*)
-		# send all other things to parse_subcommand
+		# if nothing here matches, just send it all to parse_subcommand
 		parse_subcommand $1 $2 $3
 		;;
 esac
