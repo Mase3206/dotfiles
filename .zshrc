@@ -117,3 +117,6 @@ source $ZSH/oh-my-zsh.sh
 [ -f ~/.aliases ] && source ~/.aliases
 
 alias vrun="vrun && terse_theme_prompt"
+
+# quickly sync dotfiles
+alias dotsync="$DOTFILES_DIR/quicksync.sh --from $DOTFILES_DIR/known.txt sync"
