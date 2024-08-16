@@ -135,7 +135,7 @@ EOF
 
 	# regular file
 	elif [[ $type == "regular file" ]]; then
-		echo -n "error ln: Creating symlink: $source -> $dest... "
+		echo -n "Creating symlink: $source -> $dest... "
 		ln -s $source $dest
 		echo "done."
 
