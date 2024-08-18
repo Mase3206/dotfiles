@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Uncomment for dry-run
-# set -n
+set -n
 
 # Uncomment for verbose stack trace
-# set -x
+set -x
 
 
 SHELL_SCRIPT_FILE_NAME="extras.sh"
@@ -207,7 +207,7 @@ EOF
 }
 
 function oh_my_zsh {
-	local option
+	local option tempfold curdir
 	option=$1
 
 	case $option in
@@ -222,7 +222,24 @@ function oh_my_zsh {
 			;;
 
 		install)
-			CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes'
+			# TODO - Test this in a docker container!
+
+			# prep folders
+			tempfold=$(mktemp -d)
+			curdir=$(pwd)
+
+			# download install script
+			cd $tempfold
+			curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh > install.sh
+
+			# run with these specific environment variables
+			# CHSH='yes' - tells install.sh to set Zsh as the default shell for this user
+			# RUNZSH='no' - tells install.sh not to run Zsh after the install
+			# KEEP_ZSHRC='yes' - tells install.sh not to create a backup of the existing .zshrc file
+			CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes' sh install.sh
+
+			rm install.sh
+			cd $curdir
 			;;
 
 		*)
