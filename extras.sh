@@ -223,7 +223,18 @@ function oh_my_zsh {
 
 		install)
 			CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes'
-		
+			;;
+
+		*)
+			cat << EOF
+$SHELL_SCRIPT_FILE_NAME omz [-h] <command>
+
+Commands:
+	\`detect\`: Detect existing install and display its status
+	\`install\`: Install Oh My Zsh
+EOF
+			[[ "$option" == "-h" ]] && exit 0 || exit 1
+
 	esac
 }
 
