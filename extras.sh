@@ -7,6 +7,9 @@
 # set -x
 
 
+SHELL_SCRIPT_FILE_NAME="extras.sh"
+
+
 # --------------------------------------
 # DETECT OS AND DISTRO
 
@@ -28,18 +31,18 @@ function detect_os () {
 			;;
 		
 		*)
-			echo "OS could not be automatically detected."
+			echo "OS could not be automatically detected." >&2
 			DOTFILES_OS_FAMILY="unknown"
 			manual_set_os
 
 			detect_pkg_manager
 			if [[ $DOTFILES_PKG_MANAGER == "unknown" ]]; then
-				echo "Package manager could not be automatically detected."
+				echo "Package manager could not be automatically detected." >&2
 				manual_set_pkg_manager
 			fi
 	esac
 
-	echo "Detected OS family: $DOTFILES_OS_FAMILY"
+	# echo "Detected OS family: $DOTFILES_OS_FAMILY" >&2
 }
 
 
@@ -67,7 +70,7 @@ function detect_pkg_manager () {
 		manual_set_pkg_manager
 	fi
 
-	[[ $DOTFILES_PKG_MANAGER != "unknown" ]] && echo "Detected package manager: $DOTFILES_PKG_MANAGER"
+	# [[ $DOTFILES_PKG_MANAGER != "unknown" ]] && echo "Detected package manager: $DOTFILES_PKG_MANAGER" >&2
 }
 
 
@@ -139,12 +142,31 @@ function parse_subcommand () {
 			;;
 
 		*)
-			echo "Missing required parameter"
+			echo "error: Missing required parameter" >&2
 			do_help
 			exit 1
 	
 	esac
 		
+}
+
+
+function do_help () {
+	cat << EOF
+$SHELL_SCRIPT_FILE_NAME [-h] <module> <command>
+
+Modules: 
+	\`zsh\`: Zsh
+	\`omz\`: Oh My Zsh
+	\`all\`: apply command to all
+
+Global Options:
+	\`-h\`: Display this help text
+
+Required environment variables:
+	DOTFILES_DIR - absolute path to the dotfiles repository
+		CAN be set via \`export\` or in-line. Separate declaration and command with a space.
+EOF
 }
 
 
@@ -169,7 +191,18 @@ function zsh {
 		
 		install)
 			$DOTFILES_PKG_MANAGER install -y zsh
-	
+			;;
+
+		*)
+			cat << EOF
+$SHELL_SCRIPT_FILE_NAME zsh [-h] <command>
+
+Commands:
+	\`detect\`: Detect existing install and display its status
+	\`install\`: Install Zsh using detected package manager
+EOF
+			[[ "$option" == "-h" ]] && exit 0 || exit 1
+
 	esac
 }
 
@@ -200,18 +233,22 @@ function oh_my_zsh {
 # -------------------------------------
 # MAIN LOOP
 
+init
+
+
 # check global options
 case $1 in
 	-h | help) 
 		# display help
 		do_help
+		exit 0
 		;;
 
 	*)
-		# if nothing here matches, just send it all to parse_subcommand
+		# if nothing here matches, just initialize os-specific variables and send it all to parse_subcommand
+		init
 		parse_subcommand $1 $2 $3
 		;;
 
 esac
 
-init
