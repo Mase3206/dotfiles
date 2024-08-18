@@ -175,38 +175,57 @@ EOF
 # PACKAGE/APP-SPECIFIC STUFF
 
 function zsh {
-	local option
-	option=$1
-
-	case $option in 
+	case $1 in 
 		detect)
-			if [ -x "$(command -v zsh)" ]; then 
-				echo "Zsh is installed." 
-				DOTFILES_ZSH_INSTALLED=1
-			else
-				echo "Zsh is NOT installed."
-				DOTFILES_ZSH_INSTALLED=0
-			fi
+			zsh_detect
 			;;
 		
 		install)
-			$DOTFILES_PKG_MANAGER install -y zsh
-			# back up existing .zshrc before syncing it with repo
-			mv ~/.zshrc ~/.zshrc.dotbak
-			$DOTFILES_DIR/quicksync.sh sync .zshrc
+			zsh_install
 			;;
 
 		*)
-			cat << EOF
+			zsh_help $1
+
+	esac
+
+
+	function zsh_detect () {
+		if [ -x "$(command -v zsh)" ]; then 
+			echo "Zsh is installed." 
+			DOTFILES_ZSH_INSTALLED=1
+		else
+			echo "Zsh is NOT installed."
+			DOTFILES_ZSH_INSTALLED=0
+		fi
+	}
+
+
+	function zsh_install () {
+		# test if Zsh is already installed
+		zsh_detect
+		if [[ $DOTFILES_ZSH_INSTALLED == 1 ]]; then
+			echo "Zsh is already installed!"
+			exit 2
+		fi
+
+		$DOTFILES_PKG_MANAGER install -y zsh
+		# back up existing .zshrc before syncing it with repo
+		mv ~/.zshrc ~/.zshrc.dotbak
+		$DOTFILES_DIR/quicksync.sh sync .zshrc
+	}
+
+
+	function zsh_help () {
+		cat << EOF
 $SHELL_SCRIPT_FILE_NAME zsh [-h] <command>
 
 Commands:
 	\`detect\`: Detect existing install and display its status
 	\`install\`: Install Zsh using detected package manager
 EOF
-			[[ "$option" == "-h" ]] && exit 0 || exit 1
-
-	esac
+		[[ "$1" == "-h" ]] && exit 0 || exit 1
+	}
 }
 
 function oh_my_zsh {
