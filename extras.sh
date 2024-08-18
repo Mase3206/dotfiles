@@ -210,18 +210,11 @@ EOF
 }
 
 function oh_my_zsh {
-	local option tempfold curdir
-	option=$1
+	local tempfold curdir
 
-	case $option in
+	case $1 in
 		detect) 
-			if [ -d ~/.oh-my-zsh ]; then
-				echo "Oh My Zsh is installed."
-				DOTFILES_OMZ_INSTALLED=1
-			else
-				echo "Oh My Zsh is NOT installed."
-				DOTFILES_OMZ_INSTALLED=0
-			fi
+			omz_detect
 			;;
 
 		install)
@@ -249,16 +242,61 @@ function oh_my_zsh {
 			;;
 
 		*)
-			cat << EOF
+			omz_help $1
+
+	esac
+
+
+	function omz_detect () {
+		if [ -d ~/.oh-my-zsh ]; then
+			echo "Oh My Zsh is installed."
+			DOTFILES_OMZ_INSTALLED=1
+		else
+			echo "Oh My Zsh is NOT installed."
+			DOTFILES_OMZ_INSTALLED=0
+		fi
+	}
+
+
+	function omz_install () {
+		omz_detect
+		if [[ $DOTFILES_OMZ_INSTALLED == 1 ]]; then
+			echo "Oh My Zsh is already installed!"
+			exit 2
+		fi
+
+		# prep folders
+		tempfold=$(mktemp -d)
+		curdir=$(pwd)
+
+		# download install script
+		cd $tempfold
+		curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh > install.sh
+
+		# run with these specific environment variables
+		# CHSH='yes' - tells install.sh to set Zsh as the default shell for this user
+		# RUNZSH='no' - tells install.sh not to run Zsh after the install
+		# KEEP_ZSHRC='yes' - tells install.sh not to create a backup of the existing .zshrc file
+		CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes' sh install.sh
+
+		rm install.sh
+		cd $curdir
+
+		# automatically sync Terse OMZ theme from repo
+		$DOTFILES_DIR/quicksync.sh ln .oh-my-zsh/themes/terse.zsh-theme
+	}
+
+
+	function omz_help () {
+		cat << EOF
 $SHELL_SCRIPT_FILE_NAME omz [-h] <command>
 
 Commands:
 	\`detect\`: Detect existing install and display its status
 	\`install\`: Install Oh My Zsh
 EOF
-			[[ "$option" == "-h" ]] && exit 0 || exit 1
-
-	esac
+		[[ "$1" == "-h" ]] && exit 0 || exit 1
+	}
 }
 
 
