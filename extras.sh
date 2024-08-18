@@ -191,6 +191,9 @@ function zsh {
 		
 		install)
 			$DOTFILES_PKG_MANAGER install -y zsh
+			# back up existing .zshrc before syncing it with repo
+			mv ~/.zshrc ~/.zshrc.dotbak
+			$DOTFILES_DIR/quicksync.sh sync .zshrc
 			;;
 
 		*)
@@ -240,6 +243,9 @@ function oh_my_zsh {
 
 			rm install.sh
 			cd $curdir
+
+			# automatically sync Terse OMZ theme from repo
+			$DOTFILES_DIR/quicksync.sh ln .oh-my-zsh/themes/terse.zsh-theme
 			;;
 
 		*)
