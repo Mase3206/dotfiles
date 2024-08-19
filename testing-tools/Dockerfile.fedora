@@ -2,3 +2,5 @@ FROM fedora:40
 
 RUN dnf update -y
 RUN dnf install -y --refresh git
+
+ENV DOTFILES_DIR=/root/dotfiles

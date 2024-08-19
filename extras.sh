@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Uncomment for dry-run
-set -n
+# set -n
 
 # Uncomment for verbose stack trace
-set -x
+# set -x
 
 
 SHELL_SCRIPT_FILE_NAME="extras.sh"
@@ -284,7 +284,9 @@ function omz_install () {
 	# CHSH='yes' - tells install.sh to set Zsh as the default shell for this user
 	# RUNZSH='no' - tells install.sh not to run Zsh after the install
 	# KEEP_ZSHRC='yes' - tells install.sh not to create a backup of the existing .zshrc file
-	CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes' sh install.sh
+	CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes' sh install.sh --unattended --skip-chsh
+	echo ""; echo "Changing $USER's shell to /usr/bin/zsh"
+	chsh $USER -s /usr/bin/zsh
 
 	rm install.sh
 	cd $curdir
