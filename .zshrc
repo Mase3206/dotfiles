@@ -75,6 +75,10 @@ plugins=(git)
 # plugin options
 export PYTHON_AUTO_VRUN=false
 
+# Setting this is required for some OSes to correctly render the git prompt
+# and detect the console width
+LANG="en_US.UTF-8"
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
