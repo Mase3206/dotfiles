@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo 
 echo -e "\e[32m == Checking if \$DOTFILES_DIR is set == \e[0m"
 
@@ -12,7 +14,10 @@ if [ -z $DOTFILES_DIR ]; then
 	echo -n "Adding new \$DOTFILES_DIR export to ~/.aliases... "
 	echo "export DOTFILES_DIR=$DOTFILES_DIR" >> ~/.aliases
 	echo "done."
+else
+	echo "\$DOTFILES_DIR is set to $DOTFILES_DIR."
 fi
+
 
 echo
 echo -e "\e[32m == Installing all extras == \e[0m"

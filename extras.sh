@@ -258,30 +258,36 @@ function oh_my_zsh {
 
 
 function omz_detect () {
+	echo -n "OMZ install status: "
+
 	if [ -d ~/.oh-my-zsh ]; then
-		echo "Oh My Zsh is installed."
+		echo "already installed!"
 		DOTFILES_OMZ_INSTALLED=1
 	else
-		echo "Oh My Zsh is NOT installed."
+		echo "NOT installed."
 		DOTFILES_OMZ_INSTALLED=0
 	fi
 }
 
 
 function omz_install () {
+	echo -e "\e[34m -- Installing Oh My Zsh -- \e[0m"
+
 	local tempfold curdir
 
 	omz_detect
 	if [[ $DOTFILES_OMZ_INSTALLED == 1 ]]; then
-		echo "Oh My Zsh is already installed!"
-		exit 2
+		echo -e "\e[31mSkipping\e[0m OMZ installation."
+		return
 	fi
 
 	# prep folders
+	echo
 	tempfold=$(mktemp -d)
 	curdir=$(pwd)
 
 	# download install script
+	echo -e "\e[36m- Downloading install script\e[0m"
 	cd $tempfold
 	curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh > install.sh
 
@@ -289,15 +295,18 @@ function omz_install () {
 	# CHSH='yes' - tells install.sh to set Zsh as the default shell for this user
 	# RUNZSH='no' - tells install.sh not to run Zsh after the install
 	# KEEP_ZSHRC='yes' - tells install.sh not to create a backup of the existing .zshrc file
-	CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes' sh install.sh --unattended --skip-chsh
-	echo ""; echo "Changing $USER's shell to /usr/bin/zsh"
-	chsh $USER -s /usr/bin/zsh
+	echo -e "\e[36m- Instaling OMZ\e[0m"
+	CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes' sh install.sh --unattended --skip-chsh > /dev/null 2> /dev/null
+	echo -e "\e[36m- Changing $USER's shell to /usr/bin/zsh\e[0m"
+	chsh $USER -s /usr/bin/zsh > /dev/null
 
+	echo -e "\e[36m- Cleaning up\e[0m"
 	rm install.sh
 	cd $curdir
 
+	echo -e "\e[36m- Syncing custom OMZ theme\e[0m"
 	# automatically sync Terse OMZ theme from repo
-	$DOTFILES_DIR/quicksync.sh ln .oh-my-zsh/themes/terse.zsh-theme
+	$DOTFILES_DIR/quicksync.sh ln .oh-my-zsh/themes/terse.zsh-theme > /dev/null
 }
 
 
