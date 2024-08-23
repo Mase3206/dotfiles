@@ -141,6 +141,11 @@ function parse_subcommand () {
 			oh_my_zsh $2 $3 $4
 			;;
 
+		all)
+			zsh $2 $3 $4
+			oh_my_zsh $2 $3 $4
+			;;
+
 		*)
 			echo "error: Missing required parameter" >&2
 			do_help
@@ -312,6 +317,10 @@ EOF
 
 # -------------------------------------
 # MAIN LOOP
+
+# check if DOTFILES_DIR is set; if not, error out
+[ -z $DOTFILES_DIR ] && echo "Required ENV variable \`DOTFILES_DIR\` is not set! Please set via inline declaration or via \`export\`." && exit 5
+
 
 init
 

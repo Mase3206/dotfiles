@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-os_options=(fedora ubuntu debian opensuse rocky macos freebsd)
+os_options=(fedora ubuntu debian opensuse rocky)
 
 function start () {
 

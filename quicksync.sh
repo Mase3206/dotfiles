@@ -33,8 +33,15 @@ EOF
 	# TYPE CHECKS
 	# regular file -> warning
 	if [[ $type == "regular file" ]]; then
-		echo -n "File $HOME/$1 is a regular file. Are you sure you want to remove it? [y/N] "
-		read continue
+		
+		# if `-y` is passed, bypass confirmation prompt
+		if [[ $force_yes == 0 ]]; then
+			echo -n "File $HOME/$1 is a regular file. Are you sure you want to remove it? [y/N] "
+			read continue
+		else
+			continue="y"
+		fi
+
 		if [[ $continue == "y" ]] || [[ $continue == "Y" ]]; then
 			echo -n "Removing regular file $HOME/$1... "
 			rm $HOME/$1
@@ -141,8 +148,15 @@ EOF
 
 	# directory -> warn
 	elif [[ $type == "directory" ]]; then
-		echo -n "Source $source is a directory. Are you sure you want to link this? [y/N] "
-		read continue
+
+		# if `-y` is passed, bypass confirmation prompt
+		if [[ $force_yes == 0 ]]; then
+			echo -n "Source $source is a directory. Are you sure you want to link this? [y/N] "
+			read continue
+		else
+			continue="y"
+		fi
+
 		if [[ $continue == "y" ]] || [[ $continue == "Y" ]]; then
 			echo "Creating symlink: $source -> $dest... "
 			ln -s $source $dest
@@ -298,6 +312,28 @@ EOF
 }
 
 
+# check if DOTFILES_DIR is set; if not, error out
+[ -z $DOTFILES_DIR ] && echo "Required ENV variable \`DOTFILES_DIR\` is not set! Please set via inline declaration or via \`export\`." && exit 5
+
+
+# Check if `-y` is present
+# `-y` automatically answers "yes" to all y/n prompts
+# if `-y` is detected, remove it from $@
+force_yes=0
+filtered_args=()
+
+for arg in "$@"; do
+	if [[ "$arg" == "-y" ]]; then
+		force_yes=1
+	else
+		filtered_args+=("$arg")
+	fi
+done
+
+# re-set the positional parameters to the filtered args (excluding `-y`)
+set -- "${filtered_args[@]}"
+
+
 # check global options
 case $1 in
 	-h | help) 
@@ -323,7 +359,7 @@ case $1 in
 			# $3 = subcommand
 			for i in "${!known_files[@]}"; do
 				# echo "Running $3 with ${known_files[$i]}"
-				parse_subcommand $3 "${known_files[$i]}"
+				parse_subcommand $3 "${known_files[$i]}" $4
 			done
 		else
 			echo "error: Given file $2 does not exist. Cancelling" >&2
@@ -334,6 +370,8 @@ case $1 in
 
 	*)
 		# if nothing here matches, just send it all to parse_subcommand
+		# $1 = module
+		# $2 = module subcommand
 		parse_subcommand $1 $2 $3
 		;;
 esac
