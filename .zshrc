@@ -117,12 +117,13 @@ source $ZSH/oh-my-zsh.sh
 [ -f ~/.aliases ] && source ~/.aliases
 
 alias vrun="vrun && terse_theme_prompt"
+alias gedit=gnome-text-editor
 
 # quickly run `git pull` on dotfile repo and sync all dotfiles
 function dotsync () {
 	if [[ "$DOTFILES_DIR" == "" ]]; then
 		echo "DOTFILES_DIR environment variable is not set. Setting it in your ~/.aliases file is recommended."
-		exit 1
+		return 1
 	else
 		local currdir 
 		currdir=$(pwd)

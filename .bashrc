@@ -25,6 +25,7 @@ fi
 unset rc
 
 
+# bash prompt
 function nonzero_return() {
 	RETVAL=$?
 	[ $RETVAL -ne 0 ] && echo "<$RETVAL> "
@@ -32,8 +33,20 @@ function nonzero_return() {
 
 export PS1="\[\e[31m\]\`nonzero_return\`\[\e[m\][\[\e[32m\]\u\[\e[m\] @ \[\e[36m\]\h\[\e[m\] ; \[\e[35m\]\W\[\e[m\]] \\$ "
 
-# eval "$(thefuck --alias)"
 
-SHARED="/run/media/noahsroberts/Shared"
-
+# aliases and function
 alias gedit=gnome-text-editor
+
+function dotsync () {
+	if [[ "$DOTFILES_DIR" == "" ]]; then
+		echo "DOTFILES_DIR environment variable is not set. Setting it in your ~/.aliases file is recommended."
+		return 1
+	else
+		local currdir 
+		currdir=$(pwd)
+		cd $DOTFILES_DIR
+		git pull
+		cd $currdir
+		$DOTFILES_DIR/quicksync.sh --from $DOTFILES_DIR/known.txt sync
+	fi
+}
