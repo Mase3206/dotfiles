@@ -1,6 +1,32 @@
 #!/bin/bash
 
+# set -x
+
 SHELL_SCRIPT_FILE_NAME="quicksync.sh"
+
+
+function big_header () {
+	echo; echo; echo -e "\e[32m========  $1  ========\e[0m"; echo
+}
+
+function subheader () {
+	echo; echo -e "\e[34m----  $1  ----\e[0m"
+}
+
+function step () {
+	echo -e "\e[36m- $1\e[0m"
+}
+
+function status_bad () {
+	echo -e "$1: \e[31m$2\e[0m"
+}
+
+function status_good () {
+	echo "$1: $2"
+}
+
+
+
 
 
 function do_rm () {
@@ -28,7 +54,7 @@ EOF
 	[ -f $HOME/$1 ] && ! [ -L $HOME/$1 ] && type="regular file"
 	[ -L $HOME/$1 ] && type="symlink"
 	[ -d $HOME/$1 ] && type="directory"
-	echo $type
+	# echo $type
 
 	# TYPE CHECKS
 	# regular file -> warning
@@ -240,42 +266,36 @@ function parse_subcommand () {
 			done
 			;;
 
-		sync) 
+		sync)			
 			# remove and re-link file/dir from $2 to $3
-
-			local sync_help
-			function sync_help () {
+			# help text
+			if [[ "$2" == "-h" ]]; then
 				cat << EOF
 $SHELL_SCRIPT_FILE_NAME sync <src_file> [dst_file]
 
 Arguments:
-	\`src_file\`: Relative path to source file in dotfiles repo
-		MUST be regular file or directory
-	
-	\`dst_file\` (optional): Relative path to destination file in home directory
-		DEFAULTS to relative path of src_file if empty
-		MUST not already exist
+\`src_file\`: Relative path to source file in dotfiles repo
+MUST be regular file or directory
+
+\`dst_file\` (optional): Relative path to destination file in home directory
+DEFAULTS to relative path of src_file if empty
+MUST not already exist
 
 Options: 
-	\`-h\`: Display this help text
+\`-h\`: Display this help text
 EOF
-			}
-
-			# help text
-			if [[ "$2" == "-h" ]]; then
-				sync_help
 				exit 0
 			elif [[ "$2" == "" ]]; then
 				echo "error sync: Missing required argument: src_file. Run with \`-h\` for usage." >&2
 				# sync_help
 				exit 1
 			fi
-			
+
 			# use `eval` to expand brace expressions
 			eval "sources=($2)"
 			eval "destinations=($3)"
 
-			# verify that len(sources) == len(destinations) or that destinations is empty
+			# maybe len(sources) != len(destinations) and destinations is not empty
 			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
 				echo "error sync: The number of sources and destinations given do not match. Cancelling" >&2
 				exit 1
@@ -283,23 +303,29 @@ EOF
 			# OR destinations is empty
 			elif [[ ${#destinations[@]} -eq 0 ]]; then
 				destinations=("${sources[@]}")
+			fi
 
 			# otherwise, the brace expressions probably weren't in quotes
-			else
-				echo "error sync: Brace expressions need to be enclosed in double-quotes." >&2
-				exit 1
-			fi
+			# else
+			# 	echo "${sources[@]}" "${#sources[@]}"
+			# 	echo "${destinations[@]}" "${#destinations[@]}"
+			# 	echo "error sync: Brace expressions need to be enclosed in double-quotes." >&2
+			# 	exit 1
+			# fi
 
 			# iterate over expanded items
 			for i in "${!sources[@]}"; do
-				echo "Removing and re-linking ${sources[$i]} to ${destinations[$i]}... "
+				# echo ${sources[$i]}
+				# echo ${destinations[$i]}
+				if [[ "${sources[$i]}" != "${destinations[$i]}" ]]; then
+					step "Removing and re-linking ${sources[$i]} to ${destinations[$i]}"
+				else
+					step "Removing and re-linking ${sources[$i]}"
+				fi
 
 				# run `rm` and `ln`
-				do_rm "${destinations[$i]}"
-				do_ln "${sources[$i]}" "${destinations[$i]}"
-
-				echo "done."
-				echo
+				do_rm "${destinations[$i]}" > /dev/null
+				do_ln "${sources[$i]}" "${destinations[$i]}" > /dev/null
 			done
 			;;
 		
@@ -353,8 +379,12 @@ case $1 in
 			while IFS= read -r line; do
 				known_files+=("$line")
 			done < "$2"
-			echo "Found: ${known_files[@]}"
-			echo
+			echo -n "Found: "
+			for i in "${!known_files[@]}"; do
+				echo -n "${known_files[$i]}"
+				! (( 1 + i == ${#known_files[@]} )) && echo -n ", "
+			done 
+			echo; echo
 
 			# $3 = subcommand
 			for i in "${!known_files[@]}"; do
