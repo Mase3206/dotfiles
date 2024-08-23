@@ -9,3 +9,7 @@ if [ -z $DOTFILES_DIR ]; then
 	# add to ~/.aliases so it's sourced
 	echo "export DOTFILES_DIR=$DOTFILES_DIR" >> ~/.aliases
 fi
+
+
+./extras.sh all install
+./quicksync.sh --from known.txt sync -y

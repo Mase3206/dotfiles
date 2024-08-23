@@ -141,6 +141,11 @@ function parse_subcommand () {
 			oh_my_zsh $2 $3 $4
 			;;
 
+		all)
+			zsh $2 $3 $4
+			oh_my_zsh $2 $3 $4
+			;;
+
 		*)
 			echo "error: Missing required parameter" >&2
 			do_help
