@@ -34,7 +34,7 @@ if [ -z $USER ]; then
 	step "Setting to $(id -un) (collected from \`id -un\`)"
 	export USER=$(id -un)
 
-	echo; echo "It's recommended to logout and log back in, as manually setting the \$USER variable may cause issues. Logging out and back in should fix this." >&2
+	# echo; echo "It's recommended to logout and log back in, as manually setting the \$USER variable may cause issues. Logging out and back in should fix this." >&2
 else
 	status_good "\$USER variable:" "set"
 fi
@@ -56,16 +56,17 @@ else
 	status_good "\$DOTFILES_DIR" "set to $DOTFILES_DIR."
 fi
 
-sleep 1
+sleep .2
 big_header "Installing all extras"
 ./extras.sh all install
 
 
-sleep 1
+sleep .2
 big_header "Syncing all dotfiles listed in 'known.txt'"
 ./quicksync.sh --from known.txt sync -y
 
 
+sleep .2
 big_header "Ensuring $USER's shell was changed to Zsh"
 current_shell=$(cat /etc/passwd | grep "^$USER" | awk -F: '{print $7}')
 

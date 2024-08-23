@@ -166,7 +166,7 @@ function parse_subcommand () {
 
 		all)
 			mod_zsh $2 $3 $4
-			sleep 1
+			sleep .1
 			mod_omz $2 $3 $4
 			;;
 
@@ -330,8 +330,8 @@ function omz_install () {
 	# KEEP_ZSHRC='yes' - tells install.sh not to create a backup of the existing .zshrc file
 	step "Instaling OMZ"
 	CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes' sh install.sh --unattended --skip-chsh > /dev/null 2> /dev/null
-	echo -e "\e[36m- Changing $USER's shell to /usr/bin/zsh\e[0m"
-	# chsh $USER -s /usr/bin/zsh > /dev/null
+	step "Changing $USER's shell to /usr/bin/zsh"
+	chsh $USER -s /usr/bin/zsh > /dev/null
 
 	step "Cleaning up"
 	rm install.sh
