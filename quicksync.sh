@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# set -x
+
 SHELL_SCRIPT_FILE_NAME="quicksync.sh"
 
 
@@ -264,42 +266,36 @@ function parse_subcommand () {
 			done
 			;;
 
-		sync) 
+		sync)			
 			# remove and re-link file/dir from $2 to $3
-
-			local sync_help
-			function sync_help () {
+			# help text
+			if [[ "$2" == "-h" ]]; then
 				cat << EOF
 $SHELL_SCRIPT_FILE_NAME sync <src_file> [dst_file]
 
 Arguments:
-	\`src_file\`: Relative path to source file in dotfiles repo
-		MUST be regular file or directory
-	
-	\`dst_file\` (optional): Relative path to destination file in home directory
-		DEFAULTS to relative path of src_file if empty
-		MUST not already exist
+\`src_file\`: Relative path to source file in dotfiles repo
+MUST be regular file or directory
+
+\`dst_file\` (optional): Relative path to destination file in home directory
+DEFAULTS to relative path of src_file if empty
+MUST not already exist
 
 Options: 
-	\`-h\`: Display this help text
+\`-h\`: Display this help text
 EOF
-			}
-
-			# help text
-			if [[ "$2" == "-h" ]]; then
-				sync_help
 				exit 0
 			elif [[ "$2" == "" ]]; then
 				echo "error sync: Missing required argument: src_file. Run with \`-h\` for usage." >&2
 				# sync_help
 				exit 1
 			fi
-			
+
 			# use `eval` to expand brace expressions
 			eval "sources=($2)"
 			eval "destinations=($3)"
 
-			# verify that len(sources) == len(destinations) or that destinations is empty
+			# maybe len(sources) != len(destinations) and destinations is not empty
 			if [ ${#sources[@]} -ne ${#destinations[@]} ] && [[ ${#destinations[@]} -ne 0 ]]; then
 				echo "error sync: The number of sources and destinations given do not match. Cancelling" >&2
 				exit 1
@@ -307,23 +303,29 @@ EOF
 			# OR destinations is empty
 			elif [[ ${#destinations[@]} -eq 0 ]]; then
 				destinations=("${sources[@]}")
+			fi
 
 			# otherwise, the brace expressions probably weren't in quotes
-			else
-				echo "error sync: Brace expressions need to be enclosed in double-quotes." >&2
-				exit 1
-			fi
+			# else
+			# 	echo "${sources[@]}" "${#sources[@]}"
+			# 	echo "${destinations[@]}" "${#destinations[@]}"
+			# 	echo "error sync: Brace expressions need to be enclosed in double-quotes." >&2
+			# 	exit 1
+			# fi
 
 			# iterate over expanded items
 			for i in "${!sources[@]}"; do
-				echo "Removing and re-linking ${sources[$i]} to ${destinations[$i]}... "
+				# echo ${sources[$i]}
+				# echo ${destinations[$i]}
+				if [[ "${sources[$i]}" != "${destinations[$i]}" ]]; then
+					step "Removing and re-linking ${sources[$i]} to ${destinations[$i]}"
+				else
+					step "Removing and re-linking ${sources[$i]}"
+				fi
 
 				# run `rm` and `ln`
-				do_rm "${destinations[$i]}"
-				do_ln "${sources[$i]}" "${destinations[$i]}"
-
-				echo "done."
-				echo
+				do_rm "${destinations[$i]}" > /dev/null
+				do_ln "${sources[$i]}" "${destinations[$i]}" > /dev/null
 			done
 			;;
 		
