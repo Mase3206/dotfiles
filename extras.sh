@@ -217,7 +217,7 @@ function zsh_install () {
 		exit 2
 	fi
 
-	$DOTFILES_PKG_MANAGER install -y zsh
+	sudo $DOTFILES_PKG_MANAGER install -y zsh
 	# back up existing .zshrc before syncing it with repo
 	mv ~/.zshrc ~/.zshrc.dotbak
 	$DOTFILES_DIR/quicksync.sh sync .zshrc
