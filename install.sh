@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 function big_header () {
 	echo; echo; echo -e "\e[32m========  $1  ========\e[0m"; echo
 }
@@ -25,7 +23,7 @@ function status_good () {
 
 big_header "Running pre-checks"
 
-# move the cursor up one line to remove an extra space below big_header
+# try to move the cursor up one line to remove an extra space below big_header
 tput cuu1
 subheader "Ensuring the \$USER variable is set"
 if [ -z $USER ]; then
