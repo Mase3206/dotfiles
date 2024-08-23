@@ -28,7 +28,7 @@ EOF
 	[ -f $HOME/$1 ] && ! [ -L $HOME/$1 ] && type="regular file"
 	[ -L $HOME/$1 ] && type="symlink"
 	[ -d $HOME/$1 ] && type="directory"
-	echo $type
+	# echo $type
 
 	# TYPE CHECKS
 	# regular file -> warning

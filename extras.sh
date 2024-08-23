@@ -10,6 +10,28 @@
 SHELL_SCRIPT_FILE_NAME="extras.sh"
 
 
+function big_header () {
+	echo; echo; echo -e "\e[32m========  $1  ========\e[0m"; echo
+}
+
+function subheader () {
+	echo; echo -e "\e[34m----  $1  ----\e[0m"
+}
+
+function step () {
+	echo -e "\e[36m- $1\e[0m"
+}
+
+function status_bad () {
+	echo -e "$1: \e[31m$2\e[0m"
+}
+
+function status_good () {
+	echo "$1: $2"
+}
+
+
+
 # --------------------------------------
 # DETECT OS AND DISTRO
 
@@ -122,6 +144,7 @@ function manual_set_pkg_manager () {
 # GLOBAL HELP
 
 function init () {
+	step "Detecting OS and package manager"
 	detect_os
 	
 	if [[ $DOTFILES_OS_FAMILY == "unknown" ]] || [[ $DOTFILES_PKG_MANAGER == "unknown" ]]; then
@@ -143,6 +166,7 @@ function parse_subcommand () {
 
 		all)
 			zsh $2 $3 $4
+			echo; sleep 1
 			oh_my_zsh $2 $3 $4
 			;;
 
@@ -199,28 +223,38 @@ function zsh {
 
 
 function zsh_detect () {
+	# echo -n ": "
+
 	if [ -x "$(command -v zsh)" ]; then 
-		echo "Zsh is installed." 
+		status_good "Zsh install status" "already installed!" 
 		DOTFILES_ZSH_INSTALLED=1
 	else
-		echo "Zsh is NOT installed."
+		status_bad "Zsh install status" "NOT installed."
 		DOTFILES_ZSH_INSTALLED=0
 	fi
 }
 
 
 function zsh_install () {
+	subheader "Installing Zsh"
+
 	# test if Zsh is already installed
 	zsh_detect
 	if [[ $DOTFILES_ZSH_INSTALLED == 1 ]]; then
-		echo "Zsh is already installed!"
-		exit 2
+		echo -e "\e[31mSkipping\e[0m Zsh installation."
+		return
 	fi
+	echo
 
-	sudo $DOTFILES_PKG_MANAGER install -y zsh
+	step "Installing Zsh using $DOTFILES_PKG_MANAGER"
+	sudo $DOTFILES_PKG_MANAGER install -y zsh > /dev/null
+
 	# back up existing .zshrc before syncing it with repo
-	mv ~/.zshrc ~/.zshrc.dotbak
-	$DOTFILES_DIR/quicksync.sh sync .zshrc
+	[ -f ~/.zshrc ] && step "Backing up existing .zshrc before syncing" && mv ~/.zshrc ~/.zshrc.dotbak
+
+	# touch a new .zshrc file temporarily to avoid missing file warning
+	# allows other errors to pass through if 
+	$DOTFILES_DIR/quicksync.sh ln .zshrc -y > /dev/null
 }
 
 
@@ -236,6 +270,7 @@ EOF
 }
 
 
+# --------------------------------------
 
 function oh_my_zsh {
 	case $1 in
@@ -244,7 +279,6 @@ function oh_my_zsh {
 			;;
 
 		install)
-			# TODO - Test this in a docker container!
 			omz_install
 			;;
 
@@ -256,22 +290,20 @@ function oh_my_zsh {
 
 }
 
-
 function omz_detect () {
-	echo -n "OMZ install status: "
 
 	if [ -d ~/.oh-my-zsh ]; then
-		echo "already installed!"
+		status_good "OMZ install status" "already installed!"
 		DOTFILES_OMZ_INSTALLED=1
 	else
-		echo "NOT installed."
+		status_bad "OMZ install status" "NOT installed."
 		DOTFILES_OMZ_INSTALLED=0
 	fi
 }
 
 
 function omz_install () {
-	echo -e "\e[34m -- Installing Oh My Zsh -- \e[0m"
+	subheader "Installing Oh My Zsh"
 
 	local tempfold curdir
 
@@ -280,14 +312,14 @@ function omz_install () {
 		echo -e "\e[31mSkipping\e[0m OMZ installation."
 		return
 	fi
+	echo
 
 	# prep folders
-	echo
 	tempfold=$(mktemp -d)
 	curdir=$(pwd)
 
 	# download install script
-	echo -e "\e[36m- Downloading install script\e[0m"
+	step "Downloading install script"
 	cd $tempfold
 	curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh > install.sh
 
@@ -295,16 +327,16 @@ function omz_install () {
 	# CHSH='yes' - tells install.sh to set Zsh as the default shell for this user
 	# RUNZSH='no' - tells install.sh not to run Zsh after the install
 	# KEEP_ZSHRC='yes' - tells install.sh not to create a backup of the existing .zshrc file
-	echo -e "\e[36m- Instaling OMZ\e[0m"
+	step "Instaling OMZ"
 	CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes' sh install.sh --unattended --skip-chsh > /dev/null 2> /dev/null
 	echo -e "\e[36m- Changing $USER's shell to /usr/bin/zsh\e[0m"
-	chsh $USER -s /usr/bin/zsh > /dev/null
+	# chsh $USER -s /usr/bin/zsh > /dev/null
 
-	echo -e "\e[36m- Cleaning up\e[0m"
+	step "Cleaning up"
 	rm install.sh
 	cd $curdir
 
-	echo -e "\e[36m- Syncing custom OMZ theme\e[0m"
+	step "Syncing custom OMZ theme"
 	# automatically sync Terse OMZ theme from repo
 	$DOTFILES_DIR/quicksync.sh ln .oh-my-zsh/themes/terse.zsh-theme > /dev/null
 }
@@ -344,7 +376,6 @@ case $1 in
 
 	*)
 		# if nothing here matches, just initialize os-specific variables and send it all to parse_subcommand
-		init
 		parse_subcommand $1 $2 $3
 		;;
 
