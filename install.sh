@@ -13,3 +13,4 @@ fi
 
 ./extras.sh all install
 ./quicksync.sh --from known.txt sync -y
+sudo chsh $USER -s /usr/bin/zsh
