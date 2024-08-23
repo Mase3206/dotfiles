@@ -34,7 +34,7 @@ if [ -z $USER ]; then
 
 	# echo; echo "It's recommended to logout and log back in, as manually setting the \$USER variable may cause issues. Logging out and back in should fix this." >&2
 else
-	status_good "\$USER variable:" "set"
+	status_good "\$USER variable" "set"
 fi
 
 
