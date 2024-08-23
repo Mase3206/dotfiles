@@ -313,6 +313,10 @@ EOF
 # -------------------------------------
 # MAIN LOOP
 
+# check if DOTFILES_DIR is set; if not, error out
+[ -z $DOTFILES_DIR ] && echo "Required ENV variable \`DOTFILES_DIR\` is not set! Please set via inline declaration or via \`export\`." && exit 5
+
+
 init
 
 
