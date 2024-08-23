@@ -1,0 +1,8 @@
+FROM opensuse/tumbleweed
+
+RUN zypper -n update
+RUN zypper -n install git
+
+ENV DOTFILES_DIR=/root/dotfiles
+
+WORKDIR ${DOTFILES_DIR}
