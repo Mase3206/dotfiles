@@ -157,17 +157,17 @@ function init () {
 function parse_subcommand () {
 	case $1 in 
 		zsh)
-			zsh $2 $3 $4
+			mod_zsh $2 $3 $4
 			;;
 
 		oh-my-zsh | oh_my_zsh | omz)
-			oh_my_zsh $2 $3 $4
+			mod_omz $2 $3 $4
 			;;
 
 		all)
-			zsh $2 $3 $4
-			echo; sleep 1
-			oh_my_zsh $2 $3 $4
+			mod_zsh $2 $3 $4
+			sleep 1
+			mod_omz $2 $3 $4
 			;;
 
 		*)
@@ -203,7 +203,7 @@ EOF
 # --------------------------------------
 # PACKAGE/APP-SPECIFIC STUFF
 
-function zsh {
+function mod_zsh {
 	case $1 in 
 		detect)
 			zsh_detect
@@ -223,15 +223,15 @@ function zsh {
 
 
 function zsh_detect () {
-	# echo -n ": "
 
-	if [ -x "$(command -v zsh)" ]; then 
+	if command -v zsh > /dev/null; then 
 		status_good "Zsh install status" "already installed!" 
 		DOTFILES_ZSH_INSTALLED=1
 	else
 		status_bad "Zsh install status" "NOT installed."
 		DOTFILES_ZSH_INSTALLED=0
 	fi
+
 }
 
 
@@ -272,7 +272,7 @@ EOF
 
 # --------------------------------------
 
-function oh_my_zsh {
+function mod_omz {
 	case $1 in
 		detect) 
 			omz_detect
