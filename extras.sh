@@ -254,6 +254,7 @@ function zsh_install () {
 
 	# touch a new .zshrc file temporarily to avoid missing file warning
 	# allows other errors to pass through if 
+	step "Linking Zsh dotfiles"
 	$DOTFILES_DIR/quicksync.sh ln .zshrc -y > /dev/null
 }
 
@@ -336,7 +337,7 @@ function omz_install () {
 	rm install.sh
 	cd $curdir
 
-	step "Syncing custom OMZ theme"
+	step "Linking OMZ dotfiles"
 	# automatically sync Terse OMZ theme from repo
 	$DOTFILES_DIR/quicksync.sh ln .oh-my-zsh/themes/terse.zsh-theme > /dev/null
 }
