@@ -45,7 +45,9 @@ function dotsync () {
 		local currdir 
 		currdir=$(pwd)
 		cd $DOTFILES_DIR
+		echo "Pulling updates from repo"
 		git pull
+		echo; echo "Syncing"
 		cd $currdir
 		$DOTFILES_DIR/quicksync.sh --from $DOTFILES_DIR/known.txt sync
 	fi
