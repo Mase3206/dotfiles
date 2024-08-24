@@ -1,3 +1,4 @@
 .oh-my-zsh/themes/terse.zsh-theme
 .bashrc
 .zshrc
+.gitconfig
