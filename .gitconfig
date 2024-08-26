@@ -8,3 +8,8 @@
 	process = git-lfs filter-process
 [http]
 	postBuffer = 157286400
+[credential]
+	helper = osxkeychain
+	helper = store --file ~/.config/git-credentials
+	helper = cache --timeout 30000
+
