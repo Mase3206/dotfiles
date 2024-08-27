@@ -107,16 +107,16 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# function venv-activate {
-# 	if [[ "$1" == "" ]]; then
-# 		echo "Please specify the folder of the virtual environment in your current working directory."
-# 	elif [ -d "$1" ]; then
-# 		source venv/bin/activate
-# 		source ~/.zshrc
-# 	else
-# 		echo "Virtual Environment directory named '$1' not found in $(pwd)."
-# 	fi
-# }
+function venv-activate {
+	if [[ "$1" == "" ]]; then
+		echo "Please specify the folder of the virtual environment in your current working directory."
+	elif [ -d "$1" ]; then
+		source $1/bin/activate
+		source ~/.zshrc
+	else
+		echo "Virtual Environment directory named '$1' not found in $(pwd)."
+	fi
+}
 
 [ -f ~/.aliases ] && source ~/.aliases
 
@@ -136,6 +136,7 @@ function dotsync () {
 		git pull
 		echo; echo "Syncing"
 		cd $currdir
-		$DOTFILES_DIR/quicksync.sh --from $DOTFILES_DIR/known.txt sync
+		bash $DOTFILES_DIR/quicksync.sh --from $DOTFILES_DIR/known.txt sync
 	fi
 }
+
