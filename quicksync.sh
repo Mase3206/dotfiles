@@ -181,7 +181,7 @@ EOF
 
 		# if `-y` is passed, bypass confirmation prompt
 		if [[ $force_yes == 0 ]]; then
-			echo -n "Source $source is a directory. Are you sure you want to link this? [y/N] "
+			echo -n "Source $source is a directory. Are you sure you want to link this? [y/N] " >&2
 			read continue
 		else
 			continue="y"
