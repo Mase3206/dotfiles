@@ -83,10 +83,14 @@ EOF
 		rm $HOME/$1
 		echo "done."
 	
-	# directory -> fail
+	# directory -> fail if not force_yes
 	elif [[ $type == "directory" ]]; then
-		echo "error rm: I will not remove a directory. Cancelling" >&2
-		exit 1
+        if [[ $force_yes == 1 ]]; then
+            rm -r $HOME/$1
+        else
+		    echo "error rm: I will not remove a directory. Cancelling" >&2
+		    exit 1
+        fi
 
 	# nonexistent -> skip
 	elif ! [[ $type == "exists" ]]; then
@@ -189,7 +193,7 @@ EOF
 			echo "done."
 		else
 			echo "Cancelling"
-			0
+			exit 0
 		fi
 	
 	# unknown -> fail
@@ -389,7 +393,7 @@ case $1 in
 			# $3 = subcommand
 			for i in "${!known_files[@]}"; do
 				# echo "Running $3 with ${known_files[$i]}"
-				parse_subcommand $3 "${known_files[$i]}" $4
+				force_yes=1 parse_subcommand $3 "${known_files[$i]}" $4
 			done
 		else
 			echo "error: Given file $2 does not exist. Cancelling" >&2
