@@ -38,5 +38,6 @@ case $1 in
 	step) step "$2";;
 	status_good) status_good "$2" "$3";;
 	status_bad) status_bad "$2" "$3";;
-	*) do_help
+	-h) do_help ;;
+	*) do_help; exit 1
 esac
