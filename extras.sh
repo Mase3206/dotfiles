@@ -306,12 +306,12 @@ function omz_install () {
 	# CHSH='yes' - tells install.sh to set Zsh as the default shell for this user
 	# RUNZSH='no' - tells install.sh not to run Zsh after the install
 	# KEEP_ZSHRC='yes' - tells install.sh not to create a backup of the existing .zshrc file
-	./outputs.sh step "Instaling OMZ"
+	$DOTFILES_DIR/outputs.sh step "Instaling OMZ"
 	CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes' sh install.sh --unattended --skip-chsh > /dev/null 2> /dev/null
-	./outputs.sh step "Changing $USER's shell to /usr/bin/zsh"
+	$DOTFILES_DIR/outputs.sh step "Changing $USER's shell to /usr/bin/zsh"
 	chsh $USER -s /usr/bin/zsh > /dev/null
 
-	./outputs.sh step "Cleaning up"
+	$DOTFILES_DIR/outputs.sh step "Cleaning up"
 	rm install.sh
 	cd $curdir
 
