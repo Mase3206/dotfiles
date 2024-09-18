@@ -5,30 +5,6 @@
 SHELL_SCRIPT_FILE_NAME="quicksync.sh"
 
 
-# function big_header () {
-# 	echo; echo; echo -e "\e[32m========  $1  ========\e[0m"; echo
-# }
-
-# function subheader () {
-# 	echo; echo -e "\e[34m----  $1  ----\e[0m"
-# }
-
-# function step () {
-# 	echo -e "\e[36m- $1\e[0m"
-# }
-
-# function status_bad () {
-# 	echo -e "$1: \e[31m$2\e[0m"
-# }
-
-# function status_good () {
-# 	echo "$1: $2"
-# }
-
-
-
-
-
 function do_rm () {
 	# abort if no arguments are given
 	[ -z $1 ] && echo "error rm: Missing required argument: file. Run with \`-h\` for usage." >&2 && exit 1
