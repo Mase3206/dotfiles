@@ -5,25 +5,25 @@
 SHELL_SCRIPT_FILE_NAME="quicksync.sh"
 
 
-function big_header () {
-	echo; echo; echo -e "\e[32m========  $1  ========\e[0m"; echo
-}
+# function big_header () {
+# 	echo; echo; echo -e "\e[32m========  $1  ========\e[0m"; echo
+# }
 
-function subheader () {
-	echo; echo -e "\e[34m----  $1  ----\e[0m"
-}
+# function subheader () {
+# 	echo; echo -e "\e[34m----  $1  ----\e[0m"
+# }
 
-function step () {
-	echo -e "\e[36m- $1\e[0m"
-}
+# function step () {
+# 	echo -e "\e[36m- $1\e[0m"
+# }
 
-function status_bad () {
-	echo -e "$1: \e[31m$2\e[0m"
-}
+# function status_bad () {
+# 	echo -e "$1: \e[31m$2\e[0m"
+# }
 
-function status_good () {
-	echo "$1: $2"
-}
+# function status_good () {
+# 	echo "$1: $2"
+# }
 
 
 
@@ -322,9 +322,11 @@ EOF
 				# echo ${sources[$i]}
 				# echo ${destinations[$i]}
 				if [[ "${sources[$i]}" != "${destinations[$i]}" ]]; then
-					step "Removing and re-linking ${sources[$i]} to ${destinations[$i]}"
+					m="Removing and re-linking ${sources[$i]} to ${destinations[$i]}"
+					./outputs.sh step "$m"
 				else
-					step "Removing and re-linking ${sources[$i]}"
+					m="Removing and re-linking ${sources[$i]}"
+					./outputs.sh step "$m"
 				fi
 
 				# run `rm` and `ln`

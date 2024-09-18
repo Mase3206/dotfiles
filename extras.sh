@@ -10,25 +10,25 @@
 SHELL_SCRIPT_FILE_NAME="extras.sh"
 
 
-function big_header () {
-	echo; echo; echo -e "\e[32m========  $1  ========\e[0m"; echo
-}
+# function big_header () {
+# 	echo; echo; echo -e "\e[32m========  $1  ========\e[0m"; echo
+# }
 
-function subheader () {
-	echo; echo -e "\e[34m----  $1  ----\e[0m"
-}
+# function subheader () {
+# 	echo; echo -e "\e[34m----  $1  ----\e[0m"
+# }
 
-function step () {
-	echo -e "\e[36m- $1\e[0m"
-}
+# function step () {
+# 	echo -e "\e[36m- $1\e[0m"
+# }
 
-function status_bad () {
-	echo -e "$1: \e[31m$2\e[0m"
-}
+# function status_bad () {
+# 	echo -e "$1: \e[31m$2\e[0m"
+# }
 
-function status_good () {
-	echo "$1: $2"
-}
+# function status_good () {
+# 	echo "$1: $2"
+# }
 
 
 
@@ -144,7 +144,7 @@ function manual_set_pkg_manager () {
 # GLOBAL HELP
 
 function init () {
-	step "Detecting OS and package manager"
+	./outputs.sh step "Detecting OS and package manager"
 	detect_os
 	
 	if [[ $DOTFILES_OS_FAMILY == "unknown" ]] || [[ $DOTFILES_PKG_MANAGER == "unknown" ]]; then
@@ -225,10 +225,10 @@ function mod_zsh {
 function zsh_detect () {
 
 	if command -v zsh > /dev/null; then 
-		status_good "Zsh install status" "already installed!" 
+		./outputs.sh status_good "Zsh install status" "already installed!" 
 		DOTFILES_ZSH_INSTALLED=1
 	else
-		status_bad "Zsh install status" "NOT installed."
+		./outputs.sh status_bad "Zsh install status" "NOT installed."
 		DOTFILES_ZSH_INSTALLED=0
 	fi
 
@@ -236,7 +236,7 @@ function zsh_detect () {
 
 
 function zsh_install () {
-	subheader "Installing Zsh"
+	./outputs.sh subheader "Installing Zsh"
 
 	# test if Zsh is already installed
 	zsh_detect
@@ -246,15 +246,15 @@ function zsh_install () {
 	fi
 	echo
 
-	step "Installing Zsh using $DOTFILES_PKG_MANAGER"
+	./outputs.sh step "Installing Zsh using $DOTFILES_PKG_MANAGER"
 	sudo $DOTFILES_PKG_MANAGER install -y zsh > /dev/null
 
 	# back up existing .zshrc before syncing it with repo
-	[ -f ~/.zshrc ] && step "Backing up existing .zshrc before syncing" && mv ~/.zshrc ~/.zshrc.dotbak
+	[ -f ~/.zshrc ] && ./outputs.sh step "Backing up existing .zshrc before syncing" && mv ~/.zshrc ~/.zshrc.dotbak
 
 	# touch a new .zshrc file temporarily to avoid missing file warning
 	# allows other errors to pass through if 
-	step "Linking Zsh dotfiles"
+	./outputs.sh step "Linking Zsh dotfiles"
 	$DOTFILES_DIR/quicksync.sh ln .zshrc -y > /dev/null
 }
 
@@ -294,17 +294,17 @@ function mod_omz {
 function omz_detect () {
 
 	if [ -d ~/.oh-my-zsh ]; then
-		status_good "OMZ install status" "already installed!"
+		./outputs.sh status_good "OMZ install status" "already installed!"
 		DOTFILES_OMZ_INSTALLED=1
 	else
-		status_bad "OMZ install status" "NOT installed."
+		./outputs.sh status_bad "OMZ install status" "NOT installed."
 		DOTFILES_OMZ_INSTALLED=0
 	fi
 }
 
 
 function omz_install () {
-	subheader "Installing Oh My Zsh"
+	./outputs.sh subheader "Installing Oh My Zsh"
 
 	local tempfold curdir
 
@@ -320,7 +320,7 @@ function omz_install () {
 	curdir=$(pwd)
 
 	# download install script
-	step "Downloading install script"
+	./outputs.sh step "Downloading install script"
 	cd $tempfold
 	curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh > install.sh
 
@@ -328,16 +328,16 @@ function omz_install () {
 	# CHSH='yes' - tells install.sh to set Zsh as the default shell for this user
 	# RUNZSH='no' - tells install.sh not to run Zsh after the install
 	# KEEP_ZSHRC='yes' - tells install.sh not to create a backup of the existing .zshrc file
-	step "Instaling OMZ"
+	./outputs.sh step "Instaling OMZ"
 	CHSH='yes' RUNZSH='no' KEEP_ZSHRC='yes' sh install.sh --unattended --skip-chsh > /dev/null 2> /dev/null
-	step "Changing $USER's shell to /usr/bin/zsh"
+	./outputs.sh step "Changing $USER's shell to /usr/bin/zsh"
 	chsh $USER -s /usr/bin/zsh > /dev/null
 
-	step "Cleaning up"
+	./outputs.sh step "Cleaning up"
 	rm install.sh
 	cd $curdir
 
-	step "Linking OMZ dotfiles"
+	./outputs.sh step "Linking OMZ dotfiles"
 	# automatically sync Terse OMZ theme from repo
 	$DOTFILES_DIR/quicksync.sh ln .oh-my-zsh/themes/terse.zsh-theme > /dev/null
 }
