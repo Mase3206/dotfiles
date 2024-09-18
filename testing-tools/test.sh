@@ -7,7 +7,7 @@ function start () {
 
 	if [[ ${os_options[@]} =~ $1 ]]; then
 		echo "Starting testing image for $1"
-		docker run -it --volume=/Users/noahroberts/GitHub/dotfiles:/root/dotfiles dotfile-testing:$1 bash
+		docker run -it --volume=/Users/noahroberts/GitHub/dotfiles:/root/dotfiles:ro dotfile-testing:$1 bash
 	else
 		echo "OS $1 does not have a testing image. Existing images: ${os_options[@]}"
 	fi
@@ -34,5 +34,9 @@ case $1 in
 
 	build)
 		build $2
-	
+		;;
+
+	*)
+		echo "test.sh <start|build> <distro>"
+
 esac
