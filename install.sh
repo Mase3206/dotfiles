@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ./outputs.sh big_header "Running pre-checks"
 
