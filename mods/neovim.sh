@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# used to properly show $0
+if [[ -n $DOTFILES_MODS_RUNNER ]]; then
+	SHELL_SCRIPT_FILE_NAME="$DOTFILES_MODS_RUNNER neovim"
+else 
+	SHELL_SCRIPT_FILE_NAME="mods/neovim.sh"
+fi
+
+
 function neovim_detect () {
 	if command -v nvim > /dev/null; then 
 		./outputs.sh status_good "Neovim install status" "already installed!" 
@@ -44,7 +52,7 @@ function neovim_install () {
 
 function neovim_help () {
 	cat << EOF
-$SHELL_SCRIPT_FILE_NAME neovim [-h] <command>
+$SHELL_SCRIPT_FILE_NAME [-h] <command>
 
 Commands:
 \`detect\`: Detect existing install and display its status

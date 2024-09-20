@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# used to properly show $0
+if [[ -n $DOTFILES_MODS_RUNNER ]]; then
+	SHELL_SCRIPT_FILE_NAME="$DOTFILES_MODS_RUNNER nvchad"
+else 
+	SHELL_SCRIPT_FILE_NAME="mods/neovim.sh"
+fi
+
+
 function nvchad_detect () {
 	# is file and not link
 	if [ -f ~/.config/nvim/README.md ] && [ -L ~/.config/nvim/README.md ]; then
@@ -66,7 +74,7 @@ function nvchad_install () {
 
 function nvchad_help () {
 	cat << EOF
-$SHELL_SCRIPT_FILE_NAME nvchad [-h] <command>
+$SHELL_SCRIPT_FILE_NAME [-h] <command>
 
 Commands:
 \`detect\`: Detect existing install and display its status

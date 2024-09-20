@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# used to properly show $0
+if [[ -n $DOTFILES_MODS_RUNNER ]]; then
+	SHELL_SCRIPT_FILE_NAME="$DOTFILES_MODS_RUNNER omz"
+else 
+	SHELL_SCRIPT_FILE_NAME="mods/omz.sh"
+fi
+
+
 function omz_detect () {
 	if [ -d ~/.oh-my-zsh ]; then
 		./outputs.sh status_good "OMZ install status" "already installed!"
@@ -53,7 +61,7 @@ function omz_install () {
 
 function omz_help () {
 	cat << EOF
-$SHELL_SCRIPT_FILE_NAME omz [-h] <command>
+$SHELL_SCRIPT_FILE_NAME [-h] <command>
 
 Commands:
 \`detect\`: Detect existing install and display its status

@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# used to properly show $0
+if [[ -n $DOTFILES_MODS_RUNNER ]]; then
+	SHELL_SCRIPT_FILE_NAME="$DOTFILES_MODS_RUNNER zsh"
+else 
+	SHELL_SCRIPT_FILE_NAME="mods/zsh.sh"
+fi
+
+
 function zsh_detect () {
 	if command -v zsh > /dev/null; then 
 		./outputs.sh status_good "Zsh install status" "already installed!" 
@@ -37,7 +45,7 @@ function zsh_install () {
 
 function zsh_help () {
 	cat << EOF
-$SHELL_SCRIPT_FILE_NAME zsh [-h] <command>
+$SHELL_SCRIPT_FILE_NAME [-h] <command>
 
 Commands:
 \`detect\`: Detect existing install and display its status

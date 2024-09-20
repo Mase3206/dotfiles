@@ -142,6 +142,9 @@ function init () {
 	export DOTFILES_PKG_MANAGER
 	export DOTFILES_OS_RHEL
 	export DOTFILES_OS_RHEL_VERSION
+
+	# required for help text to work properly in the mod scripts
+	export DOTFILES_MODS_RUNNER=$SHELL_SCRIPT_FILE_NAME
 }
 
 
