@@ -19,7 +19,7 @@ function build () {
 	
 	if [[ ${os_options[@]} =~ $1 ]]; then
 		echo "Building testing image for $1"
-		docker build -f Dockerfile.$1 --tag "dotfile-testing:$1" .
+		docker build $2 -f Dockerfile.$1 --tag "dotfile-testing:$1" .
 	else
 		echo "OS $1 is not in the list of known OSes. Known OSes: ${os_options[@]}"
 	fi
@@ -33,7 +33,7 @@ case $1 in
 		;;
 
 	build)
-		build $2
+		build $2 $3
 		;;
 
 	*)
