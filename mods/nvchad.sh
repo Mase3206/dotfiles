@@ -1,22 +1,5 @@
 #!/usr/bin/env bash
 
-# function mod_nvchad () {
-# 	case $1 in
-# 	detect)
-# 		nvchad_detect
-# 		;;
-	
-# 	install)
-# 		nvchad_install
-# 		;;
-	
-# 	*)
-# 		nvchad_help $1
-
-# 	esac
-# }
-
-
 function nvchad_detect () {
 	# is file and not link
 	if [ -f ~/.config/nvim/README.md ] && [ -L ~/.config/nvim/README.md ]; then
@@ -32,7 +15,7 @@ function nvchad_detect () {
 function nvchad_install () {
 	./outputs.sh subheader "Installing NvChad"
 
-	local tempfold curdir nvim_pid av av_maj am_min av_bug
+	local av av_maj av_min av_bug
 
 	if [[ $DOTFILES_OS_RHEL == 1 ]]; then
 		av=$(dnf info neovim | grep 'Version' | awk -F: '{gsub(/ /, "", $2); print $2}')
@@ -60,10 +43,6 @@ function nvchad_install () {
 	fi
 	echo
 
-	# prep folders
-	# tempfold=$(mktemp -d)
-	# curdir=$(pwd)
-
 	# download nvchad repo
 	./outputs.sh step "Downloading NvChad starter config"
 	git clone https://github.com/NvChad/starter ~/.config/nvim > /dev/null 2> /dev/null
@@ -73,12 +52,15 @@ function nvchad_install () {
 	echo -e "You'll also need to run \e[1;33m:MasonInstallAll\e[0m from within Neovim once that's done."
 	echo
 
+	# remove .git folder from nvim folder
+	# leaving it would probably have weird outcomes when just using neovim
+	./outputs.sh step "Removing .git folder (from git clone) from .config/nvim"
 	rm -rf ~/.config/nvim/.git
 
+	# link dem dots
 	./outputs.sh step "Linking customized NvChad configs"
-	$DOTFILES_DIR/quicksync.sh rm .config/nvim/lua -y > /dev/null
-	$DOTFILES_DIR/quicksync.sh ln .config/nvim/lua -y > /dev/null
-
+	./quicksync.sh rm .config/nvim/lua -y > /dev/null
+	./quicksync.sh ln .config/nvim/lua -y > /dev/null
 }
 
 

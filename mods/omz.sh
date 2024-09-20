@@ -1,25 +1,6 @@
 #!/usr/bin/env bash
 
-# function mod_omz {
-# 	case $1 in
-# 		detect) 
-# 			omz_detect
-# 			;;
-
-# 		install)
-# 			omz_install
-# 			;;
-
-# 		*)
-# 			omz_help $1
-
-# 	esac
-
-
-# }
-
 function omz_detect () {
-
 	if [ -d ~/.oh-my-zsh ]; then
 		./outputs.sh status_good "OMZ install status" "already installed!"
 		DOTFILES_OMZ_INSTALLED=1

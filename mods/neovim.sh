@@ -1,22 +1,5 @@
 #!/usr/bin/env bash
 
-# function mod_neovim () {
-# 	case $1 in
-# 		detect)
-# 			neovim_detect
-# 			;;
-		
-# 		install)
-# 			neovim_install
-# 			;;
-		
-# 		*)
-# 			neovim_help $1
-
-# 	esac
-# }
-
-
 function neovim_detect () {
 	if command -v nvim > /dev/null; then 
 		./outputs.sh status_good "Neovim install status" "already installed!" 
@@ -56,11 +39,6 @@ function neovim_install () {
 	else
 		sudo $DOTFILES_PKG_MANAGER install -y neovim > /dev/null 2> /dev/null
 	fi
-
-	# touch a new .zshrc file temporarily to avoid missing file warning
-	# allows other errors to pass through if 
-	# ./outputs.sh step "Linking Neovim dotfiles"
-	# $DOTFILES_DIR/quicksync.sh ln .config/nvim/lua -y > /dev/null
 }
 
 

@@ -1,26 +1,6 @@
 #!/usr/bin/env bash
 
-# function mod_zsh {
-# 	case $1 in 
-# 		detect)
-# 			zsh_detect
-# 			;;
-		
-# 		install)
-# 			zsh_install
-# 			;;
-
-# 		*)
-# 			zsh_help $1
-
-# 	esac
-
-
-# }
-
-
 function zsh_detect () {
-
 	if command -v zsh > /dev/null; then 
 		./outputs.sh status_good "Zsh install status" "already installed!" 
 		DOTFILES_ZSH_INSTALLED=1
@@ -28,7 +8,6 @@ function zsh_detect () {
 		./outputs.sh status_bad "Zsh install status" "NOT installed."
 		DOTFILES_ZSH_INSTALLED=0
 	fi
-
 }
 
 
