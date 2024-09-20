@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-# used to properly show $0
+# used to properly show $0 and enforce running via extras.sh
 if [[ -n $DOTFILES_MODS_RUNNER ]]; then
 	SHELL_SCRIPT_FILE_NAME="$DOTFILES_MODS_RUNNER neovim"
 else 
-	SHELL_SCRIPT_FILE_NAME="mods/neovim.sh"
+	echo "You must run this script through extras.sh, as it initializes critical environment variables used for installation and detection."
+	exit 1
 fi
 
 
