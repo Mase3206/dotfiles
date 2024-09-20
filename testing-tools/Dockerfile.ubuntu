@@ -1,7 +1,9 @@
 FROM ubuntu:latest
 
 RUN apt-get update -y && apt-get upgrade -y
-RUN apt-get install -y git curl sudo language-pack-en
+RUN ln -fs /usr/share/zoneinfo/America/Denver /etc/localtime
+RUN apt-get install -y git curl sudo language-pack-en tzdata
+RUN dpkg-reconfigure -f noninteractive tzdata
 
 ENV DOTFILES_DIR=/root/dotfiles
 
