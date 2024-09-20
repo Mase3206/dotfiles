@@ -53,6 +53,13 @@ function detect_pkg_manager () {
 	# rhel
 	elif [ -x "$(command -v dnf)" ]; then
 		DOTFILES_PKG_MANAGER="dnf"
+
+		source /etc/os-release
+		if [[ $ID == "rocky" ]]; then
+			DOTFILES_OS_RHEL=1
+		else
+			DOTFILES_OS_RHEL=0
+		fi
 	# suse
 	elif [ -x "$(command -v zypper)" ]; then
 		DOTFILES_PKG_MANAGER="zypper"
@@ -142,10 +149,16 @@ function parse_subcommand () {
 			mod_omz $2 $3 $4
 			;;
 
+		neovim | nvim)
+			mod_neovim $2 $3 $4
+			;;
+
 		all)
 			mod_zsh $2 $3 $4
 			sleep .1
 			mod_omz $2 $3 $4
+			sleep .1
+			mod_neovim $2 $3 $4
 			;;
 
 		*)
@@ -332,6 +345,78 @@ EOF
 	[[ "$1" == "-h" ]] && exit 0 || exit 1
 }
 
+
+# --------------------------------------
+
+function mod_neovim () {
+	case $1 in
+		detect)
+			neovim_detect
+			;;
+		
+		install)
+			neovim_install
+			;;
+		
+		*)
+			neovim_help $1
+
+	esac
+}
+
+
+function neovim_detect () {
+	if command -v nvim > /dev/null; then 
+		./outputs.sh status_good "Neovim install status" "already installed!" 
+		DOTFILES_NEOVIM_INSTALLED=1
+	else
+		./outputs.sh status_bad "Neovim install status" "NOT installed."
+		DOTFILES_NEOVIM_INSTALLED=0
+	fi
+}
+
+
+function neovim_install () {
+	./outputs.sh subheader "Installing Neovim"
+
+	# test if Zsh is already installed
+	neovim_detect
+	if [[ $DOTFILES_NEOVIM_INSTALLED == 1 ]]; then
+		echo -e "\e[31mSkipping\e[0m Neovim installation."
+		return
+	fi
+	echo
+
+	# RHEL systems require EPEL to be installed and CRB to be enabled
+	if [[ $DOTFILES_OS_RHEL == 1 ]]; then
+		./outputs.sh step "Installing the Extra Packages for Enterprise Linux (EPEL) repository - this is where Neovim is located"
+		sudo dnf install -y epel-release > /dev/null
+
+		./outputs.sh step "Enabling the CodeReady Builder (CRB) repository - required for many EPEL packages"
+		/usr/bin/crb enable > /dev/null
+	fi
+
+
+	./outputs.sh step "Installing Zsh using $DOTFILES_PKG_MANAGER"
+	sudo $DOTFILES_PKG_MANAGER install -y neovim > /dev/null
+
+	# touch a new .zshrc file temporarily to avoid missing file warning
+	# allows other errors to pass through if 
+	# ./outputs.sh step "Linking Neovim dotfiles"
+	# $DOTFILES_DIR/quicksync.sh ln .config/nvim/lua -y > /dev/null
+}
+
+
+function neovim_help () {
+	cat << EOF
+$SHELL_SCRIPT_FILE_NAME neovim [-h] <command>
+
+Commands:
+\`detect\`: Detect existing install and display its status
+\`install\`: Install Neovim
+EOF
+	[[ "$1" == "-h" ]] && exit 0 || exit 1
+}
 
 
 
