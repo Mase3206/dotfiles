@@ -112,7 +112,7 @@ function venv-activate {
 		echo "Please specify the folder of the virtual environment in your current working directory."
 	elif [ -d "$1" ]; then
 		source $1/bin/activate
-		#source ~/.zshrc
+		. ~/.zshrc
 	else
 		echo "Virtual Environment directory named '$1' not found in $(pwd)."
 	fi
