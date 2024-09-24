@@ -130,7 +130,7 @@ function manual_set_pkg_manager () {
 # GLOBAL HELP
 
 function init () {
-	# ./outputs.sh step "Detecting OS and package manager"
+	./outputs.sh step "Detecting OS and package manager"
 	detect_os
 	
 	if [[ $DOTFILES_OS_FAMILY == "unknown" ]] || [[ $DOTFILES_PKG_MANAGER == "unknown" ]]; then
