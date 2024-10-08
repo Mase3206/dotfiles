@@ -52,3 +52,5 @@ function dotsync () {
 		$DOTFILES_DIR/quicksync.sh --from $DOTFILES_DIR/known.txt sync
 	fi
 }
+
+source ~/.aliases
