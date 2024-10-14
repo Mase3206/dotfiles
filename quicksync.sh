@@ -299,10 +299,10 @@ EOF
 				# echo ${destinations[$i]}
 				if [[ "${sources[$i]}" != "${destinations[$i]}" ]]; then
 					m="Removing and re-linking ${sources[$i]} to ${destinations[$i]}"
-					./outputs.sh step "$m"
+					bash $DOTFILES_DIR/outputs.sh step "$m"
 				else
 					m="Removing and re-linking ${sources[$i]}"
-					./outputs.sh step "$m"
+					bash $DOTFILES_DIR/outputs.sh step "$m"
 				fi
 
 				# run `rm` and `ln`
