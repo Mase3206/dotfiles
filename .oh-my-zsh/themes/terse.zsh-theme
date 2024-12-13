@@ -93,6 +93,7 @@ terse_theme_prompt() {
 	ZSH_THEME_GIT_PROMPT_REBASE="%{$fg_bold[magenta]%}|REBASE%{${reset_color}%} "
 	ZSH_THEME_GIT_PROMPT_BISECT="%{$fg_bold[magenta]%}|BISECT%{${reset_color}%} "
 
+    #zle && zle reset-prompt
 }
 
 # run function right away upon loading theme
