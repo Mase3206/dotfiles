@@ -1,0 +1,11 @@
+# new dotmgr config
+
+files:
+- .bashrc
+- .zshrc
+- .oh-my-zsh:
+  - custom/plugins/poetry/_poetry
+  - themes/terse.zsh-theme
+- .vimrc:
+  also:  # also symlink to
+  - nvim/init.vim
