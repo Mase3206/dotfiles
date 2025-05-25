@@ -2,4 +2,4 @@
 .oh-my-zsh/custom/plugins/poetry
 .bashrc
 .zshrc
-.config/nvim/lua
+.vimrc

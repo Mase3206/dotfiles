@@ -159,10 +159,10 @@ function parse_subcommand () {
 			./mods/zsh.sh $2 $3 $4
 			sleep .1
 			./mods/omz.sh $2 $3 $4
-			sleep .1
-			./mods/neovim.sh $2 $3 $4
-			sleep .1
-			./mods/nvchad.sh $2 $3 $4
+			# sleep .1
+			# ./mods/neovim.sh $2 $3 $4
+			# sleep .1
+			# ./mods/nvchad.sh $2 $3 $4
 			;;
 
 		*)
