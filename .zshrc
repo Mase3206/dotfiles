@@ -70,7 +70,7 @@ ZSH_THEME="terse"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git poetry)
+plugins=(git)
 
 # plugin options
 export PYTHON_AUTO_VRUN=false
