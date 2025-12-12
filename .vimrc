@@ -1,5 +1,5 @@
 " line numbering
-set number relativenumber
+set number norelativenumber
 
 
 " TAB SETTINGS
