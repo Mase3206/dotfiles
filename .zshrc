@@ -141,8 +141,10 @@ function dotsync () {
 }
 
 
-if [ -f "$DOTFILES_DIR/zsh/iterm2-shell-integration.zsh" ]; then
-	test -e "$DOTFILES_DIR/zsh/iterm2-shell-integration.zsh" \
-		&& source "$DOTFILES_DIR/zsh/iterm2-shell-integration.zsh"
-fi
+#TERM2_INTEGRATION=".iterm2_shell_integration.zsh"
+#
+#if [ -f "$ITERM2_INTEGRATION" ]; then
+#	test -e "$ITERM2_INTEGRATION" \
+#		&& source "$ITERM2_INTEGRATION"
+#fi
 
