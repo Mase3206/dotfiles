@@ -1,5 +1,5 @@
 .oh-my-zsh/themes/terse.zsh-theme
-.oh-my-zsh/custom/plugins/poetry
 .bashrc
 .zshrc
 .vimrc
+.config/iterm2/com.googlecode.iterm2.plist
