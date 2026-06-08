@@ -5,9 +5,9 @@ from dotmgr import DOTFILES_DIR
 
 
 class InstallStatus(str, Enum):
-    INSTALLED = 'INSTALLED'
-    NOT_INSTALLED = 'NOT_INSTALLED'
-    INSTALL_FAILED = 'INSTALL_FAILED'
+    INSTALLED = "INSTALLED"
+    NOT_INSTALLED = "NOT_INSTALLED"
+    INSTALL_FAILED = "INSTALL_FAILED"
 
 
 class BaseMod(ABC):
@@ -24,7 +24,7 @@ class BaseMod(ABC):
         """
         The list of relative paths of all dotfiles related to this mod.
         """
-    
+
     @abstractmethod
     def detect(self, quiet: bool = False) -> bool:
         """
@@ -47,7 +47,7 @@ class BaseMod(ABC):
         Whether this mod has already been installed (or if a previous installation attempt failed). Wrapper around the mods.dat file
         """
 
-        with open(DOTFILES_DIR / "mods.dat", 'rb+') as pf:
+        with open(DOTFILES_DIR / "mods.dat", "rb+") as pf:
             data = pickle.load(pf)
 
         if not data:
@@ -57,12 +57,12 @@ class BaseMod(ABC):
             return InstallStatus.NOT_INSTALLED
         else:
             return s
-        
+
     @status.setter
     def status(self, status: InstallStatus):
         with open(DOTFILES_DIR / "mods.dat", "rwb+") as pf:
             data = pickle.load(pf)
-        
+
             if not data:
                 data = {}
 

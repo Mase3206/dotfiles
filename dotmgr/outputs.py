@@ -7,6 +7,7 @@ from enum import Enum
 
 class AnsiColors(str, Enum):
     """ANSI color codes"""
+
     BLACK = "\033[0;30m"
     RED = "\033[0;31m"
     GREEN = "\033[0;32m"
@@ -40,22 +41,22 @@ def big_header(content: str):
         + f"{AnsiColors.END}\n"
     )
 
+
 def subheader(content: str):
-    print(
-        "\n"
-        + f"{AnsiColors.BLUE}---- {content} ----"
-        + f"{AnsiColors.END}"
-    )
+    print("\n" + f"{AnsiColors.BLUE}---- {content} ----" + f"{AnsiColors.END}")
+
 
 def step(content: str):
     print(f"{AnsiColors.LIGHT_CYAN}- {content}{AnsiColors.END}")
 
+
 def status_bad(subject: str, message: str):
     print(f"{subject}: {AnsiColors.RED}{message}{AnsiColors.END}")
+
 
 def status_good(subject: str, message: str):
     print(f"{subject}: {message}")
 
+
 def skip(content: str):
     print(f"{AnsiColors.LIGHT_RED}Skipping{AnsiColors.END} {content}")
-

@@ -13,11 +13,13 @@ from typing import Union
 class UnknownFileTypeError(FileExistsError):
     pass
 
+
 class LogLevel(int, Enum):
     DEBUG = 4
     INFO = 3
     WARN = 2
     ERR = 1
+
 
 class Dotfile:
     relative_path: Path
@@ -49,77 +51,111 @@ class Dotfile:
         """
 
         if not self.dest.exists():
-            self.log('rm', LogLevel.DEBUG, "dest doesn't exist, so there's nothing to remove.")
+            self.log(
+                "rm",
+                LogLevel.DEBUG,
+                "dest doesn't exist, so there's nothing to remove.",
+            )
             return True
-        
+
         elif self.dest.is_symlink():
-            self.log('rm', LogLevel.WARN, "dest is a symlink, cautiously removing anyways")
+            self.log(
+                "rm", LogLevel.WARN, "dest is a symlink, cautiously removing anyways"
+            )
             self.dest.unlink()
             return True
-        
+
         elif self.dest.is_file():
-            self.log('rm', LogLevel.WARN, "dest is a regular file, cautiously removing anyways")
+            self.log(
+                "rm",
+                LogLevel.WARN,
+                "dest is a regular file, cautiously removing anyways",
+            )
             self.dest.unlink()
             return True
-        
+
         elif self.dest.is_dir():
-            self.log('rm', LogLevel.ERR, "dest is a directory, not removing")
-            return False
-        
-        else:
-            self.log('rm', LogLevel.ERR, f"I can't figure out what kind of file dest ({self.dest}) is somehow.")
+            self.log("rm", LogLevel.ERR, "dest is a directory, not removing")
             return False
 
-        
+        else:
+            self.log(
+                "rm",
+                LogLevel.ERR,
+                f"I can't figure out what kind of file dest ({self.dest}) is somehow.",
+            )
+            return False
+
     def ln(self):
         """
         Links the file.
-        
+
         :returns bool: True if the file was linked successfully, False otherwise
         """
 
         if not self.dest.exists():
-            self.log('ln', LogLevel.DEBUG, "dest does not exist and is not linked, linking")
+            self.log(
+                "ln", LogLevel.DEBUG, "dest does not exist and is not linked, linking"
+            )
             self.dest.symlink_to(self.src)
         elif self.dest.is_symlink():
             if self.dest.resolve() == self.src:
                 # print(f"[Dotfile.ln] ")
-                self.log('ln', LogLevel.DEBUG, "dest is already linked correctly, relinking")
+                self.log(
+                    "ln", LogLevel.DEBUG, "dest is already linked correctly, relinking"
+                )
                 self.dest.unlink()
                 self.dest.symlink_to(self.src)
             else:
-                self.log('ln', LogLevel.ERR, f"{self.dest} is already a symlink, but does not point to the right file. It points to: '{self.dest.resolve()}'")
+                self.log(
+                    "ln",
+                    LogLevel.ERR,
+                    f"{self.dest} is already a symlink, but does not point to the right file. It points to: '{self.dest.resolve()}'",
+                )
         elif self.dest.is_dir():
-            self.log('ln', LogLevel.ERR, "dest exists and is a directory. You'll need to delete it manually before continuing.")
+            self.log(
+                "ln",
+                LogLevel.ERR,
+                "dest exists and is a directory. You'll need to delete it manually before continuing.",
+            )
         elif self.dest.is_file():
             # print(f"[Dotfile.ln]:ERR {self.dest} exists and is a file. Remove it with the `rm()` function.")
-            self.log('ln', LogLevel.ERR, 'dest exists and is a file. Remove it manually or with the `rm()` function before continuing.')
+            self.log(
+                "ln",
+                LogLevel.ERR,
+                "dest exists and is a file. Remove it manually or with the `rm()` function before continuing.",
+            )
 
     def sync(self):
-        self.log('sync', LogLevel.INFO, "Attempting to sync")
+        self.log("sync", LogLevel.INFO, "Attempting to sync")
 
-        self.log('sync', LogLevel.DEBUG, 'Attempting to remove existing link (if exists)')
+        self.log(
+            "sync", LogLevel.DEBUG, "Attempting to remove existing link (if exists)"
+        )
         if self.rm():
-            self.log('sync', LogLevel.DEBUG, "Removal succeeded, attempting to re-link")
-            
-            if self.ln():
-                self.log('sync', LogLevel.INFO, "Sync succeeded")
-            else:
-                self.log('sync', LogLevel.ERR, 'Sync failed: Failed to re-link')
-        
-        else:
-            self.log('sync', LogLevel.ERR, 'Sync failed: Failed to remove existing link (if exists)')
+            self.log("sync", LogLevel.DEBUG, "Removal succeeded, attempting to re-link")
 
+            if self.ln():
+                self.log("sync", LogLevel.INFO, "Sync succeeded")
+            else:
+                self.log("sync", LogLevel.ERR, "Sync failed: Failed to re-link")
+
+        else:
+            self.log(
+                "sync",
+                LogLevel.ERR,
+                "Sync failed: Failed to remove existing link (if exists)",
+            )
 
 
 def load_dotfiles(managed_files_file: Path):
     # relative_paths: list[Path] = []
     dotfiles: dict[str, Dotfile] = {}
 
-    with open(managed_files_file, 'r') as f:
+    with open(managed_files_file, "r") as f:
         for line in f.readlines():
             line_stripped = line.strip()
-            if line_stripped == '':
+            if line_stripped == "":
                 continue
             else:
                 dotfiles[line_stripped] = Dotfile(Path(line_stripped))
@@ -159,9 +195,9 @@ class mktemp(AbstractContextManager):
 
     def __init__(self):
         self.path = Path(tempfile.mkdtemp())
-    
+
     def __enter__(self):
         return self.path
-    
+
     def __exit__(self, *excinfo):
         shutil.rmtree(self.path)
