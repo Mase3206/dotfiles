@@ -3,6 +3,8 @@
 import argparse
 from dotmgr import mods, filelib, DOTFILES_MANAGED_FILE
 from dotmgr.mods import InstallStatus
+import os
+import subprocess
 
 
 ALL_DOTFILES = filelib.load_dotfiles(DOTFILES_MANAGED_FILE)
@@ -26,6 +28,8 @@ sp_ln.add_argument(
     nargs="*",
     help="(Optional) relative path to file(s) to link. If not given, all files (except those used by uninstalled Mods) will be linked.",
     default=AVAILABLE_DOTFILES.keys(),
+    choices=AVAILABLE_DOTFILES.keys(),
+    metavar="file",
 )
 
 sp_rm = sp_manager.add_parser(
@@ -33,7 +37,13 @@ sp_rm = sp_manager.add_parser(
     help="Remove dotfiles",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
-sp_rm.add_argument("file", nargs="+", help="Relative path to file(s) to remove.")
+sp_rm.add_argument(
+    "file",
+    nargs="+",
+    help="Relative path to file(s) to remove.",
+    choices=AVAILABLE_DOTFILES.keys(),
+    metavar="file",
+)
 
 sp_sync = sp_manager.add_parser(
     "sync",
@@ -45,6 +55,8 @@ sp_sync.add_argument(
     nargs="*",
     help="(Optional) relative path to file(s) to sync. If not given, all files (except those used by uninstalled Mods) will be synced.",
     default=AVAILABLE_DOTFILES.keys(),
+    choices=AVAILABLE_DOTFILES.keys(),
+    metavar="file",
 )
 
 sp_adopt = sp_manager.add_parser(
@@ -60,6 +72,24 @@ sp_desync = sp_manager.add_parser(
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_desync.add_argument("file", nargs="+", help="Relative path to the file(s) to orphan")
+
+sp_edit = sp_manager.add_parser(
+    "edit",
+    help="Edit or view a dotfile, respecting the your chosen editor (set in $EDITOR) by default.",
+    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+)
+sp_edit.add_argument(
+    "-c", help="Open in VSCode", dest="editor_vscode", action="store_true"
+)
+sp_edit.add_argument("-v", help="Open in Vim", dest="editor_vim", action="store_true")
+sp_edit.add_argument("-n", help="Open in Nano", dest="editor_nano", action="store_true")
+sp_edit.add_argument("-l", help="Open in Less", dest="editor_less", action="store_true")
+sp_edit.add_argument(
+    "file",
+    help="Relative path to the file to edit or view",
+    choices=ALL_DOTFILES.keys(),
+    metavar="file",
+)
 
 sp_mod = sp_manager.add_parser("mod", help="Manage mods")
 sp_mod.add_argument("action", choices=("install", "detect"), help="Action")
@@ -127,6 +157,30 @@ elif args.sp == "adopt":
 
 elif args.sp == "orphan":
     raise NotImplementedError("Dotfile orphaning is not yet implemented.")
+
+elif args.sp == "edit":
+    editor = (
+        "code"
+        if args.editor_vscode
+        else "vim"
+        if args.editor_vim
+        else "nano"
+        if args.editor_nano
+        else "less"
+        if args.editor_less
+        else os.environ.get("EDITOR", "cat")
+    )
+    if editor == "cat":
+        print(
+            "WARN: $EDITOR variable is unset, and editor was not specified, so defaulted to `cat`."
+        )
+
+    dotfile = ALL_DOTFILES.get(args.file)
+    # Safely assert here, as argparse makes sure the chosen dotfile is known and valid.
+    assert dotfile
+
+    subprocess.run([editor, dotfile.src])
+
 
 elif args.sp == "mod":
     mod_name: str = args.mod_name
