@@ -1,7 +1,3 @@
-#!/usr/bin/python3
-
-
-from pathlib import Path
 from .. import outputs
 from dotmgr import HOME, USER
 from dotmgr.filelib import cd, mktemp
@@ -19,7 +15,7 @@ class OhMyZsh(BaseMod):
         return [".oh-my-zsh/themes/terse.zsh-theme"]
 
     def detect(self, quiet: bool = False) -> bool:
-        dest_path = Path("~/.oh-my-zsh").resolve()
+        dest_path = HOME / ".oh-my-zsh"
         if dest_path.exists() and dest_path.is_dir():
             if not quiet:
                 outputs.status_good("OMZ install status", "already installed!")

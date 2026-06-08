@@ -52,7 +52,7 @@ class BaseMod(ABC):
 
         if not data:
             return InstallStatus.NOT_INSTALLED
-        s = data.get(self.__name__)
+        s = data.get(self.mod_name)
         if not s:
             return InstallStatus.NOT_INSTALLED
         else:
@@ -60,12 +60,20 @@ class BaseMod(ABC):
 
     @status.setter
     def status(self, status: InstallStatus):
-        with open(DOTFILES_DIR / "mods.dat", "rwb+") as pf:
+        with open(DOTFILES_DIR / "mods.dat", "rb+") as pf:
             data = pickle.load(pf)
 
-            if not data:
-                data = {}
+        if not data:
+            data = {}
 
-            data[self.__name__] = status
+        data[self.mod_name] = status
 
+        with open(DOTFILES_DIR / "mods.dat", "wb+") as pf:
             pickle.dump(data, pf)
+
+    @property
+    def mod_name(self):
+        return self.__class__.__name__
+
+    def __str__(self) -> str:
+        return self.mod_name

@@ -27,8 +27,7 @@ class Dotfile:
     dest: Path
     log_level: LogLevel
     logging_enabled: bool
-    # is_managed: bool
-    managed_by: Union[BaseMod, None]
+    used_by: Union[BaseMod, None]
 
     def __init__(self, relative_path: Path):
         self.relative_path = relative_path
@@ -36,12 +35,13 @@ class Dotfile:
         self.dest = HOME / relative_path
         self.logging_enabled = True
         self.log_level = LogLevel.DEBUG
-        # self.is_managed = self.relative_path in mods.__mod_dotfiles__.keys()
-        self.managed_by = mods.__mod_dotfiles__.get(str(self.relative_path), None)
+        self.used_by = mods.__mod_dotfiles__.get(str(self.relative_path), None)
 
     def log(self, fname: str, level: LogLevel, message: str):
         if self.logging_enabled and level <= self.log_level:
-            print(f"[Dotfile({self.relative_path}.{fname})]:{level.name} {message}")
+            print(
+                f"{level.name:>5}  [Dotfile({self.relative_path}).{fname}]: {message}"
+            )
 
     def rm(self) -> bool:
         """
@@ -86,7 +86,7 @@ class Dotfile:
             )
             return False
 
-    def ln(self):
+    def ln(self) -> bool:
         """
         Links the file.
 
@@ -98,6 +98,7 @@ class Dotfile:
                 "ln", LogLevel.DEBUG, "dest does not exist and is not linked, linking"
             )
             self.dest.symlink_to(self.src)
+            return True
         elif self.dest.is_symlink():
             if self.dest.resolve() == self.src:
                 # print(f"[Dotfile.ln] ")
@@ -106,18 +107,21 @@ class Dotfile:
                 )
                 self.dest.unlink()
                 self.dest.symlink_to(self.src)
+                return True
             else:
                 self.log(
                     "ln",
                     LogLevel.ERR,
                     f"{self.dest} is already a symlink, but does not point to the right file. It points to: '{self.dest.resolve()}'",
                 )
+                return False
         elif self.dest.is_dir():
             self.log(
                 "ln",
                 LogLevel.ERR,
                 "dest exists and is a directory. You'll need to delete it manually before continuing.",
             )
+            return False
         elif self.dest.is_file():
             # print(f"[Dotfile.ln]:ERR {self.dest} exists and is a file. Remove it with the `rm()` function.")
             self.log(
@@ -125,8 +129,16 @@ class Dotfile:
                 LogLevel.ERR,
                 "dest exists and is a file. Remove it manually or with the `rm()` function before continuing.",
             )
+            return False
+        else:
+            self.log(
+                "rm",
+                LogLevel.ERR,
+                f"I can't figure out what kind of file dest ({self.dest}) is somehow.",
+            )
+            return False
 
-    def sync(self):
+    def sync(self) -> bool:
         self.log("sync", LogLevel.INFO, "Attempting to sync")
 
         self.log(
@@ -137,8 +149,10 @@ class Dotfile:
 
             if self.ln():
                 self.log("sync", LogLevel.INFO, "Sync succeeded")
+                return True
             else:
                 self.log("sync", LogLevel.ERR, "Sync failed: Failed to re-link")
+                return False
 
         else:
             self.log(
@@ -146,6 +160,7 @@ class Dotfile:
                 LogLevel.ERR,
                 "Sync failed: Failed to remove existing link (if exists)",
             )
+            return False
 
 
 def load_dotfiles(managed_files_file: Path):

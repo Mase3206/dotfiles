@@ -1,7 +1,3 @@
-#!/usr/bin/python3
-
-
-# from pathlib import Path
 from .. import outputs
 from dotmgr import HOME
 from dotmgr.pkg import PackageManager
