@@ -5,7 +5,7 @@ import os
 import subprocess
 from typing import Iterable, Optional
 
-from dotmgr import DOTFILES_MANAGED_FILE, filelib, git, mods, outputs
+from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, filelib, git, mods, outputs
 from dotmgr.mods import InstallStatus
 
 ALL_DOTFILES = filelib.load_dotfiles(DOTFILES_MANAGED_FILE)
@@ -23,8 +23,8 @@ class Choices(tuple):
     and marked for release in Python 3.14: https://github.com/python/cpython/issues/53834. Using this class allows you to
     set multiple possible choices and defaults on a positional argument with `nargs='*'`, as it fixes a bug in `argparse` on line 2496:
     ```python
-    if action.choices is not None and value not in action.choices:
-        ...
+           if action.choices is not None and value not in action.choices:
+               ...
     ```
     If `value` is itself a collection, the latter condition will fail, as the collection itself obviously isn't a member of the given choices.
 
@@ -56,13 +56,17 @@ This list contains the keys of the AVAILABLE_DOTFILES dict (i.e. the relative pa
 
 
 # region Define arguments
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+    prog="dot",
+    description=f"{outputs.AnsiColors.BOLD}dot{outputs.AnsiColors.END} is a custom, lightweight, stdlib-only dependency manager. Written for Python 3.9+, it supports macOS (because even macOS 26 is shipping with Python 3.9.6, which is from 2022) and older Linux distros, and, as Python 3 generally has excellent backwards compatibility, it is highly likely to work on later versions as well.",
+)
 sp_manager = parser.add_subparsers(required=True, metavar="command", dest="sp")
 
 # Link
 sp_ln = sp_manager.add_parser(
     "ln",
     help="Link dotfiles",
+    description="Link dotfiles",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_ln.add_argument(
@@ -78,6 +82,7 @@ sp_ln.add_argument(
 sp_rm = sp_manager.add_parser(
     "rm",
     help="Remove dotfiles",
+    description="Remove dotfiles",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_rm.add_argument(
@@ -92,6 +97,7 @@ sp_rm.add_argument(
 sp_sync = sp_manager.add_parser(
     "sync",
     help="Sync dotfiles",
+    description="Sync dotfiles",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_sync.add_argument(
@@ -107,6 +113,7 @@ sp_sync.add_argument(
 sp_manage = sp_manager.add_parser(
     "manage",
     help="Add file(s) in $DOTFILES_DIR to managed.files",
+    description=f"Add file(s) in $DOTFILES_DIR ({DOTFILES_DIR}) to managed.files",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_manage.add_argument(
@@ -119,6 +126,7 @@ sp_manage.add_argument(
 sp_unmanage = sp_manager.add_parser(
     "unmanage",
     help="Remove file(s) in $DOTFILES_DIR from managed.files",
+    description=f"Remove file(s) in $DOTFILES_DIR ({DOTFILES_DIR}) from managed.files",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_unmanage.add_argument(
@@ -131,15 +139,21 @@ sp_unmanage.add_argument(
 # Adopt
 sp_adopt = sp_manager.add_parser(
     "adopt",
-    help="Adopt local dotfile to dotfile repo",
+    help="Adopt local dotfile to dotfile repo $DOTFILES_DIR",
+    description=f"Adopt local dotfile to dotfile repo $DOTFILES_DIR ({DOTFILES_DIR})",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
-sp_adopt.add_argument("file", nargs="+", help="Relative path to the file(s) to adopt")
+sp_adopt.add_argument(
+    "file",
+    nargs="+",
+    help="Relative path to the file(s) to adopt",
+)
 
 # Orphan
 sp_orphan = sp_manager.add_parser(
     "orphan",
     help="Orphan one or more dotfiles. This converts a once synced dotfile to a local-only dotfile.",
+    description="Orphan one or more dotfiles. This converts a once synced dotfile to a local-only dotfile.",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_orphan.add_argument(
@@ -160,35 +174,67 @@ sp_orphan.add_argument(
 sp_edit = sp_manager.add_parser(
     "edit",
     help="Edit or view a dotfile, respecting the your chosen editor (set in $EDITOR) by default.",
+    description=f"Edit or view a dotfile, respecting the your chosen editor (set in $EDITOR) by default. Your current editor is {os.environ.get('EDITOR', 'unset')}.",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_edit.add_argument(
     "-c", help="Open in VSCode", dest="editor_vscode", action="store_true"
 )
-sp_edit.add_argument("-v", help="Open in Vim", dest="editor_vim", action="store_true")
-sp_edit.add_argument("-n", help="Open in Nano", dest="editor_nano", action="store_true")
-sp_edit.add_argument("-l", help="Open in Less", dest="editor_less", action="store_true")
+sp_edit.add_argument(
+    "-v",
+    help="Open in Vim",
+    dest="editor_vim",
+    action="store_true",
+)
+sp_edit.add_argument(
+    "-n",
+    help="Open in Nano",
+    dest="editor_nano",
+    action="store_true",
+)
+sp_edit.add_argument(
+    "-l",
+    help="Open in Less",
+    dest="editor_less",
+    action="store_true",
+)
 sp_edit.add_argument(
     "file",
     help="Relative path to the file to edit or view",
-    choices=ALL_DOTFILES.keys(),
+    choices=_available_dotfiles_choices,
     metavar="file",
 )
 
 # Mod
-sp_mod = sp_manager.add_parser("mod", help="Manage mods")
-sp_mod.add_argument("action", choices=("install", "detect"), help="Action")
-sp_mod.add_argument("mod_name", choices=mods.__mods__.keys(), help="Mod name")
+sp_mod = sp_manager.add_parser(
+    "mod",
+    help="Manage and interact with known mods",
+    description="Manage and interact with known mods",
+)
+_choices_mods = Choices(mods.__mods__.keys(), default=mods.__mods__.keys())
+sp_mod.add_argument(
+    "action",
+    choices=("install", "detect"),
+    help="Action",
+)
+sp_mod.add_argument(
+    "mod_name",
+    choices=_choices_mods,
+    help="(Optional) mod name(s). If none are given, defaults to all.",
+    nargs="*",
+    default=_choices_mods.default,
+)
 
 # Git
 sp_git = sp_manager.add_parser(
     "git",
     help="Interact with the local dotfile Git repo",
-    description="""\
-    Interact with the local dotfile Git repo in $DOTFILES_DIR.
+    description=f"""\
+    Interact with the local dotfile Git repo in $DOTFILES_DIR ({DOTFILES_DIR}).
 
-    UPLOAD: Commit changes to managed dotfiles, and push them to remote.
-    DOWNLOAD: Stash changes in local repo, pull changes from remote, then unstash changes.
+    COMMIT: Commit changes to managed dotfiles.
+    PUSH: Push changes to remote.
+    PULL: Stash changes in local repo, pull changes from remote, then unstash changes.
     UNDO: Undo the last commit and unstage the previously committed files.
     STATUS: Get the current Git status of the local repo.
     """,
@@ -346,15 +392,15 @@ elif args.sp == "edit":
 
 # Interact with mods
 elif args.sp == "mod":
-    mod_name: str = args.mod_name
-    selected_mod = mods.__mods__.get(mod_name)
-    if not selected_mod:
-        raise ValueError(f"Selected mod {mod_name} does not exist.")
+    for mod_name in args.mod_name:
+        selected_mod = mods.__mods__.get(mod_name)
+        if not selected_mod:
+            raise ValueError(f"Selected mod {mod_name} does not exist.")
 
-    if args.action == "detect":
-        selected_mod.detect()
-    elif args.action == "install":
-        selected_mod.install()
+        if args.action == "detect":
+            selected_mod.detect()
+        elif args.action == "install":
+            selected_mod.install()
 
 # Interact with Git
 elif args.sp == "git":
