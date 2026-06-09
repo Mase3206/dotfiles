@@ -1,12 +1,8 @@
 from pathlib import Path
 from enum import Enum
-import os
-from dotmgr import HOME, DOTFILES_DIR
-from dotmgr import mods
+from dotmgr import HOME, DOTFILES_DIR, mods, outputs
 from dotmgr.mods.base import BaseMod
 import shutil
-import tempfile
-from contextlib import AbstractContextManager
 from typing import Union
 
 
@@ -15,10 +11,11 @@ class UnknownFileTypeError(FileExistsError):
 
 
 class LogLevel(int, Enum):
-    DEBUG = 4
-    INFO = 3
-    WARN = 2
-    ERR = 1
+    DEBUG = 5
+    INFO = 4
+    WARN = 3
+    ERR = 2
+    CRITICAL = 1
 
 
 class Dotfile:
@@ -40,7 +37,7 @@ class Dotfile:
     def log(self, fname: str, level: LogLevel, message: str):
         if self.logging_enabled and level <= self.log_level:
             print(
-                f"{level.name:>5}  [Dotfile({self.relative_path}).{fname}]: {message}"
+                f"{level.name:>5}  [Dotfile('{self.relative_path}').{fname}]: {message}"
             )
 
     def rm(self) -> bool:
@@ -162,6 +159,131 @@ class Dotfile:
             )
             return False
 
+    def adopt(self) -> bool:
+        """
+        Move dest to src, then link src to dest.
+
+        :return bool: True if success, False otherwise.
+        """
+        self.log("adopt", LogLevel.INFO, "Attempting to adopt")
+
+        if not self.dest.exists():
+            self.log("adopt", LogLevel.ERR, "Target file does not exist, can't adopt")
+            return False
+        elif self.dest.is_symlink():
+            # if outputs.confirm(f"File '{self.dest.resolve()}' is a symlink. ")
+            self.log(
+                "adopt",
+                LogLevel.ERR,
+                "Dest is a symlink, can't adopt. Run `sync` to fix",
+            )
+            return False
+        elif self.dest.is_dir():
+            self.log("adopt", LogLevel.ERR, "Target is a folder, refusing to adopt")
+            return False
+        elif self.dest.is_file():
+            self.log(
+                "adopt",
+                LogLevel.DEBUG,
+                "Target is a regular file, moving to dotfiles folder and linking",
+            )
+            self.dest.rename(self.src)
+            if self.ln():
+                self.log("adopt", LogLevel.INFO, "Adopt succeeded")
+                return True
+            else:
+                self.log("adopt", LogLevel.ERR, "Adopt failed: Failed to relink")
+                return False
+        else:
+            self.log(
+                "rm",
+                LogLevel.ERR,
+                f"I can't figure out what kind of file dest ({self.dest}) is somehow.",
+            )
+            return False
+
+    def orphan(self) -> bool:
+        """
+        Copy src to dest, deleting dest symlink if necessary
+        """
+        self.log("orphan", LogLevel.INFO, "Attempting to orphan")
+
+        if not self.src.exists():
+            self.log(
+                "orphan",
+                LogLevel.ERR,
+                "Can't orphan dotfile from src that doesn't exist in dotfiles repo",
+            )
+            return False
+        elif self.src.is_symlink():
+            self.log(
+                "orphan",
+                LogLevel.CRITICAL,
+                f"Source is a symlink, which is {outputs.AnsiColors.BOLD}{outputs.AnsiColors.RED}very bad{outputs.AnsiColors.END}!!! Sources should {outputs.AnsiColors.BOLD}never{outputs.AnsiColors.END} be symlinks!",
+            )
+            return False
+        elif self.src.is_dir():
+            self.log("orphan", LogLevel.ERR, "Source is a folder, refusing to orphan")
+            return False
+        elif self.dest.exists() and not self.dest.is_symlink():
+            self.log(
+                "orphan",
+                LogLevel.ERR,
+                "Dest already exists and isn't a symlink, can't orphan",
+            )
+            return False
+        elif self.dest.is_symlink() and self.dest.resolve() != self.src:
+            self.log(
+                "orphan",
+                LogLevel.ERR,
+                f"Dest is a symlink, but links to {self.dest.resolve()}. Fix link with `sync` first",
+            )
+            return False
+        elif self.dest.is_symlink() and self.dest.resolve() == self.src:
+            self.log(
+                "orphan",
+                LogLevel.DEBUG,
+                "Dest is linked correctly, proceeding with orphaning",
+            )
+            if not self.rm():
+                self.log("orphan", LogLevel.ERR, "Failed to remove dest")
+                return False
+            shutil.copyfile(self.src, self.dest)
+            if self.dest.exists() and not self.dest.is_symlink():  # success
+                self.log("orphan", LogLevel.INFO, "Orphan succeeded")
+                return True
+            else:
+                self.log(
+                    "orphan",
+                    LogLevel.INFO,
+                    "Orphan failed: Dest still doesn't exist or wasn't moved correctly",
+                )
+                return False
+        elif not self.dest.exists():
+            self.log(
+                "orphan",
+                LogLevel.DEBUG,
+                "Dest doesn't exist, proceeding with orphaning",
+            )
+            shutil.copyfile(self.src, self.dest)
+            if self.dest.exists() and not self.dest.is_symlink():  # success
+                self.log("orphan", LogLevel.INFO, "Orphan succeeded")
+                return True
+            else:
+                self.log(
+                    "orphan",
+                    LogLevel.INFO,
+                    "Orphan failed: Dest still doesn't exist or wasn't moved correctly",
+                )
+                return False
+        else:
+            self.log(
+                "rm",
+                LogLevel.ERR,
+                f"I can't figure out what kind of files src ({self.src}) and dest ({self.dest}) are somehow.",
+            )
+            return False
+
 
 def load_dotfiles(managed_files_file: Path):
     # relative_paths: list[Path] = []
@@ -178,41 +300,16 @@ def load_dotfiles(managed_files_file: Path):
     return dotfiles
 
 
-class cd(AbstractContextManager):
-    """
-    Context manager for changing the current working directory.
+def update_managed_list(
+    dotfiles: Union[list[Dotfile], dict[str, Dotfile]], managed_files_file: Path
+):
+    if isinstance(dotfiles, dict):
+        relative_paths = dotfiles.keys()
+    elif isinstance(dotfiles, list):
+        relative_paths = [str(d.relative_path) for d in dotfiles]
+    else:
+        raise TypeError("`dotfiles` is not of type list[Dotfile] or dict[str, Dotfile]")
 
-    Credit to Brian M. Hunt on StackOverflow (https://stackoverflow.com/a/13197763) for suggesting this, though *this* implementation is pretty much copy-and-pasted from the source code of contextlib.py from Python 3.13.
-    """
+    with open(managed_files_file, "w+") as f:
+        f.write("\n".join(relative_paths))
 
-    path: Path
-    _old_cwd: list[Path]
-
-    def __init__(self, path: Path):
-        self.path = path
-        self._old_cwd = []
-
-    def __enter__(self):
-        self._old_cwd.append(Path.cwd())
-        os.chdir(self.path)
-        return self.path
-
-    def __exit__(self, *excinfo):
-        os.chdir(self._old_cwd.pop())
-
-
-class mktemp(AbstractContextManager):
-    """
-    Context manager for creating a new temporary directory and removing it once finished.
-    """
-
-    path: Path
-
-    def __init__(self):
-        self.path = Path(tempfile.mkdtemp())
-
-    def __enter__(self):
-        return self.path
-
-    def __exit__(self, *excinfo):
-        shutil.rmtree(self.path)

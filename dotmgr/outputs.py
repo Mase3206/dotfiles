@@ -3,6 +3,7 @@
 """Console output helpers"""
 
 from enum import Enum
+import string
 
 
 class AnsiColors(str, Enum):
@@ -60,3 +61,26 @@ def status_good(subject: str, message: str):
 
 def skip(content: str):
     print(f"{AnsiColors.LIGHT_RED}Skipping{AnsiColors.END} {content}")
+
+
+def confirm(message: str, defaul_yes: bool = True) -> bool:
+    while True:
+        iput = (
+            input(
+                f"{message} [{'Y' if defaul_yes else 'y'}/{'n' if defaul_yes else 'N'}]"
+            )
+            .strip()
+            .lower()
+        )
+        if defaul_yes:
+            if iput == "" or iput in string.whitespace or iput in ["y", "yes"]:
+                return True
+            elif iput in ["n", "no"]:
+                return False
+            # If neither, continue looping
+        else:
+            if iput in ["y", "yes"]:
+                return True
+            elif iput == "" or iput in string.whitespace or iput in ["n", "no"]:
+                return False
+            # If neither, continue looping

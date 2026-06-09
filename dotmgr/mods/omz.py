@@ -1,6 +1,6 @@
 from .. import outputs
 from dotmgr import HOME, USER
-from dotmgr.filelib import cd, mktemp
+from dotmgr.utils import cd, mktemp
 from dotmgr.mods.base import BaseMod, InstallStatus
 import subprocess
 
