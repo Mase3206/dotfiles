@@ -1,0 +1,13 @@
+[format]
+docstring-code-format = true
+indent-style = "space"
+line-ending = "lf"
+skip-magic-trailing-comma = false
+
+[lint]
+select = [
+    "W291", "F401", "I", "F541"
+]
+
+[lint.isort]
+combine-as-imports = true
