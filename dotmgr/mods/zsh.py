@@ -15,7 +15,12 @@ class Zsh(BaseMod):
         return [".zshrc"]
 
     def detect(self, quiet: bool = False) -> bool:
-        if subprocess.run("command -v zsh", shell=True).returncode == 0:
+        out = subprocess.run(
+            "command -v zsh",
+            shell=True,
+            stdout=subprocess.DEVNULL,
+        )
+        if out.returncode == 0:
             if not quiet:
                 outputs.status_good("Zsh install status", "already installed!")
             self.status = InstallStatus.INSTALLED
