@@ -1,9 +1,10 @@
-from pathlib import Path
-from enum import Enum
-from dotmgr import HOME, DOTFILES_DIR, mods, outputs
-from dotmgr.mods.base import BaseMod
 import shutil
+from enum import Enum
+from pathlib import Path
 from typing import Union
+
+from dotmgr import DOTFILES_DIR, HOME, mods, outputs
+from dotmgr.mods.base import BaseMod
 
 
 class UnknownFileTypeError(FileExistsError):
@@ -33,6 +34,9 @@ class Dotfile:
         self.logging_enabled = True
         self.log_level = LogLevel.DEBUG
         self.used_by = mods.__mod_dotfiles__.get(str(self.relative_path), None)
+
+    def __str__(self) -> str:
+        return str(self.relative_path)
 
     def log(self, fname: str, level: LogLevel, message: str):
         if self.logging_enabled and level <= self.log_level:
@@ -305,11 +309,14 @@ def update_managed_list(
 ):
     if isinstance(dotfiles, dict):
         relative_paths = dotfiles.keys()
-    elif isinstance(dotfiles, list):
+    elif isinstance(dotfiles, list) and len(dotfiles) > 0:
         relative_paths = [str(d.relative_path) for d in dotfiles]
+    elif not dotfiles:
+        return
     else:
-        raise TypeError("`dotfiles` is not of type list[Dotfile] or dict[str, Dotfile]")
+        raise TypeError(
+            "`dotfiles` is not of type list[Dotfile], or dict[str, Dotfile]"
+        )
 
     with open(managed_files_file, "w+") as f:
         f.write("\n".join(relative_paths))
-

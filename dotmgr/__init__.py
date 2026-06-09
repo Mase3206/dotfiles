@@ -1,6 +1,6 @@
+import getpass
 import os
 from pathlib import Path
-import getpass
 
 HOME = Path(os.environ.get("HOME", "~")).resolve()
 USER = os.environ.get("USER", getpass.getuser())

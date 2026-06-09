@@ -1,8 +1,8 @@
-from importlib import import_module
-from dotmgr.mods.base import BaseMod, InstallStatus
-from pathlib import Path
 from abc import ABCMeta
+from importlib import import_module
+from pathlib import Path
 
+from dotmgr.mods.base import BaseMod, InstallStatus
 
 # Dynamically load the known/enabled mods and store them for other things to use
 __mods__: dict[str, BaseMod] = {}

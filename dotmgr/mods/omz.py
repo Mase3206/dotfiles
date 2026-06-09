@@ -1,8 +1,8 @@
-from .. import outputs
-from dotmgr import HOME, USER
-from dotmgr.utils import cd, mktemp
-from dotmgr.mods.base import BaseMod, InstallStatus
 import subprocess
+
+from dotmgr import HOME, USER, outputs
+from dotmgr.mods.base import BaseMod, InstallStatus
+from dotmgr.utils import cd, mktemp
 
 
 class OhMyZsh(BaseMod):

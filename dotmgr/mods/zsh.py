@@ -1,8 +1,8 @@
-from .. import outputs
-from dotmgr import HOME
-from dotmgr.pkg import PackageManager
-from dotmgr.mods.base import BaseMod, InstallStatus
 import subprocess
+
+from dotmgr import HOME, outputs
+from dotmgr.mods.base import BaseMod, InstallStatus
+from dotmgr.pkg import PackageManager
 
 
 class Zsh(BaseMod):

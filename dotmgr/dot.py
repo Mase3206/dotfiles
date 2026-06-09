@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
 import argparse
-from dotmgr import mods, filelib, DOTFILES_MANAGED_FILE, outputs
-from dotmgr.mods import InstallStatus
 import os
 import subprocess
 from typing import Iterable, Optional
 
+from dotmgr import DOTFILES_MANAGED_FILE, filelib, git, mods, outputs
+from dotmgr.mods import InstallStatus
 
 ALL_DOTFILES = filelib.load_dotfiles(DOTFILES_MANAGED_FILE)
 AVAILABLE_DOTFILES = {
@@ -14,11 +14,7 @@ AVAILABLE_DOTFILES = {
     for name, d in ALL_DOTFILES.items()
     if not d.used_by or d.used_by.status == InstallStatus.INSTALLED
 }
-STANDALONE_DOTFILES = {
-    name: d
-    for name, d in ALL_DOTFILES.items()
-    if not d.used_by
-}
+STANDALONE_DOTFILES = {name: d for name, d in ALL_DOTFILES.items() if not d.used_by}
 
 
 class Choices(tuple):
@@ -27,7 +23,8 @@ class Choices(tuple):
     and marked for release in Python 3.14: https://github.com/python/cpython/issues/53834. Using this class allows you to
     set multiple possible choices and defaults on a positional argument with `nargs='*'`, as it fixes a bug in `argparse` on line 2496:
     ```python
-    if action.choices is not None and value not in action.choices: ...
+    if action.choices is not None and value not in action.choices:
+        ...
     ```
     If `value` is itself a collection, the latter condition will fail, as the collection itself obviously isn't a member of the given choices.
 
@@ -39,17 +36,18 @@ class Choices(tuple):
         Choices.__init__(x, _iterable, default=default)
         return x
 
-    def __init__(self, _iterable: Optional[Iterable] = None, default: Optional[Iterable] = None):
+    def __init__(
+        self, _iterable: Optional[Iterable] = None, default: Optional[Iterable] = None
+    ):
         # _iterable is already handled by tuple.__new__
         self.default = default or []
 
     def __contains__(self, item):
         return super().__contains__(item) or item == self.default
-    
+
 
 _available_dotfiles_choices = Choices(
-    AVAILABLE_DOTFILES.keys(),
-    default=AVAILABLE_DOTFILES.keys()
+    AVAILABLE_DOTFILES.keys(), default=AVAILABLE_DOTFILES.keys()
 )
 """
 This list contains the keys of the AVAILABLE_DOTFILES dict (i.e. the relative paths of the dotfiles), as well as a "hidden"
@@ -105,6 +103,31 @@ sp_sync.add_argument(
     metavar="file",
 )
 
+# Manage - add file in dotfiles to managed.files
+sp_manage = sp_manager.add_parser(
+    "manage",
+    help="Add file(s) in $DOTFILES_DIR to managed.files",
+    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+)
+sp_manage.add_argument(
+    "file",
+    nargs="+",
+    help="Relative path to file(s) to add to managed.files.",
+)
+
+# Unmanage - remove file in dotfiles to managed.files
+sp_unmanage = sp_manager.add_parser(
+    "unmanage",
+    help="Remove file(s) in $DOTFILES_DIR from managed.files",
+    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+)
+sp_unmanage.add_argument(
+    "file",
+    nargs="+",
+    help="Relative path to files(s) to remove from managed.files.",
+    choices=_available_dotfiles_choices,
+)
+
 # Adopt
 sp_adopt = sp_manager.add_parser(
     "adopt",
@@ -158,18 +181,32 @@ sp_mod.add_argument("action", choices=("install", "detect"), help="Action")
 sp_mod.add_argument("mod_name", choices=mods.__mods__.keys(), help="Mod name")
 
 # Git
-sp_git = sp_manager.add_parser("git", help="Interact with the dotfile Git repo")
+sp_git = sp_manager.add_parser(
+    "git",
+    help="Interact with the local dotfile Git repo",
+    description="""\
+    Interact with the local dotfile Git repo in $DOTFILES_DIR.
+
+    UPLOAD: Commit changes to managed dotfiles, and push them to remote.
+    DOWNLOAD: Stash changes in local repo, pull changes from remote, then unstash changes.
+    UNDO: Undo the last commit and unstage the previously committed files.
+    STATUS: Get the current Git status of the local repo.
+    """,
+)
 sp_git.add_argument(
     "action",
-    choices=("pull", "push", "reset", "commit", "update"),
-    help="Git subcommand/action",
+    choices=("commit", "push", "pull", "undo", "status"),
+    help="Upload or download changes to Git remote",
+    # default="status",
+    # nargs="?",
+    # metavar="action",
 )
-sp_git.add_argument(
-    "message",
-    nargs="?",
-    type=str,
-    help="Git commit message (optional)",
-)
+# sp_git.add_argument(
+#     "message",
+#     nargs="?",
+#     type=str,
+#     help="Git commit message (optional)",
+# )
 
 # endregion
 
@@ -218,6 +255,41 @@ elif args.sp == "sync":
                 continue
 
             dotfile.sync()
+
+# Manage - add file(s) to managed.files
+elif args.sp == "manage":
+    # dotfiles_to_add: list[filelib.Dotfile] = []
+    new_paths = []
+    for fn in args.file:
+        if fn in ALL_DOTFILES.keys():
+            print(f"'{fn}' is already managed, skipping")
+        else:
+            new_paths.append(fn)
+            ALL_DOTFILES[fn] = filelib.Dotfile(fn)
+
+    print(f"Adding new files to managed list: {' '.join(new_paths)}")
+    filelib.update_managed_list(ALL_DOTFILES, DOTFILES_MANAGED_FILE)
+
+# Unmanage - remove file(s) from managed.files
+elif args.sp == "unmanage":
+    removed = []
+    for fn in args.file:
+        dotfile = ALL_DOTFILES[fn]
+
+        if fn not in STANDALONE_DOTFILES:
+            if not outputs.confirm(
+                f"Heads up! Dotfile {fn} is used by installed mod {dotfile.used_by}, so unmanaging probably isn't recommended. Continue anyways?"
+            ):
+                continue
+
+        if dotfile.dest.exists() and dotfile.dest.is_symlink():
+            print(f"'{fn}' is still linked. Remove the link with `dot rm {fn}` first.")
+        else:
+            removed.append(fn)
+            del ALL_DOTFILES[fn]
+
+    filelib.update_managed_list(ALL_DOTFILES, DOTFILES_MANAGED_FILE)
+    print(f"Unmanaged files: {', '.join(removed)}")
 
 # Adopt - copy unmanaged (unlinked) dotfile to repo, then link it back
 elif args.sp == "adopt":
@@ -286,6 +358,48 @@ elif args.sp == "mod":
 
 # Interact with Git
 elif args.sp == "git":
-    raise NotImplementedError("The Git wrapper is not yet implemented.")
+    # raise NotImplementedError("The Git wrapper is not yet implemented.")
+    # upload, download, status
+    if args.action == "commit":
+        changed = git.get_changed_dotfiles()
+        print(git.format_changed_human(changed))
+
+        print("\nA commit message will automatically be generated.")
+
+        if outputs.confirm("Confirm commit?"):
+            git.commit_dotfiles(changed)
+
+    if args.action == "push":
+        git.git_cmd("status")
+        print()
+        if outputs.confirm("Confirm push?"):
+            git.push_dotfiles()
+
+    elif args.action == "pull":
+        git.stash_push()
+        git.pull()
+        git.stash_pop()
+
+    elif args.action == "undo":
+        print(f"{outputs.AnsiColors.BOLD}Last commit:{outputs.AnsiColors.END}")
+        git.git_cmd("--no-pager log -1 --pretty=oneline")
+
+        print(f"\n{outputs.AnsiColors.BOLD}Files changed:{outputs.AnsiColors.END}")
+        changed_files = (
+            git.git_cmd("--no-pager diff -z --name-only HEAD HEAD~1", stdout=True)
+            .stdout[:-1]
+            .split("\0")
+        )
+        print("\n".join(changed_files), end="\n\n")
+
+        if outputs.confirm("Undo last commit?"):
+            git.git_cmd("reset --soft HEAD~1")
+            git.git_cmd(["restore", "--staged", *changed_files])
+
+    elif args.action == "status":
+        # git.git_cmd('status')
+        changed = git.get_changed_dotfiles()
+        print(git.format_changed_human(changed))
+
 
 # endregion

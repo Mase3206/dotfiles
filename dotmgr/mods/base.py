@@ -1,6 +1,7 @@
+import pickle
 from abc import ABC, abstractmethod
 from enum import Enum
-import pickle
+
 from dotmgr import DOTFILES_DIR
 
 

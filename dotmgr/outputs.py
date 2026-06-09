@@ -2,8 +2,8 @@
 
 """Console output helpers"""
 
-from enum import Enum
 import string
+from enum import Enum
 
 
 class AnsiColors(str, Enum):

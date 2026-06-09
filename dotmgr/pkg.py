@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 import os
-from enum import Enum
 import subprocess
+from enum import Enum
 from pathlib import Path
 
 
