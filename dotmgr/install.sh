@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+# #!/usr/bin/bash
 
 set -euo pipefail
 
@@ -18,13 +18,10 @@ if [[ "$OSTYPE" == darwin* ]] && ! command -v brew > /dev/null; then
 cat << EOF
 It looks like you're on a Mac, and you don't have Homebrew installed yet. For this program to be useful, you really should install Homebrew first. https://brew.sh/
 
-If you don't want to install Homebrew, you will still need to install the Xcode Command Line Tools, as that installs Git, which this requires. I still don't know why Apple doesn't just ship Git with every computer, since it's not that big, (the binary is only 12K), but Apple just wanted to make things complicated. xcode-select --install
-
-I also don't know why Apple *still* ships the latest macOS with a five-year-old version of Python (which will be going EOL soon)...
-
-Anyways, that's the end of my info dump and little diatribe.
+If you don't want to install Homebrew, you will still need to install the Xcode Command Line Tools, as that installs Git, which this requires. I still don't know why Apple doesn't just ship Git with every computer, since it's not that big, (the binary is only 12K), but Apple just wanted to make things complicated. Just run: xcode-select --install
 
 EOF
+exit 1
 fi
 
 
@@ -65,7 +62,12 @@ else
     exit 1
 fi
 
-echo -e "Dependencies satisfied.\n\n"
+echo -e "Dependencies satisfied.\n"
+
+if [ -d "$DOTFILES_DIR" ]; then
+    echo "It looks like $DOTFILES_DIR already exists. Clean up any existing dotfile links, remove that directory, then try again."
+    exit 1
+fi
 
 # echo "Cloning mase3206/dotfiles in to $DOTFILES_DIR"
 git https://github.com/Mase3206/dotfiles.git $DOTFILES_DIR
@@ -79,4 +81,11 @@ cat << EOF | $PYTHON_BIN -
 import pickle
 with open("$DOTFILES_DIR/mods.dat", "wb+") as pf:
     pickle.dump({}, pf)
+EOF
+
+cat << EOF
+Done! You should be all good to go now. To install mods and sync dotfiles, simply source ~/.aliases (which contains the \`dot\` alias to $PYTHON_BIN $DOTFILES_DIR/dotmgr/dot.py) and run:
+
+dot mod install  # install all mods
+dot sync         # sync all managed dotfiles
 EOF
