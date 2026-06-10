@@ -34,6 +34,13 @@ class AnsiColors(str, Enum):
     CROSSED = "\033[9m"
     END = "\033[0m"
 
+    def __str__(self):
+        """
+        Behavior changed sometime between Python 3.9 and Python 3.13, where an enum member in an
+        f-string inserts the member's *name*, not the *value*. This fixes that.
+        """
+        return self.value
+
 
 def big_header(content: str):
     print(
