@@ -76,15 +76,13 @@ else
     echo "It looks like $DOTFILES_DIR already exists. Not cloning repo"
 fi
 
-[ -f '~/.aliases' ] && grep -f '~/.aliases' "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\""
-
-if [ -f '~/.aliases' ] \
-    && cat ~/.aliases | grep -f "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" > /dev/null;
+if [ -f ~/.aliases ] \
+    && cat ~/.aliases | grep "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" > /dev/null;
 then
+    echo "\`dot\` alias already set"
+else
     echo -e "\nAdding \`dot\` wrapper to user's ~/.aliases file"
     echo "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" >> ~/.aliases
-else
-    echo "\`dot\` alias already set"
 fi
 
 if command -v dotsync > /dev/null; then
