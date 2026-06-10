@@ -70,8 +70,9 @@ class Dotfile:
             self.log(
                 "rm",
                 LogLevel.WARN,
-                "dest is a regular file, cautiously removing anyways",
+                "dest is a regular file, making a backup before removing",
             )
+            shutil.copyfile(self.dest, str(self.dest) + '.bak')
             self.dest.unlink()
             return True
 
