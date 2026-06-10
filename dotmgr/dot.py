@@ -309,6 +309,8 @@ elif args.sp == "manage":
     for fn in args.file:
         if fn in ALL_DOTFILES.keys():
             print(f"'{fn}' is already managed, skipping")
+        elif not (DOTFILES_DIR / fn).exists():
+            print(f"'{fn}' does not exist, skipping")
         else:
             new_paths.append(fn)
             ALL_DOTFILES[fn] = filelib.Dotfile(fn)
@@ -377,12 +379,13 @@ elif args.sp == "edit":
         if args.editor_nano
         else "less"
         if args.editor_less
-        else os.environ.get("EDITOR", "cat")
+        else os.environ.get("EDITOR")
     )
-    if editor == "cat":
+    if not editor:
         print(
             "WARN: $EDITOR variable is unset, and editor was not specified, so defaulted to `cat`."
         )
+        editor = "cat"
 
     dotfile = ALL_DOTFILES.get(args.file)
     # Safely assert here, as argparse makes sure the chosen dotfile is known and valid.
