@@ -38,7 +38,7 @@ If you end up installing Homebrew as well (which, let's be real, the only person
 
 After making sure the dependencies are installed, run the following command:
 ```shell
-curl 'https://github.com/Mase3206/dotfiles/blob/main/dotmgr/install.sh' | sh
+curl 'https://github.com/Mase3206/dotfiles/blob/main/dotmgr/install.sh' | bash
 ```
 
 If your shell profile file sources ~/.aliases, you should already have an alias to **dot**. If you don't, you should set it in your profile with the following bit of code:
