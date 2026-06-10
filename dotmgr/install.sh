@@ -1,4 +1,4 @@
-# #!/usr/bin/bash
+#!/usr/bin/env bash
 
 set -euo pipefail
 
@@ -64,27 +64,51 @@ fi
 
 echo -e "Dependencies satisfied.\n"
 
-if [ -d "$DOTFILES_DIR" ]; then
-    echo "It looks like $DOTFILES_DIR already exists. Clean up any existing dotfile links, remove that directory, then try again."
-    exit 1
+# if [ -d "$DOTFILES_DIR" ] && if command -v dot > /dev/null; then
+#     echo "It looks like $DOTFILES_DIR already exists. Clean up any existing dotfile links, remove that directory, then try again."
+#     exit 1
+# fi
+
+if ! [ -d "$DOTFILES_DIR" ]; then
+    # echo "Cloning mase3206/dotfiles in to $DOTFILES_DIR"
+    git https://github.com/Mase3206/dotfiles.git $DOTFILES_DIR
+else
+    echo "It looks like $DOTFILES_DIR already exists. Not cloning repo"
 fi
 
-# echo "Cloning mase3206/dotfiles in to $DOTFILES_DIR"
-git https://github.com/Mase3206/dotfiles.git $DOTFILES_DIR
+[ -f '~/.aliases' ] && grep -f '~/.aliases' "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\""
 
-echo -e "\nAdding \`dot\` wrapper to user's ~/.aliases file"
-echo "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" >> ~/.aliases
+if [ -f '~/.aliases' ] \
+    && cat ~/.aliases | grep -f "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" > /dev/null;
+then
+    echo -e "\nAdding \`dot\` wrapper to user's ~/.aliases file"
+    echo "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" >> ~/.aliases
+else
+    echo "\`dot\` alias already set"
+fi
 
-echo "Creating empty mods.dat file in the dotfiles directory"
+if command -v dotsync > /dev/null; then
+    echo "The old \`dotsync\` function is still set. Removing this is recommended."
+    type dotsync
+fi
+
+if ! [ -f "$DOTFILES_DIR/mods.dat" ]; then
+    echo "Creating empty mods.dat file in the dotfiles directory"
 
 cat << EOF | $PYTHON_BIN -
 import pickle
 with open("$DOTFILES_DIR/mods.dat", "wb+") as pf:
     pickle.dump({}, pf)
 EOF
+else
+    echo "mods.dat already exists"
+fi
 
 cat << EOF
-Done! You should be all good to go now. To install mods and sync dotfiles, simply source ~/.aliases (which contains the \`dot\` alias to $PYTHON_BIN $DOTFILES_DIR/dotmgr/dot.py) and run:
+
+-------------------------------------------
+Done! You should be all good to go now. To install mods and sync dotfiles, simply source ~/.aliases 
+(which contains the \`dot\` alias to $PYTHON_BIN $DOTFILES_DIR/dotmgr/dot.py) and run:
 
 dot mod install  # install all mods
 dot sync         # sync all managed dotfiles
