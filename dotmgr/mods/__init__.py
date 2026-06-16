@@ -54,6 +54,11 @@ for mod in __mods__.values():
 # print(__mods__)
 # print(__mod_dotfiles__)
 
+def detect_all():
+    print("Detecting installed mods")
+    for mod in __mods__.values():
+        mod.detect(quiet=True)
+
 __all__ = [
     "BaseMod",
     "InstallStatus",

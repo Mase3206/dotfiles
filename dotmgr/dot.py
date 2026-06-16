@@ -291,6 +291,7 @@ elif args.sp == "rm":
 
 # Sync
 elif args.sp == "sync":
+    mods.detect_all()
     for fn in args.file:
         if fn in ALL_DOTFILES.keys():
             dotfile = ALL_DOTFILES[fn]
