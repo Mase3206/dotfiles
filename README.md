@@ -62,8 +62,11 @@ dot sync
 > A "managed" dotfile is one that is listed in the 'managed.files' file and is thus known to **dot**. Even if a dotfile exists in this repository, if it's not in 'managed.files', **dot** pays no attention to it.
 > Files can be easily managed or unmanaged with `dot manage <file>` and `dot unmanage <file>`, respectively.
 
+<!-- > [!warning]
+> Currently, **dot** does not support linking or managing folders. This was a deliberate design decision to avoid confusing situations, though it is likely to change in the near future. -->
+
 > [!warning]
-> Currently, **dot** does not support linking or managing folders. This was a deliberate design decision to avoid confusing situations, though it is likely to change in the near future.
+> Currently, **dot** does support linking and managing folders. This is a new and not thoroughly-tested feature, so use it at your own risk. Before anything is done to existing folders (like files), a backup in its current directory is made, so recovering from failures should be relatively painless.
 
 All file paths from hereon out are *relative paths*, relative to the user's home directory (and thus also dotfiles repository).
 

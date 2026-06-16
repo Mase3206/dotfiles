@@ -257,6 +257,7 @@ sp_git.add_argument(
 # endregion
 
 args = parser.parse_args()
+# args = parser.parse_args(['git', 'status'])
 
 # region Handle arguments
 
@@ -411,12 +412,14 @@ elif args.sp == "git":
     # upload, download, status
     if args.action == "commit":
         changed = git.get_changed_dotfiles()
-        print(git.format_changed_human(changed))
+        print(git.format_changed_human(*changed))
 
-        print("\nA commit message will automatically be generated.")
+        # print("\nA commit message will automatically be generated.")
+        msg = git.generate_commit_message(*changed)
+        print("\nCommit message:\n" + msg, end='\n\n')
 
         if outputs.confirm("Confirm commit?"):
-            git.commit_dotfiles(changed)
+            git.commit_dotfiles(*changed)
 
     if args.action == "push":
         git.git_cmd("status")
@@ -448,7 +451,7 @@ elif args.sp == "git":
     elif args.action == "status":
         # git.git_cmd('status')
         changed = git.get_changed_dotfiles()
-        print(git.format_changed_human(changed))
+        print(git.format_changed_human(*changed))
 
 
 # endregion

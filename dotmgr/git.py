@@ -46,7 +46,15 @@ def git_cmd(
         return out
 
 
-def get_changed_dotfiles() -> FileList:
+def get_changed_dotfiles() -> tuple[FileList, bool]:
+    '''
+    Get a list of dotfiles which have changed in the Git repo.
+
+    Returns
+    -------
+    :return FileList: List of changed files
+    :return bool: Whether managed.files has changed
+    '''
     # out = subprocess.run(
     #     ['git', 'status', '--porcelain', '-z'],
     #     stdout=subprocess.PIPE,
@@ -60,6 +68,8 @@ def get_changed_dotfiles() -> FileList:
 
     lines = out.stdout.split("\0")
     parsed: FileList = []
+    managed_file_changed = False
+    # files_to_notice = [*ALL_DOTFILES.keys(), 'managed.files']
     for line in lines:
         if line == "":
             continue
@@ -73,12 +83,12 @@ def get_changed_dotfiles() -> FileList:
         if path.split("/")[0] == "dotmgr":
             continue
         # Ignore unmanaged dotfiles
-        if path not in ALL_DOTFILES.keys():
-            continue
-        else:
+        if path in ['managed.files']:
+            managed_file_changed = True
+        elif path in ALL_DOTFILES.keys():
             parsed.append((status, ALL_DOTFILES[path]))
 
-    return parsed
+    return parsed, managed_file_changed
 
 
 def get_all_changed_files() -> list[tuple[GitFileStatus, str]]:
@@ -104,10 +114,12 @@ def get_all_changed_files() -> list[tuple[GitFileStatus, str]]:
     return parsed
 
 
-def generate_commit_message(changed: FileList) -> str:
+def generate_commit_message(changed: FileList, managed_file_changed: bool = False) -> str:
     # Sort the files into the right status "bins"
     new: list[str] = []
     modified: list[str] = []
+    if managed_file_changed:
+        modified += ['managed.files']
     deleted: list[str] = []
 
     for status, df in changed:
@@ -134,9 +146,11 @@ def generate_commit_message(changed: FileList) -> str:
     return "; ".join(message_lines)
 
 
-def format_changed_human(changed: FileList) -> str:
+def format_changed_human(changed: FileList, managed_file_changed: bool = True) -> str:
     new: list[str] = []
     modified: list[str] = []
+    if managed_file_changed:
+        modified += ['managed.files']
     deleted: list[str] = []
 
     for status, df in changed:
@@ -187,10 +201,12 @@ def format_changed_human(changed: FileList) -> str:
         return "No changes to managed dotfiles detected."
 
 
-def commit_dotfiles(changed: FileList):
-    message = generate_commit_message(changed)
+def commit_dotfiles(changed: FileList, managed_file_changed: bool = False):
+    message = generate_commit_message(changed, managed_file_changed)
 
     file_paths = [str(change[1].relative_path) for change in changed]
+    if managed_file_changed:
+        file_paths += ['managed.files']
 
     # Add files
     git_cmd(["add", *file_paths]).check_returncode()

@@ -20,7 +20,7 @@ class LogLevel(int, Enum):
 
 
 class Dotfile:
-    relative_path: Path
+    _raw_relative_path: str
     src: Path
     dest: Path
     log_level: LogLevel
@@ -34,6 +34,25 @@ class Dotfile:
         self.logging_enabled = True
         self.log_level = LogLevel.DEBUG
         self.used_by = mods.__mod_dotfiles__.get(str(self.relative_path), None)
+
+    @property
+    def relative_path(self) -> str:
+        return self._raw_relative_path
+
+    @relative_path.setter
+    def relative_path(self, path: Union[Path, str]):
+        if isinstance(path, Path):
+            if path.is_absolute():
+                try:
+                    path = path.relative_to(HOME)
+                except ValueError:
+                    self.log('relative_path', LogLevel.ERR, f"Given relative path {path!s} is absolute but not in '{HOME}'")
+            is_dir = path.is_dir()
+            path = str(path)
+        else:
+            is_dir = Path(path).is_dir()
+        
+        self._raw_relative_path = path + ('/' if is_dir else '')
 
     def __str__(self) -> str:
         return str(self.relative_path)
@@ -76,9 +95,14 @@ class Dotfile:
             self.dest.unlink()
             return True
 
+        # elif self.dest.is_dir():
+        #     self.log("rm", LogLevel.ERR, "dest is a directory, not removing")
+        #     return False
         elif self.dest.is_dir():
-            self.log("rm", LogLevel.ERR, "dest is a directory, not removing")
-            return False
+            self.log("rm", LogLevel.WARN, "dest is a directory, making a backup before removing")
+            shutil.copytree(self.dest, str(self.dest) + '.bak')
+            self.dest.unlink()
+            return True
 
         else:
             self.log(
@@ -117,11 +141,18 @@ class Dotfile:
                     f"{self.dest} is already a symlink, but does not point to the right file. It points to: '{self.dest.resolve()}'",
                 )
                 return False
+        # elif self.dest.is_dir():
+        #     self.log(
+        #         "ln",
+        #         LogLevel.ERR,
+        #         "dest exists and is a directory. You'll need to delete it manually before continuing.",
+        #     )
+        #     return False
         elif self.dest.is_dir():
             self.log(
                 "ln",
-                LogLevel.ERR,
-                "dest exists and is a directory. You'll need to delete it manually before continuing.",
+                LogLevel.WARN,
+                "dest exists and is a directory. Remove it manually or with the `rm()` function before continuing.",
             )
             return False
         elif self.dest.is_file():
@@ -183,9 +214,18 @@ class Dotfile:
                 "Dest is a symlink, can't adopt. Run `sync` to fix",
             )
             return False
+        # elif self.dest.is_dir():
+        #     self.log("adopt", LogLevel.ERR, "Target is a folder, refusing to adopt")
+        #     return False
         elif self.dest.is_dir():
-            self.log("adopt", LogLevel.ERR, "Target is a folder, refusing to adopt")
-            return False
+            self.log("adopt", LogLevel.DEBUG, "Target is a folder, moving to dotfiles folder and linking")
+            self.dest.rename(self.src)
+            if self.ln():
+                self.log("adopt", LogLevel.INFO, "Adopt succeeded")
+                return True
+            else:
+                self.log("adopt", LogLevel.ERR, "Adopt failed: Failed to relink")
+                return False
         elif self.dest.is_file():
             self.log(
                 "adopt",
@@ -227,9 +267,26 @@ class Dotfile:
                 f"Source is a symlink, which is {outputs.AnsiColors.BOLD}{outputs.AnsiColors.RED}very bad{outputs.AnsiColors.END}!!! Sources should {outputs.AnsiColors.BOLD}never{outputs.AnsiColors.END} be symlinks!",
             )
             return False
+        # elif self.src.is_dir():
+        #     self.log("orphan", LogLevel.ERR, "Source is a folder, refusing to orphan")
+        #     return False
         elif self.src.is_dir():
-            self.log("orphan", LogLevel.ERR, "Source is a folder, refusing to orphan")
-            return False
+            self.log("orphan", LogLevel.WARN, "Source is a folder, orphaning anyway")
+            if not self.rm():
+                self.log("orphan", LogLevel.ERR, "Failed to remove dest")
+                return False
+            shutil.copyfile(self.src, self.dest)
+            if self.dest.exists() and not self.dest.is_symlink():  # success
+                self.log("orphan", LogLevel.INFO, "Orphan succeeded")
+                return True
+            else:
+                self.log(
+                    "orphan",
+                    LogLevel.INFO,
+                    "Orphan failed: Dest still doesn't exist or wasn't moved correctly",
+                )
+                return False
+
         elif self.dest.exists() and not self.dest.is_symlink():
             self.log(
                 "orphan",
