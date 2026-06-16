@@ -1,0 +1,60 @@
+[display]
+# Master switch that hides all image previews when true.
+disable_image_preview = false
+
+# Show user avatars next to messages and in profile views.
+show_avatars = true
+
+# Render inline image previews for attachments and embeds.
+show_images = true
+
+# Preview quality: efficient, balanced, high, or original.
+image_preview_quality = "balanced"
+
+# Render custom Discord emoji as images when possible.
+show_custom_emoji = true
+
+# Crop avatars into circles instead of showing square images.
+circular_avatars = false
+
+[composer]
+# Send custom emoji your account cannot use directly as image links.
+emojis_as_links = false
+
+[credentials]
+# Credential storage: auto, keychain, or plain.
+# auto tries the system keychain first and falls back to the state file.
+store = "auto"
+
+[notifications]
+# Show desktop notifications for Discord messages that pass notification rules.
+desktop_notifications = true
+
+# Optional notification icon to include in notifications. May not work on all platforms.
+# When unset, no icon is used. It must either be a name of an icon (typically in /usr/share/icons)
+# or a path to an icon.
+notification_icon = "/path/to/icon.svg"
+
+# Optional WAV files for voice join and leave notification sounds.
+# When unset, Concord uses built-in generated tones.
+voice_join_sound = "/path/to/join.wav"
+voice_leave_sound = "/path/to/leave.wav"
+
+[voice]
+# Join or update Discord voice with Concord self-muted.
+self_mute = false
+
+# Join or update Discord voice with Concord self-deafened.
+self_deaf = false
+
+# Allow microphone transmit while this session is joined and not self-muted.
+allow_microphone_transmit = false
+
+# Voice activity threshold in dB. Lower values transmit quieter input.
+microphone_sensitivity = -30
+
+# Microphone input volume percentage, from 0 to 100.
+microphone_volume = 100
+
+# Received voice playback volume percentage, from 0 to 100.
+voice_output_volume = 100
