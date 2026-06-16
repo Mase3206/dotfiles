@@ -24,6 +24,8 @@ class BaseMod(ABC):
     def dotfiles(self) -> list[str]:
         """
         The list of relative paths of all dotfiles related to this mod.
+
+        **Note:** Directories must end in a forward slash to be correctly identified.
         """
 
     @abstractmethod
@@ -42,6 +44,19 @@ class BaseMod(ABC):
         Exceptions during the installation process may be thrown and must be handled accordingly.
         """
 
+    def update_status(self):
+        """
+        Update saved status in mods.dat.
+
+        :return bool: True if mod was detected, False otherwise
+        """
+        if self.detect(quiet=True):
+            self.status = InstallStatus.INSTALLED
+            return True
+        else:
+            self.status = InstallStatus.NOT_INSTALLED
+            return False
+
     @property
     def status(self) -> InstallStatus:
         """
@@ -53,11 +68,14 @@ class BaseMod(ABC):
 
         if not data:
             return InstallStatus.NOT_INSTALLED
+        
         s = data.get(self.mod_name)
-        if not s:
-            return InstallStatus.NOT_INSTALLED
-        else:
+        if s:
             return s
+        else:
+            _status = InstallStatus.INSTALLED if self.detect(quiet=True) else InstallStatus.NOT_INSTALLED
+            self.status = _status
+            return _status
 
     @status.setter
     def status(self, status: InstallStatus):
