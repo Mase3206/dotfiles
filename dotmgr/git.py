@@ -47,14 +47,14 @@ def git_cmd(
 
 
 def get_changed_dotfiles() -> tuple[FileList, bool]:
-    '''
+    """
     Get a list of dotfiles which have changed in the Git repo.
 
     Returns
     -------
     :return FileList: List of changed files
     :return bool: Whether managed.files has changed
-    '''
+    """
     # out = subprocess.run(
     #     ['git', 'status', '--porcelain', '-z'],
     #     stdout=subprocess.PIPE,
@@ -83,7 +83,7 @@ def get_changed_dotfiles() -> tuple[FileList, bool]:
         if path.split("/")[0] == "dotmgr":
             continue
         # Ignore unmanaged dotfiles
-        if path in ['managed.files']:
+        if path in ["managed.files"]:
             managed_file_changed = True
         elif path in ALL_DOTFILES.keys():
             parsed.append((status, ALL_DOTFILES[path]))
@@ -114,12 +114,14 @@ def get_all_changed_files() -> list[tuple[GitFileStatus, str]]:
     return parsed
 
 
-def generate_commit_message(changed: FileList, managed_file_changed: bool = False) -> str:
+def generate_commit_message(
+    changed: FileList, managed_file_changed: bool = False
+) -> str:
     # Sort the files into the right status "bins"
     new: list[str] = []
     modified: list[str] = []
     if managed_file_changed:
-        modified += ['managed.files']
+        modified += ["managed.files"]
     deleted: list[str] = []
 
     for status, df in changed:
@@ -150,7 +152,7 @@ def format_changed_human(changed: FileList, managed_file_changed: bool = True) -
     new: list[str] = []
     modified: list[str] = []
     if managed_file_changed:
-        modified += ['managed.files']
+        modified += ["managed.files"]
     deleted: list[str] = []
 
     for status, df in changed:
@@ -206,7 +208,7 @@ def commit_dotfiles(changed: FileList, managed_file_changed: bool = False):
 
     file_paths = [str(change[1].relative_path) for change in changed]
     if managed_file_changed:
-        file_paths += ['managed.files']
+        file_paths += ["managed.files"]
 
     # Add files
     git_cmd(["add", *file_paths]).check_returncode()

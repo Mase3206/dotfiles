@@ -68,12 +68,16 @@ class BaseMod(ABC):
 
         if not data:
             return InstallStatus.NOT_INSTALLED
-        
+
         s = data.get(self.mod_name)
         if s:
             return s
         else:
-            _status = InstallStatus.INSTALLED if self.detect(quiet=True) else InstallStatus.NOT_INSTALLED
+            _status = (
+                InstallStatus.INSTALLED
+                if self.detect(quiet=True)
+                else InstallStatus.NOT_INSTALLED
+            )
             self.status = _status
             return _status
 

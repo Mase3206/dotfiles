@@ -71,6 +71,12 @@ dot sync
 All file paths from hereon out are *relative paths*, relative to the user's home directory (and thus also dotfiles repository).
 
 
+#### Environment Variables
+
+- `$DOTFILES_DIR`: Points to the folder containing the dotfiles repo.
+- `$DOTFILES_LOGLEVEL`: Sets the log level. Defaults to "WARN" if unset.
+
+
 #### Link managed files
 
 ```shell

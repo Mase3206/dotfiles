@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import os
 import shutil
 from enum import Enum
 from pathlib import Path
@@ -11,12 +14,25 @@ class UnknownFileTypeError(FileExistsError):
     pass
 
 
-class LogLevel(int, Enum):
-    DEBUG = 5
-    INFO = 4
-    WARN = 3
-    ERR = 2
-    CRITICAL = 1
+class LogLevel(str, Enum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARN = "WARN"
+    ERR = "ERR"
+    CRITICAL = "CRITICAL"
+
+    def __int__(self) -> int:
+        mapping = {"DEBUG": 1, "INFO": 2, "WARN": 3, "ERR": 4, "CRITICAL": 5}
+        return mapping[self.name]
+
+    def __gt__(self, other: LogLevel) -> bool:
+        return int(self) > int(other)
+
+    def __lt__(self, other: LogLevel) -> bool:
+        return int(self) < int(other)
+
+    def __eq__(self, other: LogLevel) -> bool:
+        return int(self) == int(other)
 
 
 class Dotfile:
@@ -32,7 +48,14 @@ class Dotfile:
         self.src = (DOTFILES_DIR / relative_path).resolve()
         self.dest = HOME / relative_path
         self.logging_enabled = True
-        self.log_level = LogLevel.DEBUG
+        try:
+            self.log_level = LogLevel(
+                os.environ.get("DOTFILES_LOGLEVEL", "WARN").upper()
+            )
+        except ValueError:
+            # default to WARN if bad log level is given
+            self.log_level = LogLevel("WARN")
+
         self.used_by = mods.__mod_dotfiles__.get(str(self.relative_path), None)
 
     @property
@@ -46,19 +69,23 @@ class Dotfile:
                 try:
                     path = path.relative_to(HOME)
                 except ValueError:
-                    self.log('relative_path', LogLevel.ERR, f"Given relative path {path!s} is absolute but not in '{HOME}'")
+                    self.log(
+                        "relative_path",
+                        LogLevel.ERR,
+                        f"Given relative path {path!s} is absolute but not in '{HOME}'",
+                    )
             is_dir = path.is_dir()
             path = str(path)
         else:
             is_dir = Path(path).is_dir()
-        
-        self._raw_relative_path = path + ('/' if is_dir else '')
+
+        self._raw_relative_path = path + ("/" if is_dir else "")
 
     def __str__(self) -> str:
         return str(self.relative_path)
 
     def log(self, fname: str, level: LogLevel, message: str):
-        if self.logging_enabled and level <= self.log_level:
+        if self.logging_enabled and level >= self.log_level:
             print(
                 f"{level.name:>5}  [Dotfile('{self.relative_path}').{fname}]: {message}"
             )
@@ -91,7 +118,7 @@ class Dotfile:
                 LogLevel.WARN,
                 "dest is a regular file, making a backup before removing",
             )
-            shutil.copyfile(self.dest, str(self.dest) + '.bak')
+            shutil.copyfile(self.dest, str(self.dest) + ".bak")
             self.dest.unlink()
             return True
 
@@ -99,8 +126,12 @@ class Dotfile:
         #     self.log("rm", LogLevel.ERR, "dest is a directory, not removing")
         #     return False
         elif self.dest.is_dir():
-            self.log("rm", LogLevel.WARN, "dest is a directory, making a backup before removing")
-            shutil.copytree(self.dest, str(self.dest) + '.bak')
+            self.log(
+                "rm",
+                LogLevel.WARN,
+                "dest is a directory, making a backup before removing",
+            )
+            shutil.copytree(self.dest, str(self.dest) + ".bak")
             self.dest.unlink()
             return True
 
@@ -125,7 +156,11 @@ class Dotfile:
             )
             # Create parent directory of dest if it doesn't exist
             if not self.dest.parent.exists():
-                self.log('ln', LogLevel.DEBUG, 'Parent dir of dest does not exist, creating recursively')
+                self.log(
+                    "ln",
+                    LogLevel.DEBUG,
+                    "Parent dir of dest does not exist, creating recursively",
+                )
                 self.dest.parent.mkdir(parents=True)
             self.dest.symlink_to(self.src)
             return True
@@ -222,7 +257,11 @@ class Dotfile:
         #     self.log("adopt", LogLevel.ERR, "Target is a folder, refusing to adopt")
         #     return False
         elif self.dest.is_dir():
-            self.log("adopt", LogLevel.DEBUG, "Target is a folder, moving to dotfiles folder and linking")
+            self.log(
+                "adopt",
+                LogLevel.DEBUG,
+                "Target is a folder, moving to dotfiles folder and linking",
+            )
             self.dest.rename(self.src)
             if self.ln():
                 self.log("adopt", LogLevel.INFO, "Adopt succeeded")

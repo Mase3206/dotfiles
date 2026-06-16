@@ -416,7 +416,7 @@ elif args.sp == "git":
 
         # print("\nA commit message will automatically be generated.")
         msg = git.generate_commit_message(*changed)
-        print("\nCommit message:\n" + msg, end='\n\n')
+        print("\nCommit message:\n" + msg, end="\n\n")
 
         if outputs.confirm("Confirm commit?"):
             git.commit_dotfiles(*changed)
