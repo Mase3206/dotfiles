@@ -123,6 +123,10 @@ class Dotfile:
             self.log(
                 "ln", LogLevel.DEBUG, "dest does not exist and is not linked, linking"
             )
+            # Create parent directory of dest if it doesn't exist
+            if not self.dest.parent.exists():
+                self.log('ln', LogLevel.DEBUG, 'Parent dir of dest does not exist, creating recursively')
+                self.dest.parent.mkdir(parents=True)
             self.dest.symlink_to(self.src)
             return True
         elif self.dest.is_symlink():
