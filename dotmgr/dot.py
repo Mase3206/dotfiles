@@ -252,9 +252,10 @@ sp_edit.add_argument(
 )
 sp_edit.add_argument(
     "file",
-    help="Relative path to the file to edit or view",
+    help="Relative path to the file to edit or view. If no file is given, the editor will open to the dotfiles directory.",
     choices=_available_dotfiles_choices,
     metavar="file",
+    nargs="?"
 )
 
 # Mod
@@ -564,11 +565,14 @@ elif args.sp == "edit":
         )
         editor = "cat"
 
-    dotfile = ALL_DOTFILES.get(args.file)
-    # Safely assert here, as argparse makes sure the chosen dotfile is known and valid.
-    assert dotfile
+    if args.file:
+        dotfile = ALL_DOTFILES.get(args.file)
+        # Safely assert here, as argparse makes sure the chosen dotfile is known and valid.
+        assert dotfile
+        subprocess.run([editor, dotfile.src])
+    else:
+        subprocess.run([editor, DOTFILES_DIR])
 
-    subprocess.run([editor, dotfile.src])
 
 # Interact with mods
 elif args.sp in ["mod", "mods"]:
