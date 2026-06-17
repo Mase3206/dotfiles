@@ -23,8 +23,8 @@ class Choices(tuple):
     and marked for release in Python 3.14: https://github.com/python/cpython/issues/53834. Using this class allows you to
     set multiple possible choices and defaults on a positional argument with `nargs='*'`, as it fixes a bug in `argparse` on line 2496:
     ```python
-           if action.choices is not None and value not in action.choices:
-               ...
+    if action.choices is not None and value not in action.choices:
+        ...
     ```
     If `value` is itself a collection, the latter condition will fail, as the collection itself obviously isn't a member of the given choices.
 
@@ -134,6 +134,7 @@ sp_unmanage.add_argument(
     nargs="+",
     help="Relative path to files(s) to remove from managed.files.",
     choices=_available_dotfiles_choices,
+    metavar="file",
 )
 
 # Adopt
@@ -167,6 +168,57 @@ sp_orphan.add_argument(
     "-r",
     "--rm",
     help="Remove file from dotfile repo after orphaning",
+    action="store_true",
+)
+
+# List managed files
+sp_list = sp_manager.add_parser(
+    "list",
+    help="List all managed files' relative paths.",
+    description="List all managed files' relative paths. If no arguments are given, a file's install status is distinguised with a check/cross, and unavailable files are greyed out.",
+    epilog='An "available" file is one that either (1) isn\'t associated with a mod, or (2) is associated with an *installed* mod.',
+)
+sp_list.add_argument(
+    "-n",
+    "--no-color",
+    help="Avoid using colors. File availibility is distinguished via a +/- after the check/cross.",
+    action="store_true",
+)
+sp_list.add_argument(
+    "-r",
+    "--raw",
+    help="Just list the files. Don't add checkmarks/crosses indicating file status or +/- indicating file availability. Implies --no-color.",
+    action="store_true",
+)
+sp_list.add_argument(
+    "-0",
+    "--null-sep",
+    help="List the files with null separators. Without --raw, this has no effect.",
+    action="store_true",
+    dest="null_sep",
+)
+sp_list.add_argument(
+    "-l",
+    "--linked",
+    help="List linked files.",
+    action="store_true",
+)
+sp_list.add_argument(
+    "-u",
+    "--unlinked",
+    help="List unlinked files.",
+    action="store_true",
+)
+sp_list.add_argument(
+    "-a",
+    "--available",
+    help="List available files.",
+    action="store_true",
+)
+sp_list.add_argument(
+    "-U",
+    "--unavailable",
+    help="List unavailable files.",
     action="store_true",
 )
 
@@ -210,6 +262,7 @@ sp_mod = sp_manager.add_parser(
     "mod",
     help="Manage and interact with known mods",
     description="Manage and interact with known mods",
+    aliases=["mods"],
 )
 _choices_mods = Choices(mods.__mods__.keys(), default=mods.__mods__.keys())
 sp_mod.add_argument(
@@ -218,9 +271,15 @@ sp_mod.add_argument(
     help="Action",
 )
 sp_mod.add_argument(
+    "-n",
+    "--no-color",
+    help="When running `dot mod detect`, don't use ANSI colors to color the checkmarks/crosses.",
+    action="store_true",
+)
+sp_mod.add_argument(
     "mod_name",
     choices=_choices_mods,
-    help="(Optional) mod name(s). If none are given, defaults to all.",
+    help="(Optional) mod name(s). If none are given, defaults to all discovered mods.",
     nargs="*",
     default=_choices_mods.default,
 )
@@ -243,21 +302,11 @@ sp_git.add_argument(
     "action",
     choices=("commit", "push", "pull", "undo", "status"),
     help="Upload or download changes to Git remote",
-    # default="status",
-    # nargs="?",
-    # metavar="action",
 )
-# sp_git.add_argument(
-#     "message",
-#     nargs="?",
-#     type=str,
-#     help="Git commit message (optional)",
-# )
 
 # endregion
 
 args = parser.parse_args()
-# args = parser.parse_args(['git', 'status'])
 
 # region Handle arguments
 
@@ -369,6 +418,133 @@ elif args.sp == "orphan":
 
     filelib.update_managed_list(ALL_DOTFILES, DOTFILES_MANAGED_FILE)
 
+# List managed dotfiles in the format requested, limiting by status and/or availability (if requested)
+elif args.sp == "list":
+    # If neither is given, make both true.
+    if not args.linked and not args.unlinked:
+        args.linked = True
+        args.unlinked = True
+        hide_link_mark = False
+    else:
+        hide_link_mark = True
+
+    # If neither is given, make both true.
+    if not args.available and not args.unavailable:
+        args.available = True
+        args.unavailable = True
+        hide_avail_mark = False
+    else:
+        hide_avail_mark = True
+
+    def make_format(installed: bool, available: bool, relative_path: str) -> str:
+        """
+        Format the line with the right marker. If it makes you feel any better, I hate the obnoxious if-tree too,
+        but it was the cleanest way I could think of to implement this.
+        """
+        if hide_link_mark:
+            if args.no_color:
+                if hide_avail_mark:
+                    return relative_path
+                elif available:
+                    return "+ " + relative_path
+                else:
+                    return "- " + relative_path
+            else:
+                if available:
+                    return relative_path
+                else:
+                    return (
+                        outputs.AnsiColors.GREY
+                        + d.relative_path
+                        + outputs.AnsiColors.END
+                    )
+        else:
+            mark = ""
+            if args.no_color:
+                if installed:
+                    mark += "✔"
+                else:
+                    mark += "✘"
+                if hide_avail_mark:
+                    pass
+                elif available:
+                    mark += "+"
+                else:
+                    mark += "-"
+                mark += " "
+                return mark + relative_path
+            else:
+                if installed:
+                    mark += outputs.AnsiColors.GREEN + "✔" + outputs.AnsiColors.END
+                else:
+                    mark += outputs.AnsiColors.RED + "✘" + outputs.AnsiColors.END
+                if available:
+                    return mark + " " + relative_path
+                else:
+                    if hide_avail_mark:
+                        return mark + " " + relative_path
+                    else:
+                        return (
+                            mark
+                            + " "
+                            + outputs.AnsiColors.GREY
+                            + relative_path
+                            + outputs.AnsiColors.END
+                        )
+
+    # Only include files with the specified availability
+    dotfiles: list[filelib.Dotfile] = []
+    for d in ALL_DOTFILES.values():
+        # Are we filtering ONLY available files?
+        if args.available and not args.unavailable:
+            # If so, is this dotfile used by a mod, and is that mod installed?
+            if d.used_by and d.used_by.status == mods.InstallStatus.INSTALLED:
+                dotfiles.append(d)
+            # Or, alternatively, is this mod unused?
+            # Unused mods can't have availibility, so just include them.
+            elif not d.used_by:
+                dotfiles.append(d)
+
+        # Are we filtering ONLY unavailable files?
+        elif not args.available and args.unavailable:
+            # If so, is this dotfile used by a mod, and is that mod NOT installed?
+            if d.used_by and d.used_by.status != mods.InstallStatus.INSTALLED:
+                dotfiles.append(d)
+            # If this dotfile isn't used by a mod or is installed, skip it.
+            else:
+                continue
+
+        # Are both available AND unavailable files included, and is the dotfile NOT used by a mod?
+        # If neither -a or -U are passed, both are assumed to be included.
+        # Unused mods can't have availibility, so just include them.
+        elif (args.available and args.unavailable) or not d.used_by:
+            dotfiles.append(d)
+
+    for d in dotfiles:
+        if args.linked and d.is_linked():
+            if args.raw:
+                print(d.relative_path, end="\0" if args.null_sep else "\n")
+            else:
+                print(
+                    make_format(
+                        installed=True,
+                        available=d in AVAILABLE_DOTFILES.values(),
+                        relative_path=d.relative_path,
+                    )
+                )
+        elif args.unlinked and not d.is_linked():
+            if args.raw:
+                print(d.relative_path, end="\0" if args.null_sep else "\n")
+            else:
+                print(
+                    make_format(
+                        installed=False,
+                        available=d in AVAILABLE_DOTFILES.values(),
+                        relative_path=d.relative_path,
+                    )
+                )
+
+
 # Edit the dotfile - respects $EDITOR if editor is not chosen explicitly
 elif args.sp == "edit":
     editor = (
@@ -395,20 +571,46 @@ elif args.sp == "edit":
     subprocess.run([editor, dotfile.src])
 
 # Interact with mods
-elif args.sp == "mod":
+elif args.sp in ["mod", "mods"]:
     for mod_name in args.mod_name:
         selected_mod = mods.__mods__.get(mod_name)
         if not selected_mod:
             raise ValueError(f"Selected mod {mod_name} does not exist.")
 
         if args.action == "detect":
-            selected_mod.detect()
+            # selected_mod.detect()
+            if selected_mod.status == mods.InstallStatus.INSTALLED:
+                print(
+                    (
+                        (outputs.AnsiColors.GREEN + "✔ " + outputs.AnsiColors.END)
+                        if not args.no_color
+                        else "✔ "
+                    )
+                    + selected_mod.mod_name
+                )
+            elif selected_mod.status == mods.InstallStatus.INSTALL_FAILED:
+                print(
+                    (
+                        (outputs.AnsiColors.YELLOW + "~ " + outputs.AnsiColors.END)
+                        if not args.no_color
+                        else "~ "
+                    )
+                    + selected_mod.mod_name
+                )
+            elif selected_mod.status == mods.InstallStatus.NOT_INSTALLED:
+                print(
+                    (
+                        (outputs.AnsiColors.RED + "✘ " + outputs.AnsiColors.END)
+                        if not args.no_color
+                        else "✘ "
+                    )
+                    + selected_mod.mod_name
+                )
         elif args.action == "install":
             selected_mod.install()
 
 # Interact with Git
 elif args.sp == "git":
-    # raise NotImplementedError("The Git wrapper is not yet implemented.")
     # upload, download, status
     if args.action == "commit":
         changed = git.get_changed_dotfiles()
@@ -449,7 +651,6 @@ elif args.sp == "git":
             git.git_cmd(["restore", "--staged", *changed_files])
 
     elif args.action == "status":
-        # git.git_cmd('status')
         changed = git.get_changed_dotfiles()
         print(git.format_changed_human(*changed))
 

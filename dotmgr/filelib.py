@@ -58,6 +58,12 @@ class Dotfile:
 
         self.used_by = mods.__mod_dotfiles__.get(str(self.relative_path), None)
 
+    def __str__(self) -> str:
+        return str(self.relative_path)
+
+    def __repr__(self) -> str:
+        return f"Dotfile({self.relative_path})"
+
     @property
     def relative_path(self) -> str:
         return self._raw_relative_path
@@ -81,8 +87,24 @@ class Dotfile:
 
         self._raw_relative_path = path + ("/" if is_dir else "")
 
-    def __str__(self) -> str:
-        return str(self.relative_path)
+    def is_linked(self):
+        """
+        Is this file linked correctly?
+        """
+        if self.src.is_dir():
+            return (
+                self.dest.exists()
+                and self.dest.is_dir()
+                and self.dest.is_symlink()
+                and self.dest.resolve() == self.src
+            )
+        else:
+            return (
+                self.dest.exists()
+                and self.dest.is_file()
+                and self.dest.is_symlink()
+                and self.dest.resolve() == self.src
+            )
 
     def log(self, fname: str, level: LogLevel, message: str):
         if self.logging_enabled and level >= self.log_level:

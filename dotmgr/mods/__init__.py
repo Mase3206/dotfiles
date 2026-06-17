@@ -51,19 +51,9 @@ for mod in __mods__.values():
     for df in mod.dotfiles:
         __mod_dotfiles__[df] = mod
 
-# print(__mods__)
-# print(__mod_dotfiles__)
-
-print("Detecting installed mods")
+# Make sure each mod's stored status is accurate
 for mod in __mods__.values():
-    if mod.update_status():
-        print(
-            f" • {mod.mod_name} - installed. Available dotfiles: {','.join(mod.dotfiles)}"
-        )
-    else:
-        print(
-            f" • {mod.mod_name} - not installed. Unavailable dotfiles: {','.join(mod.dotfiles)}"
-        )
+    mod.update_status()
 
 __all__ = [
     "BaseMod",
