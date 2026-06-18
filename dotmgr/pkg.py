@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from __future__ import annotations
 
 import os
 import subprocess
@@ -10,6 +11,18 @@ class OsType(str, Enum):
     MACOS = "macos"
     LINUX = "linux"
     FREEBSD = "freebsd"
+
+    @staticmethod
+    def detect_os() -> OsType:
+        ostype = os.environ.get("OSTYPE", "unset")
+        if "darwin" in ostype:
+            return OsType.MACOS
+        elif "linux" in ostype:
+            return OsType.LINUX
+        elif "freebsd" in ostype:
+            return OsType.FREEBSD
+        else:
+            raise Exception(f"Unknown or unsupported OSTYPE: '{ostype}'")
 
 
 class PkgMgrName(str, Enum):
@@ -27,7 +40,7 @@ class PackageManager:
     sudo_required: bool
 
     def __init__(self):
-        self.ostype = self.detect_os()
+        self.ostype = OsType.detect_os()
         self.package_manager_name = self.detect_package_manager()
         self.sudo_required = (
             False if self.package_manager_name == PkgMgrName.HOMEBRW else True
@@ -47,18 +60,6 @@ class PackageManager:
             raise FileNotFoundError(
                 f"Detected package manager path as {self.package_manager_path!s}, but it doesn't actually exist or isn't a file."
             )
-
-    @classmethod
-    def detect_os(cls) -> OsType:
-        ostype = os.environ.get("OSTYPE", "unset")
-        if "darwin" in ostype:
-            return OsType.MACOS
-        elif "linux" in ostype:
-            return OsType.LINUX
-        elif "freebsd" in ostype:
-            return OsType.FREEBSD
-        else:
-            raise Exception(f"Unknown or unsupported OSTYPE: '{ostype}'")
 
     @classmethod
     def detect_package_manager(cls) -> PkgMgrName:
