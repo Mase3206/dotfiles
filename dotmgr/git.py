@@ -2,7 +2,7 @@ import shlex
 import string
 import subprocess
 from enum import Enum
-from typing import Union
+from typing import Optional, Union
 
 from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, filelib, outputs
 
@@ -62,7 +62,7 @@ def get_changed_dotfiles() -> tuple[FileList, bool]:
     #     cwd=DOTFILES_DIR
     # )
     out = git_cmd(
-        "status --porcelain -z",
+        "status --porcelain -zu",
         stdout=True,
     )
 
@@ -93,7 +93,7 @@ def get_changed_dotfiles() -> tuple[FileList, bool]:
 
 def get_all_changed_files() -> list[tuple[GitFileStatus, str]]:
     out = git_cmd(
-        "status --porcelain -z",
+        "status --porcelain -zu",
         stdout=True,
     )
 
@@ -203,8 +203,13 @@ def format_changed_human(changed: FileList, managed_file_changed: bool = True) -
         return "No changes to managed dotfiles detected."
 
 
-def commit_dotfiles(changed: FileList, managed_file_changed: bool = False):
-    message = generate_commit_message(changed, managed_file_changed)
+def commit_dotfiles(
+    changed: FileList,
+    managed_file_changed: bool = False,
+    message: Optional[str] = None,
+):
+    if not message:
+        message = generate_commit_message(changed, managed_file_changed)
 
     file_paths = [str(change[1].relative_path) for change in changed]
     if managed_file_changed:

@@ -165,9 +165,9 @@ sp_orphan.add_argument(
     metavar="file",
 )
 sp_orphan.add_argument(
-    "-r",
-    "--rm",
-    help="Remove file from dotfile repo after orphaning",
+    "-k",
+    "--keep",
+    help="Do not remove (keep) file from dotfile repo after orphaning",
     action="store_true",
 )
 
@@ -255,7 +255,7 @@ sp_edit.add_argument(
     help="Relative path to the file to edit or view. If no file is given, the editor will open to the dotfiles directory.",
     choices=_available_dotfiles_choices,
     metavar="file",
-    nargs="?"
+    nargs="?",
 )
 
 # Mod
@@ -303,6 +303,9 @@ sp_git.add_argument(
     "action",
     choices=("commit", "push", "pull", "undo", "status"),
     help="Upload or download changes to Git remote",
+)
+sp_git.add_argument(
+    "-m", help="Commit message (optional)", required=False, dest="commit_message"
 )
 
 # endregion
@@ -412,9 +415,10 @@ elif args.sp == "orphan":
 
         dotfile.orphan()
 
-        if args.rm:
+        if not args.keep:
             print(f"Removing orphaned file {fn} from managed.files")
             dotfile.src.unlink()
+            dotfile.prune_src()
             del ALL_DOTFILES[fn]
 
     filelib.update_managed_list(ALL_DOTFILES, DOTFILES_MANAGED_FILE)
@@ -621,11 +625,14 @@ elif args.sp == "git":
         print(git.format_changed_human(*changed))
 
         # print("\nA commit message will automatically be generated.")
-        msg = git.generate_commit_message(*changed)
+        if args.commit_message:
+            msg = args.commit_message
+        else:
+            msg = git.generate_commit_message(*changed)
         print("\nCommit message:\n" + msg, end="\n\n")
 
         if outputs.confirm("Confirm commit?"):
-            git.commit_dotfiles(*changed)
+            git.commit_dotfiles(*changed, msg)
 
     if args.action == "push":
         git.git_cmd("status")

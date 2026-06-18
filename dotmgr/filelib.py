@@ -297,6 +297,13 @@ class Dotfile:
                 LogLevel.DEBUG,
                 "Target is a regular file, moving to dotfiles folder and linking",
             )
+            if not self.src.parent.exists():
+                self.log(
+                    "adopt",
+                    LogLevel.DEBUG,
+                    "Parent dir of src does not exist, creating recursively",
+                )
+                self.src.parent.mkdir(parents=True)
             self.dest.rename(self.src)
             if self.ln():
                 self.log("adopt", LogLevel.INFO, "Adopt succeeded")
@@ -410,6 +417,19 @@ class Dotfile:
                 f"I can't figure out what kind of files src ({self.src}) and dest ({self.dest}) are somehow.",
             )
             return False
+
+    def prune_src(self):
+        """
+        If parent directory of source file (the "real" file in DOTFILES_DIR) is empty, remove it (and its parent(s), if applicable.)
+        """
+
+        parent = self.src.parent
+        while True:
+            if not any(parent.iterdir()):  # is empty?
+                parent.rmdir()
+                parent = parent.parent
+            else:
+                break
 
 
 def load_dotfiles(managed_files_file: Path):
