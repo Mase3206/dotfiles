@@ -62,9 +62,7 @@ class OhMyZsh(BaseMod):
                 ).check_returncode()
 
                 outputs.step("Setting user's shell to /usr/bin/zsh")
-                subprocess.run(
-                    ["/usr/bin/chsh", USER, "-s", "/usr/bin/zsh"]
-                ).check_returncode()
+                subprocess.run(["/usr/bin/chsh", USER, "-s", "/usr/bin/zsh"]).check_returncode()
 
                 outputs.step("Cleaning up")
                 # Exit the context manager to cd back out and remove temp dir

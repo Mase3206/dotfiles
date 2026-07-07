@@ -6,6 +6,7 @@ from typing import Optional, Union
 
 from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, filelib, outputs
 
+
 ALL_DOTFILES = filelib.load_dotfiles(DOTFILES_MANAGED_FILE)
 
 
@@ -20,9 +21,7 @@ class GitFileStatus(str, Enum):
 FileList = list[tuple[GitFileStatus, filelib.Dotfile]]
 
 
-def git_cmd(
-    args: Union[str, list[str]], stdout: bool = False, stdin: bool = False, **kwargs
-):
+def git_cmd(args: Union[str, list[str]], stdout: bool = False, stdin: bool = False, **kwargs):
     if stdout:
         kwargs["stdout"] = subprocess.PIPE
     if stdin:
@@ -114,9 +113,7 @@ def get_all_changed_files() -> list[tuple[GitFileStatus, str]]:
     return parsed
 
 
-def generate_commit_message(
-    changed: FileList, managed_file_changed: bool = False
-) -> str:
+def generate_commit_message(changed: FileList, managed_file_changed: bool = False) -> str:
     # Sort the files into the right status "bins"
     new: list[str] = []
     modified: list[str] = []
@@ -192,10 +189,7 @@ def format_changed_human(changed: FileList, managed_file_changed: bool = True) -
 
     # Remove hanging newline (if present (which it should be (I think)))
     if len(message_lines) > 0:
-        if (
-            message_lines[-1].strip() in string.whitespace
-            or message_lines[-1].strip() == ""
-        ):
+        if message_lines[-1].strip() in string.whitespace or message_lines[-1].strip() == "":
             message_lines = message_lines[:-1]
 
         return "\n".join(message_lines)

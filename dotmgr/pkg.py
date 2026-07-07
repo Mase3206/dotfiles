@@ -42,9 +42,7 @@ class PackageManager:
     def __init__(self):
         self.ostype = OsType.detect_os()
         self.package_manager_name = self.detect_package_manager()
-        self.sudo_required = (
-            False if self.package_manager_name == PkgMgrName.HOMEBRW else True
-        )
+        self.sudo_required = False if self.package_manager_name == PkgMgrName.HOMEBRW else True
 
         out = subprocess.run(
             f"which {self.package_manager_name}",
@@ -54,9 +52,7 @@ class PackageManager:
         )
         out.check_returncode()
         self.package_manager_path = Path(out.stdout.strip())
-        if not (
-            self.package_manager_path.exists() and self.package_manager_path.is_file()
-        ):
+        if not (self.package_manager_path.exists() and self.package_manager_path.is_file()):
             raise FileNotFoundError(
                 f"Detected package manager path as {self.package_manager_path!s}, but it doesn't actually exist or isn't a file."
             )

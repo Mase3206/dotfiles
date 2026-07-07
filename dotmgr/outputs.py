@@ -41,11 +41,7 @@ class AnsiColors(str, Enum):
 
 
 def big_header(content: str):
-    print(
-        "\n\n"
-        + f"{AnsiColors.GREEN}======== {content} ========"
-        + f"{AnsiColors.END}\n"
-    )
+    print("\n\n" + f"{AnsiColors.GREEN}======== {content} ========" + f"{AnsiColors.END}\n")
 
 
 def subheader(content: str):
@@ -71,9 +67,7 @@ def skip(content: str):
 def confirm(message: str, defaul_yes: bool = True) -> bool:
     while True:
         iput = (
-            input(
-                f"{message} [{'Y' if defaul_yes else 'y'}/{'n' if defaul_yes else 'N'}]"
-            )
+            input(f"{message} [{'Y' if defaul_yes else 'y'}/{'n' if defaul_yes else 'N'}]")
             .strip()
             .lower()
         )

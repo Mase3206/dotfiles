@@ -39,9 +39,7 @@ class Zsh(BaseMod):
             return
 
         try:
-            outputs.step(
-                "Initializing package manager wrapper handler manager class manager"
-            )
+            outputs.step("Initializing package manager wrapper handler manager class manager")
             pkgmgr = PackageManager()
 
             outputs.step(f"Installing Zsh using {pkgmgr.package_manager_name}")

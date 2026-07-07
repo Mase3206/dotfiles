@@ -3,11 +3,11 @@
 import argparse
 import os
 import subprocess
-from typing import Iterable, Optional
 from pathlib import Path
 from textwrap import dedent
+from typing import Iterable, Optional
 
-from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, filelib, git, mods, outputs, HOME
+from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, HOME, filelib, git, mods, outputs
 from dotmgr.mods import InstallStatus
 
 
@@ -39,9 +39,7 @@ class Choices(tuple):
         Choices.__init__(x, _iterable, default=default)
         return x
 
-    def __init__(
-        self, _iterable: Optional[Iterable] = None, default: Optional[Iterable] = None
-    ):
+    def __init__(self, _iterable: Optional[Iterable] = None, default: Optional[Iterable] = None):
         # _iterable is already handled by tuple.__new__
         self.default = default or []
 
@@ -49,9 +47,7 @@ class Choices(tuple):
         return super().__contains__(item) or item == self.default
 
 
-_available_dotfiles_choices = Choices(
-    AVAILABLE_DOTFILES.keys(), default=AVAILABLE_DOTFILES.keys()
-)
+_available_dotfiles_choices = Choices(AVAILABLE_DOTFILES.keys(), default=AVAILABLE_DOTFILES.keys())
 """
 This list contains the keys of the AVAILABLE_DOTFILES dict (i.e. the relative paths of the dotfiles), as well as a "hidden"
 `None` element in there to work around a bug in argparse.
@@ -114,7 +110,8 @@ sp_sync.add_argument(
 
 # File status
 sp_status = sp_manager.add_parser(
-    "status", aliases=["stat"],
+    "status",
+    aliases=["stat"],
     description="Get the current status (linked, unlinked, managed, unmanaged, etc.) of a dotfile",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR (and $HOME)',
 )
@@ -128,13 +125,9 @@ sp_status.add_argument(
     help="(Optional) relative path to file(s) to get the status of. If not given, all files (including those used by uninstalled mods) will be checked.",
     default=_all_dotfiles_choices.default,
     # choices=_all_dotfiles_choices,
-    metavar="file"
+    metavar="file",
 )
-sp_status.add_argument(
-    "--explain",
-    help="Explain what the letters mean",
-    action="store_true"
-)
+sp_status.add_argument("--explain", help="Explain what the letters mean", action="store_true")
 
 # Manage - add file in dotfiles to managed.files
 sp_manage = sp_manager.add_parser(
@@ -256,9 +249,7 @@ sp_edit = sp_manager.add_parser(
     description=f"Edit or view a dotfile, respecting the your chosen editor (set in $EDITOR) by default. Your current editor is {os.environ.get('EDITOR', 'unset')}.",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
-sp_edit.add_argument(
-    "-c", help="Open in VSCode", dest="editor_vscode", action="store_true"
-)
+sp_edit.add_argument("-c", help="Open in VSCode", dest="editor_vscode", action="store_true")
 sp_edit.add_argument(
     "-v",
     help="Open in Vim",
@@ -331,9 +322,7 @@ sp_git.add_argument(
     choices=("commit", "push", "pull", "undo", "status"),
     help="Upload or download changes to Git remote",
 )
-sp_git.add_argument(
-    "-m", help="Commit message (optional)", required=False, dest="commit_message"
-)
+sp_git.add_argument("-m", help="Commit message (optional)", required=False, dest="commit_message")
 
 # endregion
 
@@ -392,32 +381,39 @@ elif args.sp in ["status", "stat"]:
     for fn in args.file:
         file = Path(HOME / fn)
         if file.exists():
-            exists = 'E'
+            exists = "E"
             dotfile = ALL_DOTFILES.get(fn, None)
             if dotfile:
-                managed = 'M' if fn in ALL_DOTFILES else '-'
-                is_symlink = 'S' if dotfile.dest.is_symlink() else '-'
-                is_linked_correctly = 'L' if dotfile.dest.resolve() == dotfile.src else '-'
-                is_used_by_mod = 'U' if dotfile.used_by != None else '-'
-                mod_is_installed = 'I' if (dotfile.used_by.status == "INSTALLED" if dotfile.used_by else False) else '-'
+                managed = "M" if fn in ALL_DOTFILES else "-"
+                is_symlink = "S" if dotfile.dest.is_symlink() else "-"
+                is_linked_correctly = "L" if dotfile.dest.resolve() == dotfile.src else "-"
+                is_used_by_mod = "U" if dotfile.used_by != None else "-"
+                mod_is_installed = (
+                    "I"
+                    if (dotfile.used_by.status == "INSTALLED" if dotfile.used_by else False)
+                    else "-"
+                )
             else:
-                managed = '-'
-                is_symlink = 'S' if file.is_symlink() else '-'
-                is_linked_correctly = '?'
-                is_used_by_mod = '?'
-                mod_is_installed = '?'
+                managed = "-"
+                is_symlink = "S" if file.is_symlink() else "-"
+                is_linked_correctly = "?"
+                is_used_by_mod = "?"
+                mod_is_installed = "?"
         else:
-            exists = '-'
-            managed = '-'
-            is_symlink = '-'
-            is_linked_correctly = '-'
-            is_used_by_mod = '-'
-            mod_is_installed = '-'
-        
-        print(f"{fn.ljust(max_len)}  {exists} {managed} {is_symlink} {is_linked_correctly} {is_used_by_mod} {mod_is_installed}")
-    
+            exists = "-"
+            managed = "-"
+            is_symlink = "-"
+            is_linked_correctly = "-"
+            is_used_by_mod = "-"
+            mod_is_installed = "-"
+
+        print(
+            f"{fn.ljust(max_len)}  {exists} {managed} {is_symlink} {is_linked_correctly} {is_used_by_mod} {mod_is_installed}"
+        )
+
     if args.explain:
-        print(dedent("""
+        print(
+            dedent("""
         The letters, Mason. What do they mean??
         ---------------------------------------
         E = file exists
@@ -429,7 +425,8 @@ elif args.sp in ["status", "stat"]:
         
         ? = this status (exists, managed, etc.) is unknown or impossible to determine
         - = this status is false ('-' where 'E' should be = the file doesn't exist)\
-        """))
+        """)
+        )
 
 
 # Manage - add file(s) to managed.files
@@ -534,11 +531,7 @@ elif args.sp == "list":
                 if available:
                     return relative_path
                 else:
-                    return (
-                        outputs.AnsiColors.GREY
-                        + d.relative_path
-                        + outputs.AnsiColors.END
-                    )
+                    return outputs.AnsiColors.GREY + d.relative_path + outputs.AnsiColors.END
         else:
             mark = ""
             if args.no_color:
@@ -727,7 +720,8 @@ elif args.sp == "git":
 
         print(f"\n{outputs.AnsiColors.BOLD}Files changed:{outputs.AnsiColors.END}")
         changed_files = (
-            git.git_cmd("--no-pager diff -z --name-only HEAD HEAD~1", stdout=True)
+            git
+            .git_cmd("--no-pager diff -z --name-only HEAD HEAD~1", stdout=True)
             .stdout[:-1]
             .split("\0")
         )

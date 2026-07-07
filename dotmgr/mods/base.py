@@ -74,9 +74,7 @@ class BaseMod(ABC):
             return s
         else:
             _status = (
-                InstallStatus.INSTALLED
-                if self.detect(quiet=True)
-                else InstallStatus.NOT_INSTALLED
+                InstallStatus.INSTALLED if self.detect(quiet=True) else InstallStatus.NOT_INSTALLED
             )
             self.status = _status
             return _status

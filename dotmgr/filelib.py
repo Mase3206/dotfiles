@@ -49,9 +49,7 @@ class Dotfile:
         self.dest = HOME / relative_path
         self.logging_enabled = True
         try:
-            self.log_level = LogLevel(
-                os.environ.get("DOTFILES_LOGLEVEL", "WARN").upper()
-            )
+            self.log_level = LogLevel(os.environ.get("DOTFILES_LOGLEVEL", "WARN").upper())
         except ValueError:
             # default to WARN if bad log level is given
             self.log_level = LogLevel("WARN")
@@ -108,9 +106,7 @@ class Dotfile:
 
     def log(self, fname: str, level: LogLevel, message: str):
         if self.logging_enabled and level >= self.log_level:
-            print(
-                f"{level.name:>5}  [Dotfile('{self.relative_path}').{fname}]: {message}"
-            )
+            print(f"{level.name:>5}  [Dotfile('{self.relative_path}').{fname}]: {message}")
 
     def rm(self) -> bool:
         """
@@ -128,9 +124,7 @@ class Dotfile:
             return True
 
         elif self.dest.is_symlink():
-            self.log(
-                "rm", LogLevel.WARN, "dest is a symlink, cautiously removing anyways"
-            )
+            self.log("rm", LogLevel.WARN, "dest is a symlink, cautiously removing anyways")
             self.dest.unlink()
             return True
 
@@ -173,9 +167,7 @@ class Dotfile:
         """
 
         if not self.dest.exists():
-            self.log(
-                "ln", LogLevel.DEBUG, "dest does not exist and is not linked, linking"
-            )
+            self.log("ln", LogLevel.DEBUG, "dest does not exist and is not linked, linking")
             # Create parent directory of dest if it doesn't exist
             if not self.dest.parent.exists():
                 self.log(
@@ -189,9 +181,7 @@ class Dotfile:
         elif self.dest.is_symlink():
             if self.dest.resolve() == self.src:
                 # print(f"[Dotfile.ln] ")
-                self.log(
-                    "ln", LogLevel.DEBUG, "dest is already linked correctly, relinking"
-                )
+                self.log("ln", LogLevel.DEBUG, "dest is already linked correctly, relinking")
                 self.dest.unlink()
                 self.dest.symlink_to(self.src)
                 return True
@@ -235,9 +225,7 @@ class Dotfile:
     def sync(self) -> bool:
         self.log("sync", LogLevel.INFO, "Attempting to sync")
 
-        self.log(
-            "sync", LogLevel.DEBUG, "Attempting to remove existing link (if exists)"
-        )
+        self.log("sync", LogLevel.DEBUG, "Attempting to remove existing link (if exists)")
         if self.rm():
             self.log("sync", LogLevel.DEBUG, "Removal succeeded, attempting to re-link")
 
@@ -457,9 +445,7 @@ def update_managed_list(
     elif not dotfiles:
         return
     else:
-        raise TypeError(
-            "`dotfiles` is not of type list[Dotfile], or dict[str, Dotfile]"
-        )
+        raise TypeError("`dotfiles` is not of type list[Dotfile], or dict[str, Dotfile]")
 
     with open(managed_files_file, "w+") as f:
         f.write("\n".join(relative_paths))
