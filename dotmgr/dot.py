@@ -4,9 +4,12 @@ import argparse
 import os
 import subprocess
 from typing import Iterable, Optional
+from pathlib import Path
+from textwrap import dedent
 
-from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, filelib, git, mods, outputs
+from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, filelib, git, mods, outputs, HOME
 from dotmgr.mods import InstallStatus
+
 
 ALL_DOTFILES = filelib.load_dotfiles(DOTFILES_MANAGED_FILE)
 AVAILABLE_DOTFILES = {
@@ -107,6 +110,30 @@ sp_sync.add_argument(
     default=_available_dotfiles_choices.default,
     choices=_available_dotfiles_choices,
     metavar="file",
+)
+
+# File status
+sp_status = sp_manager.add_parser(
+    "status", aliases=["stat"],
+    description="Get the current status (linked, unlinked, managed, unmanaged, etc.) of a dotfile",
+    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR (and $HOME)',
+)
+_all_dotfiles_choices = Choices(
+    ALL_DOTFILES.keys(),
+    default=ALL_DOTFILES.keys(),
+)
+sp_status.add_argument(
+    "file",
+    nargs="*",
+    help="(Optional) relative path to file(s) to get the status of. If not given, all files (including those used by uninstalled mods) will be checked.",
+    default=_all_dotfiles_choices.default,
+    # choices=_all_dotfiles_choices,
+    metavar="file"
+)
+sp_status.add_argument(
+    "--explain",
+    help="Explain what the letters mean",
+    action="store_true"
 )
 
 # Manage - add file in dotfiles to managed.files
@@ -355,6 +382,55 @@ elif args.sp == "sync":
                 continue
 
             dotfile.sync()
+
+elif args.sp in ["status", "stat"]:
+    max_len = 0
+    for fn in args.file:
+        if len(fn) > max_len:
+            max_len = len(fn)
+
+    for fn in args.file:
+        file = Path(HOME / fn)
+        if file.exists():
+            exists = 'E'
+            dotfile = ALL_DOTFILES.get(fn, None)
+            if dotfile:
+                managed = 'M' if fn in ALL_DOTFILES else '-'
+                is_symlink = 'S' if dotfile.dest.is_symlink() else '-'
+                is_linked_correctly = 'L' if dotfile.dest.resolve() == dotfile.src else '-'
+                is_used_by_mod = 'U' if dotfile.used_by != None else '-'
+                mod_is_installed = 'I' if (dotfile.used_by.status == "INSTALLED" if dotfile.used_by else False) else '-'
+            else:
+                managed = '-'
+                is_symlink = 'S' if file.is_symlink() else '-'
+                is_linked_correctly = '?'
+                is_used_by_mod = '?'
+                mod_is_installed = '?'
+        else:
+            exists = '-'
+            managed = '-'
+            is_symlink = '-'
+            is_linked_correctly = '-'
+            is_used_by_mod = '-'
+            mod_is_installed = '-'
+        
+        print(f"{fn.ljust(max_len)}  {exists} {managed} {is_symlink} {is_linked_correctly} {is_used_by_mod} {mod_is_installed}")
+    
+    if args.explain:
+        print(dedent("""
+        The letters, Mason. What do they mean??
+        ---------------------------------------
+        E = file exists
+        M = is managed
+        S = is a symlink
+        L = is correctly symlinked to managed source in $DOTFILES_DIR
+        U = used by a mod
+        I = mod which uses this file is installed (if applicable)
+        
+        ? = this status (exists, managed, etc.) is unknown or impossible to determine
+        - = this status is false ('-' where 'E' should be = the file doesn't exist)\
+        """))
+
 
 # Manage - add file(s) to managed.files
 elif args.sp == "manage":
