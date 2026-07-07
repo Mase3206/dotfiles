@@ -1,0 +1,62 @@
+indent-width = 4
+line-length = 100
+
+[format]
+docstring-code-format = true
+indent-style = "space"
+line-ending = "lf"
+skip-magic-trailing-comma = false
+preview = true
+
+[lint]
+select = [
+    "W291",     # trailing-whitespace
+    "F401",     # unused-import
+    "I",        # everything from isort
+    "F541",     # f-string-missing-placeholders
+    "E261",     # too-few-spaces-before-inline-comment
+    "E302",     # blank-lines-top-level
+    "ERA001",   # commented-out-code
+    "PLW1510",  # subprocess-run-without-check - never fix automatically (naively assumes check=False is fine
+    "E501",     # line-too-long
+    "UP007",    # non-pep604-annotation-union
+    "S101",     # assert - avoid using asserts at runtime, since Python ran with -O doesn't check them
+    "PGH004",   # blanket-noqa
+
+    # Docstrings
+    "W505",     # doc-line-too-long
+    "RUF002",   # ambiguous-character-in-docstring
+    "D417",     # undocumented-param
+    "DOC201",   # docstring-missing-returns
+    "DOC402",   # docstring-missing-yields
+    "DOC501",   # docstring-missing-exception
+    "DOC102",   # docstring-extraneous-parameter
+    "DOC202",   # docstring-extraneous-returns
+    "DOC403",   # docstring-extraneous-yields
+    "DOC502",   # docstring-extraneous-exception
+    "D107",     # undocumented-public-init
+    "D200",     # unnecessary-multiline-docstring
+    "D204",     # incorrect-blank-line-after-class
+    "D213",     # multi-line-summary-second-line
+    "D415",     # missing-terminal-punctuation
+    "D418",     # overload-with-docstring
+    "D419",     # empty-docstring
+]
+
+ignore = [
+    "T201",   # print - recommends against using print statements in code, use logger instead
+    "E303",   # too-many-blank-lines
+    "D103",   # undocumented-public-function
+    # "ERA001", # commented-out-code
+    "COM812", # trailing-comma-missing - formatter handles it
+    "UP045",  # non-pep604-annotation-optional - I like the Optional
+]
+unfixable = [
+    "PLW1510"  # subprocess-run-without-check - never fix automatically (naively assumes check=False is fine
+]
+preview = true
+future-annotations = true
+
+[lint.isort]
+combine-as-imports = true
+lines-after-imports = 2

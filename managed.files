@@ -4,3 +4,4 @@
 .vimrc
 .config/iterm2/com.googlecode.iterm2.plist
 .config/concord/
+.config/ruff/ruff.toml

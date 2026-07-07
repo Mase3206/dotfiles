@@ -1,13 +1,8 @@
-[format]
-docstring-code-format = true
-indent-style = "space"
-line-ending = "lf"
-skip-magic-trailing-comma = false
+# Just use the managed ruff.toml
+extend = '../.config/ruff/ruff.toml'
+target-version = "py39"
 
 [lint]
-select = [
-    "W291", "F401", "I", "F541"
+extend-ignore = [
+    "UP007"  # Python 3.9 doesn't support the | operator
 ]
-
-[lint.isort]
-combine-as-imports = true
