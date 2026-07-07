@@ -27,15 +27,18 @@ select = [
     "W505",     # doc-line-too-long
     "RUF002",   # ambiguous-character-in-docstring
     "D417",     # undocumented-param
-    "DOC201",   # docstring-missing-returns
-    "DOC402",   # docstring-missing-yields
-    "DOC501",   # docstring-missing-exception
-    "DOC102",   # docstring-extraneous-parameter
-    "DOC202",   # docstring-extraneous-returns
-    "DOC403",   # docstring-extraneous-yields
-    "DOC502",   # docstring-extraneous-exception
+
+    # See note in [lint.ignore] for why these rules aren't selected
+    # "DOC201",   # docstring-missing-returns
+    # "DOC402",   # docstring-missing-yields
+    # "DOC501",   # docstring-missing-exception
+    # "DOC102",   # docstring-extraneous-parameter
+    # "DOC202",   # docstring-extraneous-returns
+    # "DOC403",   # docstring-extraneous-yields
+    # "DOC502",   # docstring-extraneous-exception
+
     "D107",     # undocumented-public-init
-    "D200",     # unnecessary-multiline-docstring
+    # "D200",     # unnecessary-multiline-docstring  # annoying
     "D204",     # incorrect-blank-line-after-class
     "D213",     # multi-line-summary-second-line
     "D415",     # missing-terminal-punctuation
@@ -50,9 +53,14 @@ ignore = [
     # "ERA001", # commented-out-code
     "COM812", # trailing-comma-missing - formatter handles it
     "UP045",  # non-pep604-annotation-optional - I like the Optional
+
+    # Disable pydocstyle docstring rules for the time being, as they don't support Sphynx-style
+    # parameters. Until https://github.com/astral-sh/ruff/issues/6606 is resolved, these rules
+    # aren't useful to me.
+    "DOC",
 ]
 unfixable = [
-    "PLW1510"  # subprocess-run-without-check - never fix automatically (naively assumes check=False is fine
+    "PLW1510"  # subprocess-run-without-check - never fix automatically (naively assumes check=False is fine)
 ]
 preview = true
 future-annotations = true

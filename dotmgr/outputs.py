@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
-"""Console output helpers"""
+"""Console output helpers."""
 
 import string
 from enum import Enum
 
 
 class AnsiColors(str, Enum):
-    """ANSI color codes"""
+    """ANSI color codes."""
 
     BLACK = "\033[0;30m"
     GREY = "\033[38;5;243m"
@@ -64,14 +64,22 @@ def skip(content: str):
     print(f"{AnsiColors.LIGHT_RED}Skipping{AnsiColors.END} {content}")
 
 
-def confirm(message: str, defaul_yes: bool = True) -> bool:
+def confirm(message: str, default_yes: bool = True) -> bool:
+    """
+    Print the given message to the console and ask the user to confirm before continuing. If any answer
+    other than `y`, `yes`, `n` or `no` (case-insensitive) is given, the user will be re-prompted.
+
+    :param str message: Message to display to user
+    :param bool = True default_yes: Interpret no input as affirmative
+
+    :returns bool: True if the user confirmed affirmatively, False otherwise.
+    """
+
     while True:
         iput = (
-            input(f"{message} [{'Y' if defaul_yes else 'y'}/{'n' if defaul_yes else 'N'}]")
-            .strip()
-            .lower()
+            input(f"{message} [{'Y' if default_yes else 'y'}/{'n' if default_yes else 'N'}] ").strip().lower()
         )
-        if defaul_yes:
+        if default_yes:
             if iput == "" or iput in string.whitespace or iput in ["y", "yes"]:
                 return True
             elif iput in ["n", "no"]:

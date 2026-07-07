@@ -1,8 +1,13 @@
 # Just use the managed ruff.toml
 extend = '../.config/ruff/ruff.toml'
 target-version = "py39"
+line-length = 110
 
 [lint]
 extend-ignore = [
-    "UP007"  # Python 3.9 doesn't support the | operator
+    "UP007",  # Python 3.9 doesn't support the | operator
+    "ERA001", # commented-out-code
 ]
+
+# [pydocstyle]
+# convention = "sphinx"

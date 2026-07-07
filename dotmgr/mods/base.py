@@ -31,15 +31,17 @@ class BaseMod(ABC):
     @abstractmethod
     def detect(self, quiet: bool = False) -> bool:
         """
-        Detect installation and print status to console (if quiet = False)
+        Detect installation and print status to console (if quiet = False).
 
+        :param bool quiet: If true, do not print status to console. Defaults to False.
         :returns bool: True if mod was detected, False otherwise
         """
 
     @abstractmethod
     def install(self):
         """
-        The runner of this mod is responsible for ensuring all dependencies of this mod are satisfied *before* running `install()`.
+        The runner of this mod is responsible for ensuring all dependencies of this mod are
+        satisfied *before* running `install()`.
 
         Exceptions during the installation process may be thrown and must be handled accordingly.
         """
@@ -60,7 +62,8 @@ class BaseMod(ABC):
     @property
     def status(self) -> InstallStatus:
         """
-        Whether this mod has already been installed (or if a previous installation attempt failed). Wrapper around the mods.dat file
+        Whether this mod has already been installed (or if a previous installation attempt failed).
+        Wrapper around the mods.dat file.
         """
 
         with open(DOTFILES_DIR / "mods.dat", "rb+") as pf:
@@ -73,14 +76,15 @@ class BaseMod(ABC):
         if s:
             return s
         else:
-            _status = (
-                InstallStatus.INSTALLED if self.detect(quiet=True) else InstallStatus.NOT_INSTALLED
-            )
+            _status = InstallStatus.INSTALLED if self.detect(quiet=True) else InstallStatus.NOT_INSTALLED
             self.status = _status
             return _status
 
     @status.setter
     def status(self, status: InstallStatus):
+        """
+        :param InstallStatus status: Install status to set
+        """  # docstring description is inherited by getter
         with open(DOTFILES_DIR / "mods.dat", "rb+") as pf:
             data = pickle.load(pf)
 
@@ -94,6 +98,7 @@ class BaseMod(ABC):
 
     @property
     def mod_name(self):
+        """The name of this mod. Wrapper around some class introspection."""
         return self.__class__.__name__
 
     def __str__(self) -> str:

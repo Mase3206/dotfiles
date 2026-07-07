@@ -2,12 +2,13 @@ import shlex
 import string
 import subprocess
 from enum import Enum
-from typing import Optional, Union
+from typing import Any, Generic, Optional, TypeVar, Union
 
 from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, filelib, outputs
 
 
 ALL_DOTFILES = filelib.load_dotfiles(DOTFILES_MANAGED_FILE)
+T = TypeVar("T")
 
 
 class GitFileStatus(str, Enum):
@@ -18,10 +19,35 @@ class GitFileStatus(str, Enum):
     UNTRACKED = "??"
 
 
-FileList = list[tuple[GitFileStatus, filelib.Dotfile]]
+class FileList(Generic[T], list[tuple[GitFileStatus, T]]): ...
 
 
-def git_cmd(args: Union[str, list[str]], stdout: bool = False, stdin: bool = False, **kwargs):
+def git_cmd(
+    args: Union[str, list[str]],
+    stdout: bool = False,
+    stdin: bool = False,
+    **kwargs: Any,
+) -> subprocess.CompletedProcess[str]:
+    """
+    Run a Git command.
+
+    Some key-word arguments are pre-set and should not be changed:
+    ```python
+    stderr = subprocess.PIPE
+    cwd = DOTFILES_DIR
+    encoding = "utf-8"
+    check = True
+    ```
+
+
+    :param str | list[str] args: Git subcommand and arguments. If str, will be split with :func:`shlex.split`.
+    :param bool = False stdout: Pipe stdout
+    :param bool = False stdin: Pipe stdin
+    :param kwargs: Additional keyword arguments to pass to :func:`subprocess.run`
+
+    :returns subprocess.CompletedProcess[str]:
+    """
+
     if stdout:
         kwargs["stdout"] = subprocess.PIPE
     if stdin:
@@ -35,6 +61,7 @@ def git_cmd(args: Union[str, list[str]], stdout: bool = False, stdin: bool = Fal
         cwd=DOTFILES_DIR,
         stderr=subprocess.PIPE,
         encoding="utf-8",
+        check=True,
         **kwargs,
     )
 
@@ -45,30 +72,23 @@ def git_cmd(args: Union[str, list[str]], stdout: bool = False, stdin: bool = Fal
         return out
 
 
-def get_changed_dotfiles() -> tuple[FileList, bool]:
+def get_changed_dotfiles() -> tuple[FileList[filelib.Dotfile], bool]:
     """
     Get a list of dotfiles which have changed in the Git repo.
 
-    Returns
-    -------
-    :return FileList: List of changed files
+    :return FileList[Dotfile]: List of changed dotfiles
     :return bool: Whether managed.files has changed
     """
-    # out = subprocess.run(
-    #     ['git', 'status', '--porcelain', '-z'],
-    #     stdout=subprocess.PIPE,
-    #     encoding='utf-8',
-    #     cwd=DOTFILES_DIR
-    # )
+
     out = git_cmd(
         "status --porcelain -zu",
         stdout=True,
     )
 
     lines = out.stdout.split("\0")
-    parsed: FileList = []
+    parsed: FileList[filelib.Dotfile] = FileList()
     managed_file_changed = False
-    # files_to_notice = [*ALL_DOTFILES.keys(), 'managed.files']
+
     for line in lines:
         if line == "":
             continue
@@ -90,14 +110,20 @@ def get_changed_dotfiles() -> tuple[FileList, bool]:
     return parsed, managed_file_changed
 
 
-def get_all_changed_files() -> list[tuple[GitFileStatus, str]]:
+def get_all_changed_files() -> FileList[str]:
+    """
+    Get all changed files, including dotfiles and non-dotfiles.
+
+    :returns FileList[str]: List of paths (relative to $DOTFILES_DIR) of changed files.
+    """
+
     out = git_cmd(
         "status --porcelain -zu",
         stdout=True,
     )
 
     lines = out.stdout.split("\0")
-    parsed: list[tuple[GitFileStatus, str]] = []
+    parsed: FileList[str] = FileList()
     for line in lines:
         if line == "":
             continue
@@ -113,7 +139,35 @@ def get_all_changed_files() -> list[tuple[GitFileStatus, str]]:
     return parsed
 
 
-def generate_commit_message(changed: FileList, managed_file_changed: bool = False) -> str:
+def generate_commit_message(changed: FileList[filelib.Dotfile], managed_file_changed: bool) -> str:
+    """
+    Generates a simple commit message for modified dotfiles.
+
+    - **N** - new (added and untracked) files
+    - **M** - modified files
+    - **D** - deleted files
+
+    **Example message:**
+    ```
+    N: .bashrc, .vimrc; M: .zshrc, managed.files; D: .config/ruff/ruff.toml
+    ```
+
+    **Example usage:**
+    ```
+    # Get changed files and whether managed.file changed
+    changed_files, changed_managed_file = git.get_changed_dotfiles()
+
+    # Pass both to this function - could also be done via argument expansion
+    msg = git.generate_commit_message(changed_files, changed_managed_file)
+    ```
+
+
+    :param FileList[Dotfile] changed: List of changed dotfiles
+    :param bool managed_file_changed: Whether the managed.files file has changed
+
+    :returns str: Generated commit message
+    """
+
     # Sort the files into the right status "bins"
     new: list[str] = []
     modified: list[str] = []
@@ -132,8 +186,6 @@ def generate_commit_message(changed: FileList, managed_file_changed: bool = Fals
         else:
             print(f"{df} has unknown status {status}")
 
-    # new += ['.asdf']
-
     message_lines = []
     if new:
         message_lines.append("N: " + ", ".join(new))
@@ -145,7 +197,31 @@ def generate_commit_message(changed: FileList, managed_file_changed: bool = Fals
     return "; ".join(message_lines)
 
 
-def format_changed_human(changed: FileList, managed_file_changed: bool = True) -> str:
+def format_changed_human(changed: FileList[filelib.Dotfile], managed_file_changed: bool) -> str:
+    """
+    Format the list of changed files in a more human-friendly way.
+
+    **Example message:**
+    ```
+    New (untracked and just added):
+    - .bashrc
+    - .vimrc
+
+    Modified files:
+    - .zshrc
+    - managed.files
+
+    Deleted files:
+    - .config/ruff/ruff.toml
+    ```
+
+
+    :param FileList[Dotfile] changed: List of changed dotfiles
+    :param bool managed_file_changed: Whether the managed.files file has changed
+
+    :returns str: Generated message
+    """
+
     new: list[str] = []
     modified: list[str] = []
     if managed_file_changed:
@@ -198,10 +274,19 @@ def format_changed_human(changed: FileList, managed_file_changed: bool = True) -
 
 
 def commit_dotfiles(
-    changed: FileList,
-    managed_file_changed: bool = False,
+    changed: FileList[filelib.Dotfile],
+    managed_file_changed: bool,
     message: Optional[str] = None,
 ):
+    """
+    Commit the given changed dotfiles to the Git repo in $DOTFILES_DIR.
+
+    :param FileList[Dotfile] changed: List of changed dotfiles
+    :param bool managed_file_changed: Whether the managed.files file has changed
+    :param Optional[str] message: Optional manual commit message. If not given, a message will automatically
+        be generated by :func:`~dotmgr.git.generate_commit_message`
+    """
+
     if not message:
         message = generate_commit_message(changed, managed_file_changed)
 
@@ -210,41 +295,27 @@ def commit_dotfiles(
         file_paths += ["managed.files"]
 
     # Add files
-    git_cmd(["add", *file_paths]).check_returncode()
+    git_cmd(["add", *file_paths])
 
     # Commit
-    git_cmd(["commit", "-m", message]).check_returncode()
-
-    # Push
-    # push_dotfiles()
+    git_cmd(["commit", "-m", message])
 
 
 def push_dotfiles():
-    # changed_dotfiles = get_changed_dotfiles()
-    # all_changed = get_all_changed_files()
-    # changed_non_dotfiles = [f for f in all_changed if f not in changed_dotfiles]
-
-    # if len(changed_non_dotfiles) > 0:
-
-    git_cmd("push").check_returncode()
+    """Runs `git push`."""
+    git_cmd("push")
 
 
 def stash_push():
-    git_cmd("stash").check_returncode()
+    """Runs `git stash` to stash the current uncommited changes."""
+    git_cmd("stash")
 
 
 def stash_pop():
-    git_cmd("stash pop").check_returncode()
+    """Runs `git stash pop` to unstash the previously-stashed changes."""
+    git_cmd("stash pop")
 
 
 def pull():
-    git_cmd("pull").check_returncode()
-
-
-# print(generate_commit_message(status_dotfiles()))
-
-# print(ALL_DOTFILES['.zshrc'])
-# for s in status_dotfiles():
-#     print(s[0], s[1])
-
-# print(lines)
+    """Runs `git pull`."""
+    git_cmd("pull")

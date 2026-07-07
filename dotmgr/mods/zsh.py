@@ -6,6 +6,16 @@ from dotmgr.pkg import PackageManager
 
 
 class Zsh(BaseMod):
+    """
+    Install Zsh.
+
+    This plugin attempts to install Zsh using your system's package manager. See
+    :class:`~dotmgr.pkg.PackageManager` for notes about platform support.
+
+    - Dependencies: none
+    - Dotfiles: .zshrc
+    """
+
     @property
     def dependencies(self):
         return []
@@ -19,6 +29,7 @@ class Zsh(BaseMod):
             "command -v zsh",
             shell=True,
             stdout=subprocess.DEVNULL,
+            check=False,  # exit status handled manually
         )
         if out.returncode == 0:
             if not quiet:

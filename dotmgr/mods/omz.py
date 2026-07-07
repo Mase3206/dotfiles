@@ -6,6 +6,16 @@ from dotmgr.utils import cd, mktemp
 
 
 class OhMyZsh(BaseMod):
+    """
+    Oh My Zsh plugin.
+
+    This plugin installs Oh My Zsh (and Zsh, if it isn't already installed). It will also attempt
+    to set the user's shell to Zsh.
+
+    - Dependencies: Zsh
+    - Dotfiles: .oh-my-zsh/themes/terse.zsh-theme
+    """
+
     @property
     def dependencies(self) -> list[str]:
         return ["Zsh"]
@@ -45,7 +55,8 @@ class OhMyZsh(BaseMod):
                         ],
                         cwd=cwd,
                         stdout=f,
-                    ).check_returncode()
+                        check=True,
+                    )
 
                 outputs.step("Installing OMZ")
                 subprocess.run(
@@ -59,10 +70,18 @@ class OhMyZsh(BaseMod):
                         "USER": USER,
                     },
                     cwd=cwd,
-                ).check_returncode()
+                    check=True,
+                )
 
                 outputs.step("Setting user's shell to /usr/bin/zsh")
-                subprocess.run(["/usr/bin/chsh", USER, "-s", "/usr/bin/zsh"]).check_returncode()
+                try:
+                    subprocess.run(["/usr/bin/chsh", USER, "-s", "/usr/bin/zsh"], check=True)
+                except subprocess.CalledProcessError:
+                    print(
+                        f"Unable to set Zsh as the shell for user '{USER}'. You'll need to "
+                        "change it yourself with this command:\n"
+                        f"/usr/bin/chsh {USER} -s /usr/bin/zsh"
+                    )
 
                 outputs.step("Cleaning up")
                 # Exit the context manager to cd back out and remove temp dir

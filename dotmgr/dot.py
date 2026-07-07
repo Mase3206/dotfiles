@@ -5,7 +5,7 @@ import os
 import subprocess
 from pathlib import Path
 from textwrap import dedent
-from typing import Iterable, Optional
+from typing import Iterable
 
 from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, HOME, filelib, git, mods, outputs
 from dotmgr.mods import InstallStatus
@@ -22,24 +22,37 @@ STANDALONE_DOTFILES = {name: d for name, d in ALL_DOTFILES.items() if not d.used
 
 class Choices(tuple):
     """
-    This class provides a wrapper around the `tuple` class to work around a 14-year-old bug in Python that was only fixed in 2024
-    and marked for release in Python 3.14: https://github.com/python/cpython/issues/53834. Using this class allows you to
-    set multiple possible choices and defaults on a positional argument with `nargs='*'`, as it fixes a bug in `argparse` on line 2496:
+    Wrapper class around tuple to fix a weird bug in argparse.
+
+    This class provides a wrapper around the `tuple` class to work around a 14-year-old bug in
+    Python that was only fixed in 2024 and marked for release in Python 3.14:
+    https://github.com/python/cpython/issues/53834. Using this class allows you to set multiple
+    possible choices and defaults on a positional argument with `nargs='*'`, as it fixes a bug in
+    `argparse` on line 2496:
+
     ```python
     if action.choices is not None and value not in action.choices:
         ...
     ```
-    If `value` is itself a collection, the latter condition will fail, as the collection itself obviously isn't a member of the given choices.
+    If `value` is itself a collection, the latter condition will fail, as the collection itself
+    obviously isn't a member of the given choices.
 
-    Once Apple eventually updates the version of Python it ships to 3.14 or newer, this workaround can be removed.
+    Once every platform I wish to support eventually updates the version of Python it ships to 3.14
+    or newer, this workaround can be removed.
     """
 
-    def __new__(cls, _iterable: Iterable, default: Optional[Iterable] = None):
+    def __new__(cls, _iterable: Iterable, default: Iterable = []):
         x = tuple.__new__(cls, _iterable)
         Choices.__init__(x, _iterable, default=default)
         return x
 
-    def __init__(self, _iterable: Optional[Iterable] = None, default: Optional[Iterable] = None):
+    def __init__(self, _iterable: Iterable = [], default: Iterable = []):
+        """
+        Create a new `Choices` object.
+
+        :param Iterable = [] _iterable: All allowed choices
+        :param Iterable = [] default: Default choices
+        """
         # _iterable is already handled by tuple.__new__
         self.default = default or []
 
@@ -49,15 +62,21 @@ class Choices(tuple):
 
 _available_dotfiles_choices = Choices(AVAILABLE_DOTFILES.keys(), default=AVAILABLE_DOTFILES.keys())
 """
-This list contains the keys of the AVAILABLE_DOTFILES dict (i.e. the relative paths of the dotfiles), as well as a "hidden"
-`None` element in there to work around a bug in argparse.
+This list contains the keys of the AVAILABLE_DOTFILES dict (i.e. the relative paths of the
+dotfiles), as well as a "hidden" `None` element in there to work around a bug in argparse.
 """
 
 
 # region Define arguments
 parser = argparse.ArgumentParser(
     prog="dot",
-    description=f"{outputs.AnsiColors.BOLD}dot{outputs.AnsiColors.END} is a custom, lightweight, stdlib-only dependency manager. Written for Python 3.9+, it supports macOS (because even macOS 26 is shipping with Python 3.9.6, which is from 2022) and older Linux distros, and, as Python 3 generally has excellent backwards compatibility, it is highly likely to work on later versions as well.",
+    description=f"""
+        {outputs.AnsiColors.BOLD}dot{outputs.AnsiColors.END} is a custom, lightweight, stdlib-only
+        dependency manager. Written for Python 3.9+, it supports macOS (because even macOS 26 is
+        shipping with Python 3.9.6, which is from 2022) and older Linux distros, and, as Python 3
+        generally has excellent backwards compatibility, it is highly likely to work on later
+        versions as well.
+    """,
 )
 sp_manager = parser.add_subparsers(required=True, metavar="command", dest="sp")
 
@@ -71,7 +90,10 @@ sp_ln = sp_manager.add_parser(
 sp_ln.add_argument(
     "file",
     nargs="*",
-    help="(Optional) relative path to file(s) to link. If not given, all files (except those used by uninstalled Mods) will be linked.",
+    help="""
+        (Optional) relative path to file(s) to link. If not given, all files (except those used by
+        uninstalled Mods) will be linked.
+    """,
     default=_available_dotfiles_choices.default,
     choices=_available_dotfiles_choices,
     metavar="file",
@@ -80,8 +102,8 @@ sp_ln.add_argument(
 # Remove
 sp_rm = sp_manager.add_parser(
     "rm",
-    help="Remove dotfiles",
-    description="Remove dotfiles",
+    help="Remove (unlink) dotfiles",
+    description="Remove (unlink) dotfiles. The actual source file is not removed.",
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_rm.add_argument(
@@ -102,7 +124,10 @@ sp_sync = sp_manager.add_parser(
 sp_sync.add_argument(
     "file",
     nargs="*",
-    help="(Optional) relative path to file(s) to sync. If not given, all files (except those used by uninstalled Mods) will be synced.",
+    help="""
+        (Optional) relative path to file(s) to sync. If not given, all files (except those used by
+        uninstalled Mods) will be synced.
+    """,
     default=_available_dotfiles_choices.default,
     choices=_available_dotfiles_choices,
     metavar="file",
@@ -122,7 +147,10 @@ _all_dotfiles_choices = Choices(
 sp_status.add_argument(
     "file",
     nargs="*",
-    help="(Optional) relative path to file(s) to get the status of. If not given, all files (including those used by uninstalled mods) will be checked.",
+    help="""
+        (Optional) relative path to file(s) to get the status of. If not given, all files
+        (including those used by uninstalled mods) will be checked.
+    """,
     default=_all_dotfiles_choices.default,
     # choices=_all_dotfiles_choices,
     metavar="file",
@@ -195,8 +223,14 @@ sp_orphan.add_argument(
 sp_list = sp_manager.add_parser(
     "list",
     help="List all managed files' relative paths.",
-    description="List all managed files' relative paths. If no arguments are given, a file's install status is distinguised with a check/cross, and unavailable files are greyed out.",
-    epilog='An "available" file is one that either (1) isn\'t associated with a mod, or (2) is associated with an *installed* mod.',
+    description="""
+        List all managed files' relative paths. If no arguments are given, a file's install status is
+        distinguised with a check/cross, and unavailable files are greyed out.
+    """,
+    epilog="""
+        An "available" file is one that either (1) isn\'t associated with a mod, or (2) is associated with
+        an *installed* mod.
+    """,
 )
 sp_list.add_argument(
     "-n",
@@ -207,7 +241,10 @@ sp_list.add_argument(
 sp_list.add_argument(
     "-r",
     "--raw",
-    help="Just list the files. Don't add checkmarks/crosses indicating file status or +/- indicating file availability. Implies --no-color.",
+    help="""
+        Just list the files. Don't add checkmarks/crosses indicating file status or +/- indicating file
+        availability. Implies --no-color.
+    """,
     action="store_true",
 )
 sp_list.add_argument(
@@ -246,7 +283,10 @@ sp_list.add_argument(
 sp_edit = sp_manager.add_parser(
     "edit",
     help="Edit or view a dotfile, respecting the your chosen editor (set in $EDITOR) by default.",
-    description=f"Edit or view a dotfile, respecting the your chosen editor (set in $EDITOR) by default. Your current editor is {os.environ.get('EDITOR', 'unset')}.",
+    description=f"""
+        Edit or view a dotfile, respecting the your chosen editor (set in $EDITOR) by default. Your current
+        editor is {outputs.AnsiColors.UNDERLINE}{os.environ.get("EDITOR", "unset")}{outputs.AnsiColors.END}.
+    """,
     epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_edit.add_argument("-c", help="Open in VSCode", dest="editor_vscode", action="store_true")
@@ -270,7 +310,10 @@ sp_edit.add_argument(
 )
 sp_edit.add_argument(
     "file",
-    help="Relative path to the file to edit or view. If no file is given, the editor will open to the dotfiles directory.",
+    help="""
+        Relative path to the file to edit or view. If no file is given, the editor will open to the
+        dotfiles directory.
+    """,
     choices=_available_dotfiles_choices,
     metavar="file",
     nargs="?",
@@ -307,14 +350,14 @@ sp_mod.add_argument(
 sp_git = sp_manager.add_parser(
     "git",
     help="Interact with the local dotfile Git repo",
-    description=f"""\
-    Interact with the local dotfile Git repo in $DOTFILES_DIR ({DOTFILES_DIR}).
+    description=f"""
+        Interact with the local dotfile Git repo in $DOTFILES_DIR ({DOTFILES_DIR}).
 
-    COMMIT: Commit changes to managed dotfiles.
-    PUSH: Push changes to remote.
-    PULL: Stash changes in local repo, pull changes from remote, then unstash changes.
-    UNDO: Undo the last commit and unstage the previously committed files.
-    STATUS: Get the current Git status of the local repo.
+        COMMIT: Commit changes to managed dotfiles.
+        PUSH: Push changes to remote.
+        PULL: Stash changes in local repo, pull changes from remote, then unstash changes.
+        UNDO: Undo the last commit and unstage the previously committed files.
+        STATUS: Get the current Git status of the local repo.
     """,
 )
 sp_git.add_argument(
@@ -338,7 +381,8 @@ if args.sp == "ln":
 
             if fn not in AVAILABLE_DOTFILES.keys():
                 print(
-                    f"Dotfile {fn} shouldn't be linked yet, since it's used by {dotfile.used_by}, which isn't installed yet."
+                    f"Dotfile {fn} shouldn't be linked yet, since it's used by {dotfile.used_by}, which "
+                    "isn't installed yet."
                 )
                 continue
 
@@ -352,7 +396,8 @@ elif args.sp == "rm":
 
             if fn not in AVAILABLE_DOTFILES.keys():
                 print(
-                    f"Dotfile {fn} shouldn't be removed yet, since it's used by {dotfile.used_by}, which isn't installed yet."
+                    f"Dotfile {fn} shouldn't be removed yet, since it's used by {dotfile.used_by}, which "
+                    "isn't installed yet."
                 )
                 continue
 
@@ -366,7 +411,8 @@ elif args.sp == "sync":
 
             if fn not in AVAILABLE_DOTFILES.keys():
                 print(
-                    f"Dotfile {fn} shouldn't be synced yet, since it's used by {dotfile.used_by}, which isn't installed yet."
+                    f"Dotfile {fn} shouldn't be synced yet, since it's used by {dotfile.used_by}, which "
+                    "isn't installed yet."
                 )
                 continue
 
@@ -389,9 +435,7 @@ elif args.sp in ["status", "stat"]:
                 is_linked_correctly = "L" if dotfile.dest.resolve() == dotfile.src else "-"
                 is_used_by_mod = "U" if dotfile.used_by != None else "-"
                 mod_is_installed = (
-                    "I"
-                    if (dotfile.used_by.status == "INSTALLED" if dotfile.used_by else False)
-                    else "-"
+                    "I" if (dotfile.used_by.status == "INSTALLED" if dotfile.used_by else False) else "-"
                 )
             else:
                 managed = "-"
@@ -408,7 +452,8 @@ elif args.sp in ["status", "stat"]:
             mod_is_installed = "-"
 
         print(
-            f"{fn.ljust(max_len)}  {exists} {managed} {is_symlink} {is_linked_correctly} {is_used_by_mod} {mod_is_installed}"
+            f"{fn.ljust(max_len)}  {exists} {managed} {is_symlink} {is_linked_correctly} "
+            f"{is_used_by_mod} {mod_is_installed}"
         )
 
     if args.explain:
@@ -453,7 +498,8 @@ elif args.sp == "unmanage":
 
         if fn not in STANDALONE_DOTFILES:
             if not outputs.confirm(
-                f"Heads up! Dotfile {fn} is used by installed mod {dotfile.used_by}, so unmanaging probably isn't recommended. Continue anyways?"
+                f"Heads up! Dotfile {fn} is used by installed mod {dotfile.used_by}, so unmanaging probably "
+                "isn't recommended. Continue anyways?"
             ):
                 continue
 
@@ -482,7 +528,8 @@ elif args.sp == "orphan":
 
         if fn not in STANDALONE_DOTFILES:
             if not outputs.confirm(
-                f"Heads up! Dotfile {fn} is used by installed mod {dotfile.used_by}, so orphaning it is risky. Continue anyways?"
+                f"Heads up! Dotfile {fn} is used by installed mod {dotfile.used_by}, so orphaning it is "
+                "risky. Continue anyways?"
             ):
                 continue
 
@@ -516,8 +563,8 @@ elif args.sp == "list":
 
     def make_format(installed: bool, available: bool, relative_path: str) -> str:
         """
-        Format the line with the right marker. If it makes you feel any better, I hate the obnoxious if-tree too,
-        but it was the cleanest way I could think of to implement this.
+        Format the line with the right marker. If it makes you feel any better, I hate the obnoxious
+        if-tree too, but it was the cleanest way I could think of to implement this.
         """
         if hide_link_mark:
             if args.no_color:
@@ -558,13 +605,7 @@ elif args.sp == "list":
                     if hide_avail_mark:
                         return mark + " " + relative_path
                     else:
-                        return (
-                            mark
-                            + " "
-                            + outputs.AnsiColors.GREY
-                            + relative_path
-                            + outputs.AnsiColors.END
-                        )
+                        return mark + " " + outputs.AnsiColors.GREY + relative_path + outputs.AnsiColors.END
 
     # Only include files with the specified availability
     dotfiles: list[filelib.Dotfile] = []
@@ -633,18 +674,17 @@ elif args.sp == "edit":
         else os.environ.get("EDITOR")
     )
     if not editor:
-        print(
-            "WARN: $EDITOR variable is unset, and editor was not specified, so defaulted to `cat`."
-        )
+        print("WARN: $EDITOR variable is unset, and editor was not specified, so defaulted to `cat`.")
         editor = "cat"
 
     if args.file:
         dotfile = ALL_DOTFILES.get(args.file)
         # Safely assert here, as argparse makes sure the chosen dotfile is known and valid.
-        assert dotfile
-        subprocess.run([editor, dotfile.src])
+        if not dotfile:
+            raise ValueError(dotfile)
+        subprocess.run([editor, dotfile.src], check=True)
     else:
-        subprocess.run([editor, DOTFILES_DIR])
+        subprocess.run([editor, DOTFILES_DIR], check=True)
 
 
 # Interact with mods
@@ -676,11 +716,7 @@ elif args.sp in ["mod", "mods"]:
                 )
             elif selected_mod.status == mods.InstallStatus.NOT_INSTALLED:
                 print(
-                    (
-                        (outputs.AnsiColors.RED + "✘ " + outputs.AnsiColors.END)
-                        if not args.no_color
-                        else "✘ "
-                    )
+                    ((outputs.AnsiColors.RED + "✘ " + outputs.AnsiColors.END) if not args.no_color else "✘ ")
                     + selected_mod.mod_name
                 )
         elif args.action == "install":
@@ -720,10 +756,7 @@ elif args.sp == "git":
 
         print(f"\n{outputs.AnsiColors.BOLD}Files changed:{outputs.AnsiColors.END}")
         changed_files = (
-            git
-            .git_cmd("--no-pager diff -z --name-only HEAD HEAD~1", stdout=True)
-            .stdout[:-1]
-            .split("\0")
+            git.git_cmd("--no-pager diff -z --name-only HEAD HEAD~1", stdout=True).stdout[:-1].split("\0")
         )
         print("\n".join(changed_files), end="\n\n")
 

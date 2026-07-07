@@ -36,7 +36,21 @@ class LogLevel(str, Enum):
 
 
 class Dotfile:
+    """
+    A managed dotfile.
+
+    :param Path src: Absolute path to the actual file in $DOTFILES_DIR
+    :param Path dest: Absolute path to the link destination in $HOME
+    :param LogLevel log_level: What log level to use when logging file operations on this dotfile
+    :param bool logging_enabled: Whether logging is actually enabled
+    :param BaseMod | None used_by: The Mod which uses this dotfile. This field is automatically set.
+    """
+
     _raw_relative_path: str
+    """
+    [PRIVATE] A string containing the relative path to this dotfile. Use
+    :attr:`relative_path` instead.
+    """
     src: Path
     dest: Path
     log_level: LogLevel
@@ -44,6 +58,12 @@ class Dotfile:
     used_by: Union[BaseMod, None]
 
     def __init__(self, relative_path: Path):
+        """
+        Create a new Dotfile object.
+
+        :param Path relative_path: Path to the dotfile, relative to $DOTFILES_DIR (and thus also $HOME)
+        """
+
         self.relative_path = relative_path
         self.src = (DOTFILES_DIR / relative_path).resolve()
         self.dest = HOME / relative_path
@@ -64,10 +84,14 @@ class Dotfile:
 
     @property
     def relative_path(self) -> str:
+        """The path of this dotfile relative to $DOTFILES_DIR (and thus also $HOME)."""
         return self._raw_relative_path
 
     @relative_path.setter
     def relative_path(self, path: Union[Path, str]):
+        """
+        :param Path | str path: Path relative to $DOTFILES_DIR (and thus also $HOME)
+        """
         if isinstance(path, Path):
             if path.is_absolute():
                 try:
@@ -88,6 +112,8 @@ class Dotfile:
     def is_linked(self):
         """
         Is this file linked correctly?
+
+        :returns bool: True if the file is linked correctly, False otherwise
         """
         if self.src.is_dir():
             return (
@@ -105,6 +131,16 @@ class Dotfile:
             )
 
     def log(self, fname: str, level: LogLevel, message: str):
+        """
+        Use the logger to log a message to stdout via `print`.
+
+        If the specified log level is lower than the log level set when this Dotfile was initialized, the
+        message will not be logged.
+
+        :param str fname: Function name
+        :param LogLevel level: Log level of this message
+        :param str message: Log message
+        """
         if self.logging_enabled and level >= self.log_level:
             print(f"{level.name:>5}  [Dotfile('{self.relative_path}').{fname}]: {message}")
 
@@ -189,7 +225,8 @@ class Dotfile:
                 self.log(
                     "ln",
                     LogLevel.ERR,
-                    f"{self.dest} is already a symlink, but does not point to the right file. It points to: '{self.dest.resolve()}'",
+                    f"{self.dest} is already a symlink, but does not point to the right file. It points "
+                    f"to: '{self.dest.resolve()}'",
                 )
                 return False
         # elif self.dest.is_dir():
@@ -203,7 +240,8 @@ class Dotfile:
             self.log(
                 "ln",
                 LogLevel.WARN,
-                "dest exists and is a directory. Remove it manually or with the `rm()` function before continuing.",
+                "dest exists and is a directory. Remove it manually or with the `rm()` function before "
+                "continuing.",
             )
             return False
         elif self.dest.is_file():
@@ -211,7 +249,8 @@ class Dotfile:
             self.log(
                 "ln",
                 LogLevel.ERR,
-                "dest exists and is a file. Remove it manually or with the `rm()` function before continuing.",
+                "dest exists and is a file. Remove it manually or with the `rm()` function before "
+                "continuing.",
             )
             return False
         else:
@@ -223,6 +262,12 @@ class Dotfile:
             return False
 
     def sync(self) -> bool:
+        """
+        Sync this dotfile.
+
+        First, unlink or remove the existing file with :meth:`rm`. Then, link it with
+        :func:`ln`.
+        """
         self.log("sync", LogLevel.INFO, "Attempting to sync")
 
         self.log("sync", LogLevel.DEBUG, "Attempting to remove existing link (if exists)")
@@ -309,8 +354,11 @@ class Dotfile:
 
     def orphan(self) -> bool:
         """
-        Copy src to dest, deleting dest symlink if necessary
+        Copy src to dest, deleting dest symlink if necessary.
+
+        :return bool: True if successfully orphaned, False otherwise
         """
+
         self.log("orphan", LogLevel.INFO, "Attempting to orphan")
 
         if not self.src.exists():
@@ -324,7 +372,9 @@ class Dotfile:
             self.log(
                 "orphan",
                 LogLevel.CRITICAL,
-                f"Source is a symlink, which is {outputs.AnsiColors.BOLD}{outputs.AnsiColors.RED}very bad{outputs.AnsiColors.END}!!! Sources should {outputs.AnsiColors.BOLD}never{outputs.AnsiColors.END} be symlinks!",
+                f"Source is a symlink, which is {outputs.AnsiColors.BOLD}{outputs.AnsiColors.RED}very "
+                f"bad{outputs.AnsiColors.END}!!! Sources should {outputs.AnsiColors.BOLD}never"
+                f"{outputs.AnsiColors.END} be symlinks!",
             )
             return False
         # elif self.src.is_dir():
@@ -408,8 +458,17 @@ class Dotfile:
 
     def prune_src(self):
         """
-        If parent directory of source file (the "real" file in DOTFILES_DIR) is empty, remove it (and its parent(s), if applicable.)
+        If parent directory of source file (the "real" file in $DOTFILES_DIR) is empty, remove it (and its
+        parent(s), if applicable).
+
+        :raises FileExistsError: If the "real" source file still exists in $DOTFILES_DIR
         """
+
+        # Make sure the source doesn't exist before continuing.
+        if self.src.exists():
+            raise FileExistsError(
+                f"{self.relative_path} still exists in $DOTFILES_DIR, refusing to prune its parent dir(s)."
+            )
 
         parent = self.src.parent
         while True:
@@ -421,7 +480,13 @@ class Dotfile:
 
 
 def load_dotfiles(managed_files_file: Path):
-    # relative_paths: list[Path] = []
+    """
+    Load managed dotfiles from the managed.files file.
+
+    :param Path managed_files_file: Path to the managed.files file
+    :returns dict[str, Dotfile]: Dictionary of managed dotfiles, where the key is the relative path
+    """
+
     dotfiles: dict[str, Dotfile] = {}
 
     with open(managed_files_file, "r") as f:
@@ -436,8 +501,17 @@ def load_dotfiles(managed_files_file: Path):
 
 
 def update_managed_list(
-    dotfiles: Union[list[Dotfile], dict[str, Dotfile]], managed_files_file: Path
+    dotfiles: Union[list[Dotfile], dict[str, Dotfile]],
+    managed_files_file: Path,
 ):
+    """
+    Mark the given dotfiles as managed by listing them in managed.files.
+
+    :param list[Dotfile] | dict[str, Dotfile] dotfiles: Dotfiles to mark as managed. If dict, the keys must
+        be the relative paths of the dotfiles.
+    :param Path managed_files_file: Path to the managed.files file
+    """
+
     if isinstance(dotfiles, dict):
         relative_paths = dotfiles.keys()
     elif isinstance(dotfiles, list) and len(dotfiles) > 0:

@@ -14,10 +14,9 @@ else:
     DOTFILES_DIR = Path(DOTFILES_DIR)
 
 # Get the path to managed.files
-DOTFILES_MANAGED_FILE = Path(
-    os.environ.get("DOTFILES_MANAGED_FILE", DOTFILES_DIR / "managed.files")
-)
+DOTFILES_MANAGED_FILE = Path(os.environ.get("DOTFILES_MANAGED_FILE", DOTFILES_DIR / "managed.files"))
 if not DOTFILES_MANAGED_FILE.exists():
     raise FileNotFoundError(
-        f"managed.files file (which lists which dotfiles to care about) wasn't found in the dotfiles directory '{DOTFILES_DIR}'"
+        "managed.files file (which lists which dotfiles to care about) wasn't found in the "
+        f"dotfiles directory '{DOTFILES_DIR}'"
     )
