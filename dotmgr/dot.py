@@ -70,7 +70,7 @@ parser = argparse.ArgumentParser(
     prog="dot",
     description=f"""
         {outputs.AnsiColors.BOLD}dot{outputs.AnsiColors.END} is a custom, lightweight, stdlib-only
-        dependency manager. Written for Python 3.9+, it supports macOS (because even macOS 26 is
+        dotfile manager. Written for Python 3.9+, it supports macOS (because even macOS 26 is
         shipping with Python 3.9.6, which is from 2022) and older Linux distros, and, as Python 3
         generally has excellent backwards compatibility, it is highly likely to work on later
         versions as well.
