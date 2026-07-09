@@ -1,5 +1,5 @@
 # Just use the managed ruff.toml
-extend = '../.config/ruff/ruff.toml'
+extend = '.config/ruff/ruff.toml'
 target-version = "py39"
 line-length = 110
 

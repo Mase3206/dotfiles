@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 
-HOME = Path(os.environ.get("HOME", "~")).resolve()
+HOME = Path.home()
 USER = os.environ.get("USER", getpass.getuser())
 
 # Make sure the dotfiles directory is set

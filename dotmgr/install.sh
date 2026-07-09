@@ -76,14 +76,27 @@ else
     echo "It looks like $DOTFILES_DIR already exists. Not cloning repo"
 fi
 
-if [ -f ~/.aliases ] \
-    && cat ~/.aliases | grep "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" > /dev/null;
-then
-    echo "\`dot\` alias already set"
-else
-    echo -e "\nAdding \`dot\` wrapper to user's ~/.aliases file"
-    echo "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" >> ~/.aliases
-fi
+# if [ -f ~/.aliases ] \
+#     && cat ~/.aliases | grep "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" > /dev/null;
+# then
+#     echo "\`dot\` alias already set"
+# else
+#     echo -e "\nAdding \`dot\` wrapper to user's ~/.aliases file"
+#     echo "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" >> ~/.aliases
+# fi
+
+
+echo "Saving stub script to ~/.local/bin/dot"
+! [ -d '~/.local/bin' ] && mkdir -p ~/.local/bin
+
+cat <<EOF > ~/.local/bin/dot
+#!/bin/sh
+/usr/bin/python3 /Users/noahroberts/.config/dotfiles/dotmgr/dot.py \$@
+EOF
+chmod +x ~/.local/bin/dot
+
+echo "Make sure you don't have an alias overriding this."
+
 
 if command -v dotsync > /dev/null; then
     echo "The old \`dotsync\` function is still set. Removing this is recommended."
