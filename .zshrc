@@ -151,6 +151,8 @@ export XDG_CONFIG_HOME="$HOME/.config"
 # This line is needed to make the new Python-based dotfiles manager work,
 # since it does some dynamic import trickery.
 export PYTHONPATH="$DOTFILES_DIR:$PYTHONPATH"
+export PATH="$HOME/.local/bin:$PATH"
+export EDITOR='vim'
 
 #TERM2_INTEGRATION=".iterm2_shell_integration.zsh"
 #
