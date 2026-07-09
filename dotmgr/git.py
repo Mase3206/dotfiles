@@ -26,6 +26,7 @@ def git_cmd(
     args: Union[str, list[str]],
     stdout: bool = False,
     stdin: bool = False,
+    check: bool = True,
     **kwargs: Any,
 ) -> subprocess.CompletedProcess[str]:
     """
@@ -61,7 +62,7 @@ def git_cmd(
         cwd=DOTFILES_DIR,
         stderr=subprocess.PIPE,
         encoding="utf-8",
-        check=True,
+        check=check,
         **kwargs,
     )
 
@@ -313,7 +314,12 @@ def stash_push():
 
 def stash_pop():
     """Runs `git stash pop` to unstash the previously-stashed changes."""
-    git_cmd("stash pop")
+    out = git_cmd("stash pop", check=False)
+    if out.returncode == 1 and out.stderr == 'No stash entries found':
+        print(out.stderr)
+        return
+    else:
+        out.check_returncode()
 
 
 def pull():
