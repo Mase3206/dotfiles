@@ -440,6 +440,8 @@ def main():
 
         print("Generating Zsh completions")
         compfile_path = HOME / ".oh-my-zsh/custom/completions/_dot"
+        if not compfile_path.parent.exists():
+            compfile_path.parent.mkdir()
         commands = compmaker.convert_from_parser(parser, cmd_name="dot")
         with open(compfile_path, "w+") as f:
             f.write(compmaker.render_zsh(commands))
