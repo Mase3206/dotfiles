@@ -15,6 +15,18 @@ from typing import Any, Iterable, Optional, Union
 
 @dataclass
 class Command:
+    """
+    An Argparse command (or subcommand).
+
+    :param str name: The name the user sees
+    :param str help: Help text
+    :param str description: Longer description
+    :param list[Argument] positionals: Positional arguments
+    :param list[Argument] optionals: Optional arguments
+    :param list[Argument] subcommands: Subcommands of this command
+    :param Optional[str] = "" epilog: Extra information at the bottom of this command's help page
+    """
+
     name: str
     help: str
     description: str
@@ -47,6 +59,19 @@ class NargType(Enum):
 
 @dataclass
 class Argument:
+    """
+    A single Argparse argument (not a subparser).
+
+    :param str name: Either the name the user sees or its `metavar`
+    :param list[str] flags: Command line flag(s), if used
+    :param bool required: Is this arg required?
+    :param str help: Help text
+    :param NargType = UNSET nargs: How many arguments this accepts
+    :param Optional[Iterable | Any] default: Default options
+    :param Optional[Iterable] choices: Choices this argument has
+    :param Optional[str] choices_shell_updater: Shell function (or command) used to fetch dynamic choices
+    """
+
     name: str
     flags: list[str]
     required: bool
@@ -73,6 +98,7 @@ class Argument:
 
 
 def _iterable_to_list(value: Any) -> Any:
+    """Convert `dict_keys` to a list, since JSON doesn't like them."""
     if value is None:
         return None
     if type(value).__name__ == "dict_keys":
@@ -83,6 +109,7 @@ def _iterable_to_list(value: Any) -> Any:
 
 
 def _normalize_nargs(nargs: Any) -> NargType:
+    """If we get an unknown nargs type, normalize it to UNSET."""
     try:
         return NargType(nargs)
     except ValueError:
@@ -90,16 +117,21 @@ def _normalize_nargs(nargs: Any) -> NargType:
 
 
 def _help_text(text: Any) -> str:
+    """Normalize and prepare a command or argument's help text."""
     value = str(text) if text else "(no help defined)"
     return value.replace("%", "%%").replace("[", "\\[").replace("]", "\\]")
 
 
 def _choice_updater(choices: Any) -> Optional[str]:
+    """
+    Get the `dynamic_shell` attribute (choice updater function/command) of the argument or command's
+    choices, if present.
+    """
     return getattr(choices, "dynamic_shell", None)
 
 
 def action_to_field(action: Any) -> Argument:
-    """Normalize an argparse action into a compact, shell-friendly field."""
+    """Normalize an Argparse action into a much simpler model."""
     return Argument(
         name=str(action.metavar if action.metavar else action.dest),
         flags=list(getattr(action, "option_strings", [])),
@@ -113,18 +145,22 @@ def action_to_field(action: Any) -> Argument:
 
 
 def _shell_word(value: str) -> str:
+    """Escape a string in quotes for use in a shell script."""
     return shlex.quote(value)
 
 
 def _choice_list(values: Iterable[Any]) -> str:
+    """Cast the argument or command's choices to a shell array."""
     return "(" + " ".join(_shell_word(str(value)) for value in values) + ")"
 
 
 def _description_choice_list(values: Iterable[tuple[str, str]]) -> str:
+    """Generate the full description/definition for a set of choices."""
     return "((" + " ".join(_shell_word(f"{name}:{description}") for name, description in values) + "))"
 
 
 def _argument_action(field: Argument, helper_name: Optional[str]) -> str:
+    """Determine the correct argument action in the argument spec."""
     if helper_name:
         return helper_name
     if field.choices:
@@ -135,6 +171,7 @@ def _argument_action(field: Argument, helper_name: Optional[str]) -> str:
 
 
 def _argument_spec(field: Argument, helper_name: Optional[str] = None) -> str:
+    """Generate the a well-formed argument spec for an argument."""
     action = _argument_action(field, helper_name)
 
     if field.flags:
@@ -164,6 +201,7 @@ def _dispatch_helper_name(parent_name: str, child_name: str) -> str:
 
 
 def _choice_helper_name(function_name: str, field_name: str) -> str:
+    """The formatted name of the helper function for a dynamic choice loader."""
     return f"_{function_name.lstrip('_')}__{field_name}_choices"
 
 
@@ -186,6 +224,19 @@ def _render_command(
     helper_defs: list[str],
     helper_lookup: dict[str, str],
 ) -> None:
+    """
+    Render a single command.
+    
+    :param Command command: The command to render.
+    :param str function_name: Name of the autocompletion function. This should be the name of the actual
+        program prepended with an underscore.
+    :param list[str] command_defs: The lines containing the in-progress command definition
+    :param list[str] helper_defs: List of "helper functions", which wrap around dynamic choices
+    :param list[str] helper_lookup: A helpful dict mapping dynamic choice loaders to their helper functions
+
+    :returns Nothing: All data is updated in-place.
+    """
+    
     lines: list[str] = [f"{function_name}() {{"]
 
     if command.subcommands:
@@ -250,7 +301,12 @@ def _render_command(
 
 
 def render_zsh(command: Command) -> str:
-    """Render an autoloadable zsh completion file for the parsed command tree."""
+    """
+    Render an autoloadable Zsh completion definition for the parsed command tree.
+    
+    :param Command command: A parsed command tree
+    :returns str: Rendered Zsh completion definition
+    """
     command_defs: list[str] = []
     helper_defs: list[str] = []
     helper_lookup: dict[str, str] = {}
@@ -271,6 +327,15 @@ def convert_from_parser(
     cmd_name: Optional[str] = None,
     help_str: str = "",
 ) -> Command:
+    """
+    Convert an Argparse parser to a tree of :class:`~Command` and :class:`~Argument` objects.
+
+    :param argparse.ArgumentParser parser: The parser to analyze
+    :param Optional[str] cmd_name: The name used to invoke this command
+    :param Optional[str] help_str: The help string of this command
+
+    :returns Command: A parsed command tree and its positional arguments, optional arguments, and subcommands
+    """
 
     if not cmd_name:
         cmd_name = parser.prog.split(" ")[-1]
