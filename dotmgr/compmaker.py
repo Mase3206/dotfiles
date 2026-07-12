@@ -226,7 +226,7 @@ def _render_command(
 ) -> None:
     """
     Render a single command.
-    
+
     :param Command command: The command to render.
     :param str function_name: Name of the autocompletion function. This should be the name of the actual
         program prepended with an underscore.
@@ -236,7 +236,7 @@ def _render_command(
 
     :returns Nothing: All data is updated in-place.
     """
-    
+
     lines: list[str] = [f"{function_name}() {{"]
 
     if command.subcommands:
@@ -303,7 +303,7 @@ def _render_command(
 def render_zsh(command: Command) -> str:
     """
     Render an autoloadable Zsh completion definition for the parsed command tree.
-    
+
     :param Command command: A parsed command tree
     :returns str: Rendered Zsh completion definition
     """

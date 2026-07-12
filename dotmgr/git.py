@@ -315,7 +315,7 @@ def stash_push():
 def stash_pop():
     """Runs `git stash pop` to unstash the previously-stashed changes."""
     out = git_cmd("stash pop", check=False)
-    if out.returncode == 1 and out.stderr == 'No stash entries found':
+    if out.returncode == 1 and out.stderr == "No stash entries found":
         print(out.stderr)
         return
     else:
@@ -325,3 +325,9 @@ def stash_pop():
 def pull():
     """Runs `git pull`."""
     git_cmd("pull")
+
+
+def diff(files: list[str]):
+    cmd = ["--no-pager", "diff"]
+    cmd += files
+    git_cmd(cmd)

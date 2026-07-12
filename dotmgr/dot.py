@@ -10,11 +10,6 @@ from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, HOME, filelib, git, mods
 from dotmgr.mods import InstallStatus
 
 
-# Only import dotmgr.compmaker if this is the main module to avoid circular imports.
-# if __name__ == '__main__':
-#     from dotmgr import compmaker
-
-
 ALL_DOTFILES = filelib.load_dotfiles(DOTFILES_MANAGED_FILE)
 AVAILABLE_DOTFILES = {
     name: d
@@ -384,43 +379,83 @@ sp_mod_list.add_argument(
     action="store_true",
     dest="null_sep",
 )
-sp_mod_list.add_argument("-i", "--installed", help="List installed mods", action="store_true")
-sp_mod_list.add_argument("-u", "--uninstalled", help="List uninstalled mods", action="store_true")
-
-# sp_mod.add_argument(
-#     "action",
-#     choices=("install", "detect"),
-#     help="Action",
-# )
-# sp_mod.add_argument(
-#     "mod_name",
-#     choices=_choices_mods,
-#     help="(Optional) mod name(s). If none are given, defaults to all discovered mods.",
-#     nargs="*",
-#     default=_choices_mods.default,
-# )
+sp_mod_list.add_argument(
+    "-i",
+    "--installed",
+    help="List installed mods",
+    action="store_true",
+)
+sp_mod_list.add_argument(
+    "-u",
+    "--uninstalled",
+    help="List uninstalled mods",
+    action="store_true",
+)
 
 
 # Git
 sp_git = sp_manager.add_parser(
     "git",
     help="Interact with the local dotfile Git repo",
-    description=f"""
-        Interact with the local dotfile Git repo in $DOTFILES_DIR ({DOTFILES_DIR}).
+    description="Interact with the local dotfile Git repo in $DOTFILES_DIR",
+)
+sp_git_manager = sp_git.add_subparsers(required=True, metavar="action", dest="action")
 
-        COMMIT: Commit changes to managed dotfiles.
-        PUSH: Push changes to remote.
-        PULL: Stash changes in local repo, pull changes from remote, then unstash changes.
-        UNDO: Undo the last commit and unstage the previously committed files.
-        STATUS: Get the current Git status of the local repo.
-    """,
+sp_git_commit = sp_git_manager.add_parser(
+    "commit",
+    help="Commit changes to managed dotfiles",
+    description="Commit changes to managed dotfiles.",
 )
-sp_git.add_argument(
-    "action",
-    choices=("commit", "push", "pull", "undo", "status"),
-    help="Upload or download changes to Git remote",
+sp_git_commit.add_argument(
+    "-m",
+    help="Commit message (optional)",
+    required=False,
+    dest="commit_message",
 )
-sp_git.add_argument("-m", help="Commit message (optional)", required=False, dest="commit_message")
+
+sp_git_push = sp_git_manager.add_parser(
+    "push",
+    help="Push changes to remote",
+    description="Push changes to remote.",
+)
+
+sp_git_pull = sp_git_manager.add_parser(
+    "pull",
+    help="Stash changes in local repo, pull changes from remote, then unstash changes",
+    description="Stash changes in local repo, pull changes from remote, then unstash changes.",
+)
+
+sp_git_undo = sp_git_manager.add_parser(
+    "undo",
+    help="Undo the last commit and unstage the previously committed files",
+    description="Undo the last commit and unstage the previously committed files.",
+)
+
+sp_git_status = sp_git_manager.add_parser(
+    "status",
+    help="Get the current Git status of the local repo",
+    description="Get the current Git status of the local repo.",
+)
+
+sp_git_diff = sp_git_manager.add_parser(
+    "diff",
+    help="Get the current Git diff of changed files",
+    description="Get the current Git diff of changed files.",
+)
+sp_git_diff.add_argument(
+    "-a",
+    "--all",
+    help="Include diff of non-dotfiles",
+    action="store_true",
+)
+sp_git_diff.add_argument(
+    "file",
+    help="Relative path to the file (optional). If not given, the diff of all dotfiles will be shown.",
+    choices=_available_dotfiles_choices,
+    default=_available_dotfiles_choices.default,
+    metavar="file",
+    nargs="*",
+)
 
 # endregion
 
@@ -810,6 +845,9 @@ def main():
         elif args.action == "status":
             changed = git.get_changed_dotfiles()
             print(git.format_changed_human(*changed))
+
+        elif args.action == "diff":
+            git.diff(args.file)
 
 
 if __name__ == "__main__":
