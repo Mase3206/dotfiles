@@ -8,9 +8,11 @@ You seem to have found my super secret dotfiles. Go you. They're pretty boring f
 **dot** is a custom, lightweight, stdlib-only dotfile manager. Written for Python 3.9+, it supports macOS (because even macOS 26 is shipping with Python 3.9.6, which is from 2022) and older Linux distros, and, as Python 3
 generally has excellent backwards compatibility, it is highly likely to work on later versions as well.
 
-I am aware that others have created dedicated programs to do just this. However, I have deliberately avoided them for that exact reason: I want a *script*, not a *program*. I want to clone my dotfiles repository, add an alias to a local ~/.aliases file (which is unique to each computer, but is sourced in .zshrc), and run `dot sync`. That's exactly what install.sh does. Nothing to install, nothing to have to update separately. It's a *script*.
+I am aware that others have created dedicated programs to do just this. However, I have deliberately avoided them for that exact reason: I want a *script*, not a *program*. I want to clone my dotfiles repository and run `dot sync`. That's exactly what install.sh does. No dependencies to install, nothing to have to update separately. It's a *script*.
 
 Is this a bit overly particular? Oh probably. But this is the \*nix world we're talking about. This little niche of the tech world is nothing if not passionately opinionated. And besides, people with opinions get things done.
+
+My demand is justified, too. I would like to keep my dotfiles synced across all different kinds of devices: my personal laptop and desktop, my primary file server, and my work computer. For the first two, dependencies aren't a huge deal, but they are a bit of a pain. For the latter, however, that is a big deal. IT isn't going to let me install [uv](https://docs.astral.sh/uv/) just to sync my dotfiles (great Python project manager, btw).
 
 
 ### Installation
@@ -27,33 +29,33 @@ The following package managers are supported:
 - zypper
 - pkg (FreeBSD)
 
-If installing on macOS, you'll need to install the Xcode Command Line Tools, as this installs Git. It's also *highly* recommended to install [Homebrew](https://brew.sh), both because **dot mods** can make use of it to install packages, and because it's just awesome.
+> [!warning]
+> Support for all these package managers is theoretical at this point. The only mod which uses this (as of writing) is Zsh, and I have only tested that mod on my Mac, which already has Zsh installed. Use at your own risk.
 
-```shell
-# install Xcode Command Line Tools
-xcode-select --install
-```
-
-If you end up installing Homebrew as well (which, let's be real, the only person likely reading this is me, so you will), Homebrew automatically prompts you to install the Xcode Command Line Tools during its own installation process.
+> [!note]
+> If installing on macOS, you'll need to install the Xcode Command Line Tools, as this installs Git. It's also *highly* recommended to install [Homebrew](https://brew.sh), both because **dot mods** can make use of it to install packages, and because it's just awesome.
+> 
+> ```shell
+> # install Xcode Command Line Tools
+> xcode-select --install
+> ```
+> 
+> If you end up installing Homebrew as well (which, let's be real, the only person likely reading this is me, so you will), Homebrew automatically prompts you to install the Xcode Command Line Tools during its own installation process.
 
 After making sure the dependencies are installed, run the following command:
 ```shell
 curl 'https://github.com/Mase3206/dotfiles/blob/main/dotmgr/install.sh' | bash
 ```
 
-If your shell profile file sources ~/.aliases, you should already have an alias to **dot**. If you don't, you should set it in your profile with the following bit of code:
+The dotfile repo is cloned to $XDG\_CONFIG\_HOME/dotfiles, and a little stub script which actually runs `dot` lives in ~/.local/bin.
 
-```shell
-echo "alias dot=\"$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py\"" >> ~/.aliases
-```
-
-where `$PYTHON_BIN` is the full path to or name of the Python 3 executable you wish to use. The install script detects this automatically, but you'll need to do it manually here.
-
-After all that, run these commands to install all mods and sync all files:
+After that, run these commands to install all mods and sync all files:
 ```shell
 dot mod install
 dot sync
 ```
+
+**dot** also supports autocompletions for Zsh, though you need to install Oh My Zsh first (hint: `dot mod install OhMyZsh`), as the destination path for the autocompletion definition is hardcoded to ~/.oh-my-zsh/custom/completions/_dot.
 
 
 ### Usage
@@ -61,9 +63,6 @@ dot sync
 > [!note]
 > A "managed" dotfile is one that is listed in the 'managed.files' file and is thus known to **dot**. Even if a dotfile exists in this repository, if it's not in 'managed.files', **dot** pays no attention to it.
 > Files can be easily managed or unmanaged with `dot manage <file>` and `dot unmanage <file>`, respectively.
-
-<!-- > [!warning]
-> Currently, **dot** does not support linking or managing folders. This was a deliberate design decision to avoid confusing situations, though it is likely to change in the near future. -->
 
 > [!warning]
 > Currently, **dot** does support linking and managing folders. This is a new and not thoroughly-tested feature, so use it at your own risk. Before anything is done to existing folders (like files), a backup in its current directory is made, so recovering from failures should be relatively painless.
@@ -143,6 +142,21 @@ dot orphan [-r / --rm] <file> [file ...]
 
 Unlink a managed dotfile and move it to the user's home folder. If `-r` or `--rm` are passed, the managed dotfile will be unmanaged and deleted from the dotfiles repository. This converts the once linked file into a local-only, unlinked, and unsynced dotfile.
 
+#### List managed dotfiles and their statuses
+
+```shell
+dot list [-nr0luaU]
+```
+
+List all managed files' relative paths. If no arguments are given, a file's install status is distinguished with a check/cross, and unavailable files are greyed out. Very helpful for scripting.
+
+- `-n`, `--no-color`: Avoid using colors. File availibility is distinguished via a +/- after the check/cross.
+- `-r`, `--raw`: Just list the files. Don't add checkmarks/crosses indicating file status or +/- indicating file availability. Implies --no-color.
+- `-0`, `--null-sep`: List the files with null separators. Without --raw, this has no effect.
+- `-l`, `--linked`: List linked files.
+- `-u`, `--unlinked`: List unlinked files.
+- `-a`, `--available`: List available files.
+- `-U`, `--unavailable`: List unavailable files.
 
 #### Edit a dotfile
 
@@ -184,9 +198,10 @@ The *git* subcommand provides an easy way to commit and push changes to dotfiles
 - **undo:** Undo the last commit and unstage the previously committed files.
 	- Note: this has not been tested very thoroughly, so use it at your own risk.
 - **status:** Get the current Git status of the local repo.
+- **diff:** Get the current Git diff of changed files
 
 
-### Mods
+## Mods
 
 Mods are Python modules with one or more classes which subclass `dotmgr.mods.base.BaseMod` and implement certain methods. See [Authoring Mods.md](dotmgr/mods/Authoring Mods.md) for details.
 
@@ -198,5 +213,28 @@ Mods keep track of their install status between executions via the mods.dat file
 
 For example, the Zsh mod will install the Z-shell (if not already installed) with your system's package manager (if it's able to detect it). If Zsh is already installed, it will mark itself as such in the gitignored mods.dat file and exit successfully.
 
-The OhMyZsh mod will install Oh My Zsh (which basically just downloads some files and shoves them in your home folder) and mark itself as installed. If ~/.oh-my-zsh is already present, it will mark itself as already installed and exit successfully.
+The OhMyZsh mod will also install Oh My Zsh (which basically just downloads some files and shoves them in your home folder) and mark itself as installed. If ~/.oh-my-zsh is already present, it will mark itself as already installed and exit successfully.
 
+### Zsh
+
+- Source: zsh.py
+- Files it manages: .zshrc
+- Dependencies: none
+
+It's Zsh.
+
+```shell
+dot mod install Zsh
+```
+
+### Oh My Zsh
+
+- Source: omz.py
+- Files it manages: anything in .oh-my-zsh/
+- Dependencies: Zsh
+
+[Website](https://ohmyz.sh/)
+
+```shell
+dot mod install OhMyZsh
+```

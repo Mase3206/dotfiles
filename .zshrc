@@ -7,6 +7,16 @@ if [ -f /opt/homebrew/bin/brew ]; then
 	eval "$(brew shellenv)"
 fi
 
+# DotMgr stuff
+export XDG_CONFIG_HOME="$HOME/.config"
+export DOTFILES_DIR="$XDG_CONFIG_HOME/dotfiles"
+
+# This line is needed to make the new Python-based dotfiles manager work,
+# since it does some dynamic import trickery.
+export PYTHONPATH="$DOTFILES_DIR:$PYTHONPATH"
+export PATH="$HOME/.local/bin:$PATH"
+export EDITOR='vim'
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -127,37 +137,4 @@ function venv-activate {
 [ -f ~/.aliases ] && source ~/.aliases
 
 alias vrun="vrun && terse_theme_prompt"
-alias gedit=gnome-text-editor
-
-# quickly run `git pull` on dotfile repo and sync all dotfiles
-function dotsync () {
-	if [[ "$DOTFILES_DIR" == "" ]]; then
-		echo "DOTFILES_DIR environment variable is not set. Setting it in your ~/.aliases file is recommended."
-		return 1
-	else
-		local currdir 
-		currdir=$(pwd)
-		cd $DOTFILES_DIR
-		echo "Pulling updates from repo"
-		git pull
-		echo; echo "Syncing"
-		cd $currdir
-		bash $DOTFILES_DIR/quicksync.sh --from $DOTFILES_DIR/known.txt sync
-	fi
-}
-
-export XDG_CONFIG_HOME="$HOME/.config"
-
-# This line is needed to make the new Python-based dotfiles manager work,
-# since it does some dynamic import trickery.
-export PYTHONPATH="$DOTFILES_DIR:$PYTHONPATH"
-export PATH="$HOME/.local/bin:$PATH"
-export EDITOR='vim'
-
-#TERM2_INTEGRATION=".iterm2_shell_integration.zsh"
-#
-#if [ -f "$ITERM2_INTEGRATION" ]; then
-#	test -e "$ITERM2_INTEGRATION" \
-#		&& source "$ITERM2_INTEGRATION"
-#fi
-
+alias gedit="gnome-text-editor"

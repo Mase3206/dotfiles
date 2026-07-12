@@ -4,11 +4,17 @@ set -euo pipefail
 
 
 # Set the DOTFILES_DIR if it hasn't been set yet.
-[ -n "${DOTFILES_DIR}" ] || export DOTFILES_DIR='~/.config/dotfiles'
+if [ -n "${DOTFILES_DIR}" ];
+	echo "Dotfiles directory set to: $DOTFILES_DIR"
+else
+	export DOTFILES_DIR="$XDG_CONFIG_HOME/dotfiles"
+	echo "DOTFILES_DIR variable is unset, so I'm assuming $XDG_CONFIG_HOME/dotfiles. This is what it is set to in .zshrc."
+fi
 
 # This line is needed to make the new Python-based dotfiles manager work,
 # since it does some dynamic import trickery.
 export PYTHONPATH="$DOTFILES_DIR:$PYTHONPATH"
+export PATH="~/.local/bin:$PATH"  # make sure local bin is in path, since that's where `dot` lives
 
 # If the folder containing the dotfiles doesn't exist, create it.
 [ -d "$DOTFILES_DIR/.." ] || mkdir -p "$DOTFILES_DIR/.."
@@ -109,8 +115,8 @@ fi
 cat << EOF
 
 -------------------------------------------
-Done! You should be all good to go now. To install mods and sync dotfiles, simply source ~/.aliases 
-(which contains the \`dot\` alias to $PYTHON_BIN $DOTFILES_DIR/dotmgr/dot.py) and run:
+Done! You should be all good to go now. To install mods and sync dotfiles,
+simply run:
 
 dot mod install  # install all mods
 dot sync         # sync all managed dotfiles
