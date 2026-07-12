@@ -3,7 +3,8 @@
 import argparse
 import os
 import subprocess
-from typing import Iterable
+from collections import UserList
+from typing import Generic, Iterable, TypeVar
 
 from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, HOME, filelib, git, mods, outputs
 from dotmgr.mods import InstallStatus
@@ -22,17 +23,10 @@ AVAILABLE_DOTFILES = {
 }
 STANDALONE_DOTFILES = {name: d for name, d in ALL_DOTFILES.items() if not d.used_by}
 
-# _sep = '\x1f'
-# os.environ["_DOTMGR_ALL_DOTFILES"] = _sep.join(ALL_DOTFILES.keys())
-# os.environ["_DOTMGR_AVAILABLE_DOTFILES"] = _sep.join(AVAILABLE_DOTFILES.keys())
-# os.environ["_DOTMGR_STANDALONE_DOTFILES"] = _sep.join(STANDALONE_DOTFILES.keys())
-# os.environ.
-
-# print(os.environ.get('_DOTMGR_ALL_DOTFILES'))
-# subprocess.run('echo $_DOTMGR_ALL_DOTFILES', shell=True)
+T = TypeVar("T", bound=str)
 
 
-class DynamicChoices(tuple):
+class DynamicChoices(UserList[T], Generic[T]):
     """
     Wrapper class around tuple to fix a weird bug in argparse.
 
@@ -51,22 +45,21 @@ class DynamicChoices(tuple):
 
     Once every platform I wish to support eventually updates the version of Python it ships to 3.14
     or newer, this workaround can be removed.
+
+    :param Iterable[T] = [] data: Defined choices
+    :param Iterable[T] = [] default: Default selection
+    :param str = "" dynamic_shell: Shell command which runs to get the up-to-date list, separated by null
+        characters. Needed for autocomplete.
     """
 
-    def __new__(
-        cls,
-        _iterable: Iterable,
-        default: Iterable = [],
-        dynamic_shell: str = "",
-    ):
-        x = tuple.__new__(cls, _iterable)
-        DynamicChoices.__init__(x, _iterable, default=default, dynamic_shell=dynamic_shell)
-        return x
+    data: list
+    default: list
+    dynamic_shell: str
 
     def __init__(
         self,
-        _iterable: Iterable = [],
-        default: Iterable = [],
+        data: Iterable[T] = [],
+        default: Iterable[T] = [],
         dynamic_shell: str = "",
     ):
         """
@@ -77,12 +70,15 @@ class DynamicChoices(tuple):
         :param str = '' dynamic_shell: Shell command to run to get the up-to-date list, separated by null
             characters. Needed for autocomplete.
         """
-        # _iterable is already handled by tuple.__new__
-        self.default = default or []
+        self.data = list(data)
+        self.default = list(default) or []
         self.dynamic_shell = dynamic_shell
 
     def __contains__(self, item):
         return super().__contains__(item) or item == self.default
+
+    def __add__(self, value: Iterable[T]) -> Iterable[T]:
+        return super().__add__(value)
 
 
 _available_dotfiles_choices = DynamicChoices(
@@ -379,7 +375,7 @@ sp_mod_list = sp_mod_manager.add_parser(
     "list",
     help="List mods satisfying the requested conditions - useful for scripting",
     description="List mods satisfying the requested conditions. If no conditions are listed, all mods "
-        "(regardless of status) are listed.",
+    "(regardless of status) are listed.",
 )
 sp_mod_list.add_argument(
     "-0",
