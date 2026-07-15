@@ -1,42 +1,36 @@
-#!/bin/bash
+#!/bin/zsh
 
+set -euo pipefail
 
-os_options=(fedora ubuntu debian opensuse rocky)
+os_options=(fedora debian opensuse rocky)
 
-function start () {
-
+function do_test() {
 	if [[ ${os_options[@]} =~ $1 ]]; then
-		echo "Starting testing image for $1"
-		docker run -it --volume=/Users/noahroberts/GitHub/dotfiles:/root/dotfiles:ro dotfile-testing:$1 bash
+		# Build image
+		echo "Building image for $1 - this could take a while..."
+		hash=$(docker build -q -f Dockerfile.$1 .)
+
+		# Start image
+		echo "Starting test for for $1"
+		echo "Once you're finished in there, just run \`exit\`."
+		docker run --rm -it $hash bash
+
+		# Remove image (since they're quite large)
+		echo "Cleaning up"
+		docker image rm $hash
+
 	else
 		echo "OS $1 does not have a testing image. Existing images: ${os_options[@]}"
+		exit 1
 	fi
-	
-}
-
-
-function build () {
-	
-	if [[ ${os_options[@]} =~ $1 ]]; then
-		echo "Building testing image for $1"
-		docker build $2 -f Dockerfile.$1 --tag "dotfile-testing:$1" .
-	else
-		echo "OS $1 is not in the list of known OSes. Known OSes: ${os_options[@]}"
-	fi
-
 }
 
 
 case $1 in 
-	start)
-		start $2
-		;;
-
-	build)
-		build $2 $3
+	-h)
+		echo "test.sh <distro>"
 		;;
 
 	*)
-		echo "test.sh <start|build> <distro>"
-
+		do_test $@
 esac

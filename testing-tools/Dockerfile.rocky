@@ -1,9 +1,17 @@
-FROM rockylinux:9.3
+FROM rockylinux/rockylinux:9-ubi-init
 
 RUN dnf update -y
-RUN dnf install -y --refresh git util-linux-user sudo
+RUN dnf install -y git util-linux-user python3 which sudo
 # util-linux-user provides `chsh`
 
-ENV DOTFILES_DIR=/root/dotfiles
+ENV PYTHONPATH="/root/.config/dotfiles:"
+ENV PATH="/root/.local/bin:/root/.local/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ENV XDG_CONFIG_HOME="/root/.config"
+ENV DOTFILES_DIR="/root/.config/dotfiles"
 
-WORKDIR ${DOTFILES_DIR}
+WORKDIR "/root"
+
+COPY "entrypoint.sh" "/entrypoint.sh"
+
+CMD [ "/entrypoint.sh" ]
+ENTRYPOINT [ "/entrypoint.sh" ]

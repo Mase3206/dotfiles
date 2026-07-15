@@ -24,13 +24,13 @@ Before installing, make sure you have the following dependencies installed:
 
 The following package managers are supported:
 - dnf
-- apt-get
-- brew
+- apt-get (Debian, Ubuntu is untested)
+- brew (just macOS, Linux is untested)
 - zypper
 - pkg (FreeBSD)
 
 > [!warning]
-> Support for all these package managers is theoretical at this point. The only mod which uses this (as of writing) is Zsh, and I have only tested that mod on my Mac, which already has Zsh installed. Use at your own risk.
+> I have tested ever package manager except Homebrew (despite my primary computer being a Mac). They work just fine.
 
 > [!note]
 > If installing on macOS, you'll need to install the Xcode Command Line Tools, as this installs Git. It's also *highly* recommended to install [Homebrew](https://brew.sh), both because **dot mods** can make use of it to install packages, and because it's just awesome.
