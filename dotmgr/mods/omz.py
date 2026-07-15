@@ -1,6 +1,7 @@
 import subprocess
 
 from dotmgr import HOME, USER, outputs
+from dotmgr.mods import __mods__
 from dotmgr.mods.base import BaseMod, InstallStatus
 from dotmgr.utils import cd, mktemp
 
@@ -42,6 +43,11 @@ class OhMyZsh(BaseMod):
         if self.detect():
             outputs.skip("OMZ installation")
             return
+        
+        _zsh = __mods__["Zsh"]
+        if not _zsh.detect():
+            outputs.step("Zsh not detected, installing")
+            _zsh.install()
 
         try:
             with mktemp() as tempfolder, cd(tempfolder) as cwd:
@@ -50,8 +56,8 @@ class OhMyZsh(BaseMod):
                     subprocess.run(
                         [
                             "/usr/bin/curl",
-                            "-fsS:",
-                            "'https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh'",
+                            "-fsS",
+                            "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh",
                         ],
                         cwd=cwd,
                         stdout=f,
@@ -61,9 +67,9 @@ class OhMyZsh(BaseMod):
                 outputs.step("Installing OMZ")
                 subprocess.run(
                     ["/bin/sh", "install.sh"],
-                    shell=True,
+                    shell=False,
                     env={
-                        "CHSH": "yes",
+                        "CHSH": "no",
                         "RUNZSH": "no",
                         "KEEP_ZSHRC": "yes",
                         "HOME": HOME,

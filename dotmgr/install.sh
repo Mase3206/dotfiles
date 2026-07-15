@@ -1,20 +1,26 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
 
 # Set the DOTFILES_DIR if it hasn't been set yet.
 if [ -n "${DOTFILES_DIR}" ]; then
 	echo "Dotfiles directory set to: $DOTFILES_DIR"
-else
+elif [ -n "${XDG_CONFIG_HOME}" ]; then
 	export DOTFILES_DIR="$XDG_CONFIG_HOME/dotfiles"
 	echo "DOTFILES_DIR variable is unset, so I'm assuming $XDG_CONFIG_HOME/dotfiles. This is what it is set to in .zshrc."
+else
+    echo "Neither \$DOTFILES_DIR nor \$XDG_CONFIG_HOME are set, so I'm going to assume they should go into ~/.config/dotfiles."
+    export XDG_CONFIG_HOME="$HOME/.config"
+    export DOTFILES_DIR="$XDG_CONFIG_HOME/dotfiles"
 fi
 
 # This line is needed to make the new Python-based dotfiles manager work,
 # since it does some dynamic import trickery.
-export PYTHONPATH="$DOTFILES_DIR:$PYTHONPATH"
-export PATH="~/.local/bin:$PATH"  # make sure local bin is in path, since that's where `dot` lives
+export PYTHONPATH="$DOTFILES_DIR:$PYTHONPATH"  # just let it eval to empty if unset, it's fine here
+export PATH="$HOME/.local/bin:$PATH"  # make sure local bin is in path, since that's where `dot` lives
+
+
 
 # If the folder containing the dotfiles doesn't exist, create it.
 [ -d "$DOTFILES_DIR/.." ] || mkdir -p "$DOTFILES_DIR/.."
@@ -75,8 +81,8 @@ echo -e "Dependencies satisfied.\n"
 #     exit 1
 # fi
 
-if ! [ -d "$DOTFILES_DIR" ]; then
-    # echo "Cloning mase3206/dotfiles in to $DOTFILES_DIR"
+if ! [ -d "$DOTFILES_DIR/.git" ]; then
+    echo "Cloning mase3206/dotfiles in to $DOTFILES_DIR"
     git https://github.com/Mase3206/dotfiles.git $DOTFILES_DIR
 else
     echo "It looks like $DOTFILES_DIR already exists. Not cloning repo"
@@ -120,4 +126,12 @@ simply run:
 
 dot mod install  # install all mods
 dot sync         # sync all managed dotfiles
+
+
+Also, in case you need them, these are the environment variables you'll need:
+
+export PYTHONPATH="$PYTHONPATH"
+export PATH="$PATH"
+export DOTFILES_DIR="$DOTFILES_DIR"
+export XDG_CONFIG_HOME="$XDG_CONFIG_HOME"
 EOF
