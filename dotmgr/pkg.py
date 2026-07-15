@@ -29,6 +29,9 @@ class Platform(str, Enum):
             return Platform.FREEBSD
         else:
             raise Exception(f"Unknown or unsupported OSTYPE: '{ostype}'")
+        
+    def __str__(self) -> str:
+        return self.value
 
 
 class PkgMgrName(str, Enum):
@@ -37,6 +40,9 @@ class PkgMgrName(str, Enum):
     ZYPPER = "zypper"
     PKG = "pkg"
     HOMEBRW = "brew"
+        
+    def __str__(self) -> str:
+        return self.value
 
 
 class PackageManager:
@@ -80,7 +86,7 @@ class PackageManager:
         self.sudo_required = False if self.package_manager_name == PkgMgrName.HOMEBRW else True
 
         out = subprocess.run(
-            f"which {self.package_manager_name}",
+            f"which {self.package_manager_name.value}",
             shell=True,
             stdout=subprocess.PIPE,
             encoding="utf-8",
