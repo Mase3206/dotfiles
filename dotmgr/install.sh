@@ -83,7 +83,7 @@ echo -e "Dependencies satisfied.\n"
 
 if ! [ -d "$DOTFILES_DIR/.git" ]; then
     echo "Cloning mase3206/dotfiles in to $DOTFILES_DIR"
-    git https://github.com/Mase3206/dotfiles.git $DOTFILES_DIR
+    git clone --depth=1 https://github.com/Mase3206/dotfiles.git $DOTFILES_DIR
 else
     echo "It looks like $DOTFILES_DIR already exists. Not cloning repo"
 fi
