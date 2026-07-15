@@ -44,7 +44,7 @@ The following package managers are supported:
 
 After making sure the dependencies are installed, run the following command:
 ```shell
-curl 'https://github.com/Mase3206/dotfiles/blob/main/dotmgr/install.sh' | bash
+curl 'https://raw.githubusercontent.com/Mase3206/dotfiles/refs/heads/main/dotmgr/install.sh' | bash
 ```
 
 The dotfile repo is cloned to $XDG\_CONFIG\_HOME/dotfiles, and a little stub script which actually runs `dot` lives in ~/.local/bin.

@@ -4,7 +4,7 @@ set -euo pipefail
 
 
 # Set the DOTFILES_DIR if it hasn't been set yet.
-if [ -n "${DOTFILES_DIR}" ];
+if [ -n "${DOTFILES_DIR}" ]; then
 	echo "Dotfiles directory set to: $DOTFILES_DIR"
 else
 	export DOTFILES_DIR="$XDG_CONFIG_HOME/dotfiles"
