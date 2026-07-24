@@ -3,5 +3,7 @@
 .zshrc
 .vimrc
 .config/iterm2/com.googlecode.iterm2.plist
-.config/concord/
 .config/ruff/ruff.toml
+.config/concord/config.toml
+.config/concord/keymap.toml
+.config/concord/DOCUMENTATION.link
