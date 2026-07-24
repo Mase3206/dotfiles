@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import shutil
 import subprocess
 from collections import UserList
 from typing import Generic, Iterable, TypeVar
@@ -594,7 +595,10 @@ def main():
 
             if not args.keep:
                 print(f"Removing orphaned file {fn} from managed.files")
-                dotfile.src.unlink()
+                if dotfile.src.is_dir():
+                    shutil.rmtree(dotfile.src, )
+                else:
+                    dotfile.src.unlink()
                 dotfile.prune_src()
                 del ALL_DOTFILES[fn]
 

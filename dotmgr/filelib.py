@@ -184,7 +184,7 @@ class Dotfile:
                 "dest is a directory, making a backup before removing",
             )
             shutil.copytree(self.dest, str(self.dest) + ".bak")
-            self.dest.unlink()
+            shutil.rmtree(self.dest)
             return True
 
         else:
@@ -385,7 +385,7 @@ class Dotfile:
             if not self.rm():
                 self.log("orphan", LogLevel.ERR, "Failed to remove dest")
                 return False
-            shutil.copyfile(self.src, self.dest)
+            shutil.copytree(self.src, self.dest)
             if self.dest.exists() and not self.dest.is_symlink():  # success
                 self.log("orphan", LogLevel.INFO, "Orphan succeeded")
                 return True
