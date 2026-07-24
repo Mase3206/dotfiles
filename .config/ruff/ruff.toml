@@ -16,7 +16,7 @@ select = [
     "F541",     # f-string-missing-placeholders
     "E261",     # too-few-spaces-before-inline-comment
     "E302",     # blank-lines-top-level
-    "ERA001",   # commented-out-code
+    # "ERA001",   # commented-out-code
     "PLW1510",  # subprocess-run-without-check - never fix automatically (naively assumes check=False is fine
     "E501",     # line-too-long
     "UP007",    # non-pep604-annotation-union
