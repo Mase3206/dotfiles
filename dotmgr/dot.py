@@ -4,6 +4,7 @@ import argparse
 import os
 import shutil
 import subprocess
+import sys
 from collections import UserList
 from typing import Generic, Iterable, TypeVar
 
@@ -326,6 +327,22 @@ sp_edit.add_argument(
     choices=_available_dotfiles_choices,
     metavar="file",
     nargs="?",
+)
+
+
+# Dump/Cat
+sp_cat = sp_manager.add_parser(
+    "cat",
+    help="Dump (cat) the contents of the dotfile to stdout.",
+    description="Dump (cat) the contents of the dotfile to stdout.",
+    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+)
+sp_cat.add_argument(
+    "file",
+    help="Relative path to the file to dump (cat).",
+    choices=_available_dotfiles_choices,
+    metavar="file",
+    nargs="+"
 )
 
 
@@ -747,6 +764,16 @@ def main():
             subprocess.run([editor, dotfile.src], check=True)
         else:
             subprocess.run([editor, DOTFILES_DIR], check=True)
+
+    # Dump (cat) the contents of the dotfile to stdout
+    elif args.sp == "cat":
+        for fn in args.file:
+            dotfile = ALL_DOTFILES[fn]
+            with open(dotfile.src, 'r') as f:
+                # Use sys.stdout.write instead of print, as print might mangle the contents a bit (like add
+                # an extra newline at the end). `cat` does't do that, and we're emulating `cat`.
+                sys.stdout.write(f.read())
+        sys.stdout.flush()
 
     # Interact with mods
     elif args.sp in ["mod", "mods"]:
