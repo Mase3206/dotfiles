@@ -49,6 +49,11 @@ jobs:
         run: uv sync --locked --all-extras --dev
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
+        with:
+          # same version as on my laptop
+          ruby-version: 2.6.10
+          # runs 'bundle install' and caches installed gems automatically
+          bundler-cache: true
       - name: Install ronn-ng
         run: gem install ronn-ng
       - name: Compile HTML docs
