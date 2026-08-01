@@ -1,0 +1,48 @@
+dot-list(1) -- List all managed dotfiles' relative paths and their statuses
+================================================================================
+
+## SYNOPSIS
+
+`dot list` [-h] [-nr0luaU]
+
+## DESCRIPTION
+
+List all managed files' relative paths. If no arguments are given, a file's install status is distinguised with a check/cross, and unavailable files are greyed out.
+
+This subcommand is especially helpful for scripting and is actually used by **dot**'s Zsh completions (via `dotmgr.dot.DynamicChoices` and compmaker.py) to dynamically determine the available choices within the completion itself.
+
+Part of dot(1).
+
+## OPTIONS
+
+All output and query options can be combined.
+
+  * `-h`, `--h`:
+    Show command help.
+
+### Output options
+
+  * `-n`, `--no-color`:
+    Avoid using colors. File availibility is distinguished via a +/- after the check/cross.
+
+  * `-r`, `--raw`:
+    Just list the files' relative paths. Don't add checkmarks/crosses indicating file status or +/- indicating file availability. Implies `--no-color`.
+
+  * `-0`, `--null-sep`:
+    List the files with null separators. Without `--raw`, this has no effect.
+
+### Query options
+
+If none of these options are passed, all files (linked, unlinked, available, and unavailable) will be selected. This is equivalent to passing `-luaU`.
+
+  * `-l`, `--linked`:
+    List linked files.
+
+  * `-u`, `--unlinked`:
+    List unlinked files.
+
+  * `-a`, `--available`:
+    List available files. A file is only "available" if it is not used by a mod (see dot-mod(1)) or the mod(s) which use it are installed.
+
+  * `-U`, `--unavailable`:
+    List unavailable files. A file is "unavailable" if it is used by a mod (or potentially multiple mods) which are not installed (see dot-mod(1)).

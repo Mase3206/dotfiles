@@ -1,0 +1,96 @@
+dot(1) -- a customizable, lightweight, install-less, stdlib-only dotfile manager
+===============================================================================
+
+## SYNOPSIS
+
+`dot` [-h] [--zsh-completions] <subcommand> [<args>]
+
+## DESCRIPTION
+
+**dot** is a customizable, lightweight, install-less, stdlib-only dotfile manager. Written for Python 3.9+, it supports macOS (because even macOS 26 is shipping with Python 3.9.6, which is from 2022) and older Linux distros, and, as Python 3 generally has excellent backwards compatibility, it is highly likely to work on later versions as well.
+
+## OPTIONS
+
+Most options are part of subcommands, but there are two root-level options:
+
+  * `-h`, `--help`:
+    Show command help page
+
+  * `--zsh-completions`:
+    Generate and save the Zsh completion definition for **dot**. Completions are saved in ~/.oh-my-zsh/custom/completions/dot, so make sure Oh My Zsh is installed first! (_hint:_ use `dot mod install OhMyZsh`).
+    
+    This option is exclusive, meaning **dot** will exit after creating and installing the autocompletion definition file.
+  
+  * <subcommand>:
+    See [SUBCOMMANDS][].
+
+  * [<args>]:
+    Argument(s) passed to <subcommand> which may or may not be optional, depending on the subcommand.
+
+## SUBCOMMANDS
+
+  * dot-ln(1):
+    Link dotfiles
+  
+  * dot-rm(1):
+    Remove (unlink) dotfiles
+
+  * dot-sync(1):
+    Sync dotfiles
+  
+  * dot-manage(1):
+    Add file(s) in dotfile repo to managed.files
+
+  * dot-unmanage(1):
+    Remove file(s) in dotfile repo from managed.files
+
+  * dot-adopt(1):
+    Adopt local dotfile to dotfile repo and link it
+
+  * dot-orphan(1):
+    Convert a managed dotfile to a local-only dotfile and unmanage it
+
+  * dot-list(1):
+    List all managed dotfiles' relative paths and their statuses
+
+  * dot-edit(1):
+    Edit or view a dotfile, respecting your chosen $EDITOR by default
+  
+  * dot-cat(1):
+    Dump the contents of the dotfile to stdout (i.e. `cat` the file)
+
+  * dot-mod(1):
+    Manage and interact with known mods
+  
+  * dot-git(1):
+    Interact with the local dotfile Git repository
+
+## ENVIRONMENT
+
+  * DOTFILES_DIR:
+    Absolute path to the dotfiles directory (sometimes called "dotfiles repository", "repository", or even just "repo"). Must be set for **dot** to function. By default, .zshrc (managed) sets this to $XDG_CONFIG_HOME/dotfiles.
+
+    A dotfile's "relative path" is relative to $DOTFILES_DIR _and_ the user's $HOME folder.
+
+  * XDG_CONFIG_HOME:
+    .zshrc (managed) sets this to $HOME/.config (the default as specified by the Free Desktop project). macOS does not set this, so .zshrc has to set it manually.
+
+## DEPENDENCIES
+
+**dot** depends on Git and Python 3.9+.
+
+## KNOWN BUGS
+
+dot-adopt(1), dot-orphan(1), dot-manage(1), and dot-unmanage(1) sometimes have weird behavior with directories (which is 100% my fault). I'll fix it someday.
+
+## SECURITY CONSIDERATIONS
+
+**dot** mods are Python 3 classes wrapping around basically anything, including shell and package manager commands. Always review 3rd-party mod definitions before installing. The authors of **dot** are not responsible for any issues which may be caused by 3rd-party mods.
+
+## AUTHOR
+
+**dot** was created by [Mase3206](https://github.com/Mase3206) as a fun side-project to make managing dotfiles less frustrating. Other solutions existed, but almost all required installing itself (also often with some dependencies), and he didn't want that. That's why **dot** is a _script_, not a program.
+
+## COPYRIGHT
+
+**dot**, alongside any dotfiles in this repository, are in the public domain under the Unlicense. See [LICENSE](https://github.com/Mase3206/dotfiles?tab=Unlicense-1-ov-file) and [Unlicense on tldr;legal](https://www.tldrlegal.com/license/unlicense).

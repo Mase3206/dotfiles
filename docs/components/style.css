@@ -1,0 +1,45 @@
+
+
+nav {
+	display: flex;
+
+	* {
+		color: black !important;
+	}
+
+	a {
+		text-decoration: none !important;
+		&:hover {
+			text-decoration: underline !important;
+			text-decoration-style: solid !important;
+		}
+	}
+
+	p:has(.site-title) {
+		font-size: larger;
+		text-align: left;
+		margin-bottom: 0px !important;
+	}
+
+	menu {
+		padding-left: 0px;
+	}
+
+	menu.navbar{
+		text-align: right;
+		display: flex;
+		list-style-type: none;
+		margin: 0em 0em 0em auto;
+
+		li {
+			margin: 0em 0em 0em 1em;
+		}
+	}
+}
+
+a {
+	text-decoration: underline !important;
+}
+a:hover {
+	text-decoration-style: dashed !important;
+}

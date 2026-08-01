@@ -1,0 +1,24 @@
+dot-sync(1) -- Sync managed dotfiles
+====================================
+
+## SYNOPSIS
+
+`dot sync` [-h] [<file>...]
+
+## DESCRIPTION
+
+Sync one or more managed dotfiles from the dotfile repository. See the ENVIRONMENT section of dot(1) for details.
+
+"Syncing" means linking, re-linking, or fixing broken links of dotfiles.
+- If the dotfile is not present, link it.
+- If the dotfile _is_ present, remove and re-link it, regardless of where it's linked to.
+
+Part of dot(1).
+
+## OPTIONS
+
+  * `-h`, `--h`:
+    Show command help.
+
+  * [<file>]:
+    One or more managed files (optional). Paths are relative to the dotfile repo. If no files are passed, all managed files will be synced.

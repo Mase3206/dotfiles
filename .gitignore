@@ -173,3 +173,15 @@ mods.dat
 
 # Vim stuff
 *.swp
+
+# Ronn stuff
+# Rendered HTML
+docs/*.[0-9].html
+docs/man/*.[0-9].html
+# Rendered ROFF
+docs/*.[0-9]
+docs/man/*.[0-9]
+docs/*.md
+
+# Yes, really ignore requirements.txt. I promise I know what I'm doing.
+requirements.txt

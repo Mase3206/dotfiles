@@ -43,7 +43,7 @@ class OhMyZsh(BaseMod):
         if self.detect():
             outputs.skip("OMZ installation")
             return
-        
+
         _zsh = __mods__["Zsh"]
         if not _zsh.detect():
             outputs.step("Zsh not detected, installing")

@@ -107,6 +107,13 @@ parser.add_argument(
     help="Generate and save the Zsh completion definition for dot",
 )
 
+# Generate and install manfiles
+parser.add_argument(
+    "--man",
+    action="store_true",
+    help="Generate and install man files to ~/.local/share/man",
+)
+
 sp_manager = parser.add_subparsers(required=False, metavar="command", dest="sp")
 
 # Link
@@ -342,7 +349,7 @@ sp_cat.add_argument(
     help="Relative path to the file to dump (cat).",
     choices=_available_dotfiles_choices,
     metavar="file",
-    nargs="+"
+    nargs="+",
 )
 
 
@@ -429,6 +436,7 @@ sp_git_commit.add_argument(
     help="Commit message (optional)",
     required=False,
     dest="commit_message",
+    metavar="message",
 )
 
 sp_git_push = sp_git_manager.add_parser(
@@ -451,8 +459,8 @@ sp_git_undo = sp_git_manager.add_parser(
 
 sp_git_status = sp_git_manager.add_parser(
     "status",
-    help="Get the current Git status of the local repo",
-    description="Get the current Git status of the local repo.",
+    help="Get the current Git status of the managed dotfiles",
+    description="Get the current Git status of the managed dotfiles.",
 )
 
 sp_git_diff = sp_git_manager.add_parser(
@@ -497,6 +505,65 @@ def main():
         print(f"Saved completions to {compfile_path!s}. Reload shell to use them.")
         exit()
         return  # don't do anything after this
+    elif args.man:
+        from pathlib import Path
+
+        from dotmgr.utils import cd
+
+        try:
+            subprocess.run(
+                "command -v ronn",
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=True,
+                shell=True,
+            )
+        except subprocess.CalledProcessError:
+            from pkg import PackageManager, PkgMgrName
+
+            # We don't need the package manager to install it, since we're using `brew bundle` here
+            msg = "ronn (https://github.com/apjanke/ronn-ng) is required to " \
+            "build man files but is not installed."
+            if PackageManager().package_manager_name == PkgMgrName.HOMEBRW and outputs.confirm(
+                msg + " It can be installed through Homebrew. Install it?"
+            ):
+                with cd(DOTFILES_DIR) as dotdir:
+                    try:
+                        subprocess.run(
+                            ["brew", "bundle", "install"],
+                            cwd=dotdir,
+                            check=True,
+                        )
+                    except subprocess.CalledProcessError as cpe:
+                        exit(cpe.returncode)
+            else:
+                print(
+                    msg
+                    + " The only way to install it is through Homebrew, which is not installed. Exiting..."
+                )
+                exit(1)
+
+        man_folder = Path(os.environ.get("XDG_DATA_HOME", HOME / ".local/share")) / "man/man1"
+        if not man_folder.exists():
+            man_folder.mkdir(parents=True)
+        docs_folder = DOTFILES_DIR / "docs"
+
+        ronns = list(docs_folder.glob("*.[0-9].ronn"))
+        with cd(DOTFILES_DIR / "docs") as docsdir:
+            subprocess.run(
+                ["ronn", "--roff", *ronns],
+                cwd=docsdir,
+                check=True,
+            )
+
+        for r in ronns:
+            # if (man_folder / r.stem).exists():
+            print(r.stem, end=": ")
+            (man_folder / r.stem).unlink(missing_ok=True)
+            dest = shutil.move(docs_folder / r.stem, man_folder)
+            print(f"moved {r} into {dest}")
+
+        return
 
     if not args.sp:
         # print(parser.usage)
@@ -613,7 +680,9 @@ def main():
             if not args.keep:
                 print(f"Removing orphaned file {fn} from managed.files")
                 if dotfile.src.is_dir():
-                    shutil.rmtree(dotfile.src, )
+                    shutil.rmtree(
+                        dotfile.src,
+                    )
                 else:
                     dotfile.src.unlink()
                 dotfile.prune_src()
@@ -769,7 +838,7 @@ def main():
     elif args.sp == "cat":
         for fn in args.file:
             dotfile = ALL_DOTFILES[fn]
-            with open(dotfile.src, 'r') as f:
+            with open(dotfile.src, "r") as f:
                 # Use sys.stdout.write instead of print, as print might mangle the contents a bit (like add
                 # an extra newline at the end). `cat` does't do that, and we're emulating `cat`.
                 sys.stdout.write(f.read())

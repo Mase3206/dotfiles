@@ -1,0 +1,65 @@
+dot-git(1) -- Interact with the local dotfile Git repository
+============================================================
+
+## SYNOPSIS
+
+`dot git` [-h] <action> [<args>]
+
+## DESCRIPTION
+
+Interact with the local dotfile Git repository. As a general rule (unless specifically stated otherwise), this only interacts with managed dotfiles (i.e. those listed in managed.files), not the actual source code of **dot**. This is to make it very fast and easy to commit, push, and pull changes made to dotfiles.
+
+Part of dot(1).
+
+## OPTIONS
+
+  * `-h`, `--h`:
+    Show command help.
+
+  * <action>:
+    See [ACTIONS][].
+
+  * [<args>]:
+    Argument(s) passed to <action> which may or may not be optional, depending on the action.
+
+## ACTIONS
+
+`-h` always means "show command help".
+
+  * `commit` [-h] [-m <message>]:
+    Commit the changes made to managed dotfiles. Unless `-m` is passed, the commit message will be automatically generated. You will be asked to confirm the commit interactively.
+
+    * `-m` <message>:
+      Optionally specify the commit message. If not passed, a message will automatically generated.
+
+
+  * `push`:
+    Push the changes made to remote.
+
+
+  * `pull`:
+    Stash changes in local repo, pull changes from remote, then unstash changes.
+
+    _NOTE:_ This might be a bit finicky, so use with caution. Also, it might exit non-zero if there's nothing to stash (and then unstash), but that's okay.
+
+
+  * `undo`:
+    Undo the last commit and unstage the previously committed files.
+
+    _NOTE:_ While this has been tested, it might be a bit finicky, so use with caution.
+
+
+  * `status`:
+    Get the current Git status of the managed dotfiles.
+    &nbsp;
+
+
+  * `diff` [-h] [-a] [<file>...]:
+    Get the current Git diff of the given files.
+
+    * [<file>...]:
+      Relative path to the file(s) to diff (optional). If not given, the diff of all managed dotfiles will be shown.
+
+    * `-a`, `--all`:
+      Include the diff of non-dotfiles (i.e. source code and documentation)
+

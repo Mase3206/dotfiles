@@ -1,0 +1,22 @@
+dot-manage(1) -- Add file(s) in dotfile repo to managed.files
+=============================================================
+
+## SYNOPSIS
+
+`dot manage` [-h] <file>...
+
+## DESCRIPTION
+
+Mark one or more unmanaged dotfiles that are already present in the dotfiles repository as managed by adding its relative path to managed.files. The actual file itself is not moved, removed, or otherwise modified.
+
+To import (or "adopt") a local dotfile into the dotfile repository, see dot-adopt(1).
+
+Part of dot(1).
+
+## OPTIONS
+
+  * `-h`, `--h`:
+    Show command help.
+
+  * <file>:
+    One or more managed files. Paths are relative to the dotfile repo.

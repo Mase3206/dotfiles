@@ -1,0 +1,15 @@
+# manuals
+dot(1)          dot.1
+dot-ln(1)       dot-ln.1
+dot-rm(1)       dot-rm.1
+dot-sync(1)     dot-sync.1
+dot-manage(1)   dot-manage.1
+dot-unmanage(1) dot-unmanage.1
+dot-adopt(1)    dot-adopt.1
+dot-orphan(1)   dot-orphan.1
+dot-list(1)     dot-list.1
+dot-edit(1)     dot-edit.1
+dot-cat(1)      dot-cat.1
+dot-mod(1)      dot-mod.1
+dot-git(1)      dot-git.1
+

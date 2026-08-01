@@ -1,12 +1,11 @@
 # Noah's Dotfiles
 
-You seem to have found my super secret dotfiles. Go you. They're pretty boring for the most part. 
+You seem to have found my super secret dotfiles. Go you. They're pretty boring for the most part. The dotfile manager's pretty neat though.
 
 
 ## New dotfile manager
 
-**dot** is a custom, lightweight, stdlib-only dotfile manager. Written for Python 3.9+, it supports macOS (because even macOS 26 is shipping with Python 3.9.6, which is from 2022) and older Linux distros, and, as Python 3
-generally has excellent backwards compatibility, it is highly likely to work on later versions as well.
+**dot** is a customizable, lightweight, install-less, stdlib-only dotfile manager. Written for Python 3.9+, it supports macOS (because even macOS 26 is shipping with Python 3.9.6, which is from 2022) and older Linux distros, and, as Python 3 generally has excellent backwards compatibility, it is highly likely to work on later versions as well.
 
 I am aware that others have created dedicated programs to do just this. However, I have deliberately avoided them for that exact reason: I want a *script*, not a *program*. I want to clone my dotfiles repository and run `dot sync`. That's exactly what install.sh does. No dependencies to install, nothing to have to update separately. It's a *script*.
 
@@ -203,7 +202,7 @@ The *git* subcommand provides an easy way to commit and push changes to dotfiles
 
 ## Mods
 
-Mods are Python modules with one or more classes which subclass `dotmgr.mods.base.BaseMod` and implement certain methods. See [Authoring Mods.md](dotmgr/mods/Authoring Mods.md) for details.
+Mods are Python modules with one or more classes which subclass `dotmgr.mods.base.BaseMod` and implement certain methods. See [Authoring Mods.md](https://github.com/Mase3206/dotfiles/blob/main/dotmgr/mods/Authoring%20Mods.md) for details.
 
 Mods which subclass `BaseMod` and are in a module within `dotmgr.mods` will be automatically detected and imported.
 

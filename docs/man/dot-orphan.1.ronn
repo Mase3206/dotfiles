@@ -1,0 +1,30 @@
+dot-orphan(1) -- Unlink managed dotfile(s) and remove them from the repository
+==============================================================================
+
+## SYNOPSIS
+
+`dot orphan` [-h] <file>...
+
+## DESCRIPTION
+
+Orphan one or more local dotfiles from the user's home folder into the dotfiles repository by:
+1. Unlinking it
+2. Copying the real file to the user's $HOME
+3. Removing the real file from the dotfiles repository and managed.files. If you wish to keep the file in the repo, use `-k`. 
+
+This converts a once managed dotfile to a local-only dotfile.
+
+To simply mark a dotfile already present in the dotfiles repository as managed, see dot-manage(1).
+
+Part of dot(1).
+
+## OPTIONS
+
+  * `-h`, `--h`:
+    Show command help.
+
+  * `-k`, `--keep`:
+    Do not remove the file from the dotfile repository after orphaning
+
+  * <file>:
+    One or more managed files. Paths are relative to the dotfile repo.

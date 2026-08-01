@@ -1,0 +1,24 @@
+dot-ln(1) -- Link managed dotfiles from repo to home directory
+==============================================================
+
+## SYNOPSIS
+
+`dot ln` [-h] [<file>...]
+
+## DESCRIPTION
+
+Link one or more managed dotfiles from the dotfile repository.
+
+- If a file is not linked, it will link it.
+- If a file is already linked correctly, it will exit.
+- If a file is linked incorrectly, it will throw an error informing you to remove it with dot-rm(1) first and exit.
+
+Part of dot(1).
+
+## OPTIONS
+
+  * `-h`, `--h`:
+    Show command help.
+
+  * [<file>]:
+    One or more managed files (optional). Paths are relative to the dotfile repo. If no files are passed, all managed files will be linked.

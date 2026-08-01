@@ -1,0 +1,30 @@
+{
+    "[markdown]": {
+        "editor.unicodeHighlight.ambiguousCharacters": false,
+        "editor.unicodeHighlight.invisibleCharacters": false,
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+            "comments": "off",
+            "strings": "off",
+            "other": "off"
+        },
+        "editor.tabSize": 2
+    },
+    "files.associations": {
+        "*.ronn": "markdown",
+        "*.1.*.html": "html",
+    },
+    "[html]": {
+        "editor.suggest.insertMode": "replace",
+        "editor.tabSize": 2,
+        "editor.useTabStops": false,
+    },
+    "[jinja-html]": {
+        "editor.suggest.insertMode": "replace",
+        "editor.tabSize": 2,
+        "editor.useTabStops": true,
+        "editor.insertSpaces": false,
+    },
+    "liveServer.settings.multiRootWorkspaceName": "dotfiles"
+}

@@ -1,0 +1,58 @@
+dot-mod(1) -- Manage dot mods
+=============================
+
+## SYNOPSIS
+
+`dot mod` [-h] <action> [<args>]
+
+## DESCRIPTION
+
+Manage and interact with known mods.
+
+Mods are subclasses of `dotmgr.mods.BaseMod` defined in Python files in "dotmgr/mods". A dynamic importer in "dotmgr/mods/\_\_init\_\_.py" searches for these files, imports the subclasses of `BaseMod`, and stores them in a dictionary for **dot** to use later. Mods in this dictionary are considered "known" (or sometimes called "discovered").
+
+A mod can depend on zero or more other mods to install, which will be automatically installed before this one.
+
+A mod can also mark zero or more dotfiles as "used by" it. Any dotfile "used by" a mod which is not installed is considered "unavailable".
+
+For more details on what a mod is and how they are authored, see the [Mods section of README.md](https://github.com/Mase3206/dotfiles/blob/main/README.md#mods) and [Authoring Mods.md](https://github.com/Mase3206/dotfiles/blob/main/dotmgr/mods/Authoring%20Mods.md)
+
+Part of dot(1).
+
+## OPTIONS
+
+  * `-h`, `--h`:
+    Show command help.
+
+  * <action>:
+    See [ACTIONS][].
+
+  * [<args>]:
+    Argument(s) passed to <action> which may or may not be optional, depending on the action.
+
+## ACTIONS
+
+`-h` always means "show command help".
+
+  * `install` [-h] [<mod_name>...]:
+    Install the specified mod(s). If none are given, install all discovered mods.
+
+
+  * `detect` [-h] [-n] [<mod_name>...]:
+    Run the detection script of the specified mod(s). If none are given, install all discovered mods.
+
+    * `-n`, `--no-color`:
+      prevents the use of ANSI colors to color the checkmarks/crosses signifying whether a mod is installed.
+
+
+  * `list` [-h] [-0iu]:
+    List mods satisfying the requested conditions. If no conditions are listed, all mods (regardless of status) are listed. Conditions can be combined.
+
+    * `-0`, `--null-sep`:
+      List the mods with null separators.
+    
+    * `-i`, `--installed`:
+      List installed mods.
+
+    * `-u`, `--uninstalled`:
+      List uninstalled mods.

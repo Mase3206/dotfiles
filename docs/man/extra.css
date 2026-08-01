@@ -1,0 +1,14 @@
+/* Give subcommands (actions) some extra room */
+h2#ACTIONS ~ dl>dt:has(code) {
+    margin-top: 20px;
+}
+
+/* But don't give that room to their arguments */
+h2#ACTIONS ~ dl>dd>dl>dt:has(code) {
+    margin-top: 0px;
+}
+
+/* Don't justify text. */
+.man-decor.man-head.man.head ~ * {
+    text-align: left !important;
+}

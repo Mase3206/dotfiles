@@ -1,0 +1,34 @@
+dot-edit(1) -- Edit or view a dotfile, respecting your chosen $EDITOR by default
+==================================================================================
+
+## SYNOPSIS
+
+`dot edit` [-h] [-cvnl] [<file>]
+
+## DESCRIPTION
+
+Edit or view a dotfile, respecting the your chosen editor (set in $EDITOR) by default.
+
+<!-- This subcommand is especially helpful for scripting and is actually used by **dot**'s Zsh completions (via `dotmgr.dot.DynamicChoices` and compmaker.py) to dynamically determine the available choices within the completion itself. -->
+
+Part of dot(1).
+
+## OPTIONS
+
+  * `-h`, `--h`:
+    Show command help.
+
+  * [<file>]:
+    Relative path of the managed dotfile (optional). If no file is given, the dotfiles repository will be opened instead.
+
+  * `-c`:
+    Open the file in Visual Studio Code
+
+  * `-v`:
+    Open the file in Vim
+
+  * `-n`:
+    Open the file in Nano
+  
+  * `-l`:
+    Open the file in Less

@@ -6,10 +6,16 @@ if [ -f /opt/homebrew/bin/brew ]; then
 	export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 	eval "$(brew shellenv)"
 fi
+# Don't exit open casks
+# export HOMEBREW_NO_UPGRADE_QUIT_CASKS=1
+
+# Set the XDG variables if they're not set -- looking at you macOS.
+(( ${XDG_DATA_HOME} )) || export XDG_DATA_HOME="$HOME/.local/share"
 
 # DotMgr stuff
-export XDG_CONFIG_HOME="$HOME/.config"
+(( ${XDG_CONFIG_HOME} )) || export XDG_CONFIG_HOME="$HOME/.config"
 export DOTFILES_DIR="$XDG_CONFIG_HOME/dotfiles"
+export MANPATH="$XDG_DATA_HOME/man:$MANPATH"
 
 # This line is needed to make the new Python-based dotfiles manager work,
 # since it does some dynamic import trickery.

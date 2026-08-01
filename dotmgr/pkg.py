@@ -29,7 +29,7 @@ class Platform(str, Enum):
             return Platform.FREEBSD
         else:
             raise Exception(f"Unknown or unsupported OSTYPE: '{ostype}'")
-        
+
     def __str__(self) -> str:
         return self.value
 
@@ -40,7 +40,7 @@ class PkgMgrName(str, Enum):
     ZYPPER = "zypper"
     PKG = "pkg"
     HOMEBRW = "brew"
-        
+
     def __str__(self) -> str:
         return self.value
 

@@ -1,0 +1,22 @@
+dot-unmanage(1) -- Remove file(s) in dotfile repo from managed.files
+====================================================================
+
+## SYNOPSIS
+
+`dot unmanage` [-h] <file>...
+
+## DESCRIPTION
+
+Unmark one or more managed dotfiles that are already present in the dotfiles repository by removing its relative path from managed.files. The actual file itself is not moved, removed, or otherwise modified.
+
+To export (or "orphan") a local dotfile from the dotfile repository, see dot-orphan(1).
+
+Part of dot(1).
+
+## OPTIONS
+
+  * `-h`, `--h`:
+    Show command help.
+
+  * <file>:
+    One or more managed files. Paths are relative to the dotfile repo.

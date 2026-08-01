@@ -1,0 +1,20 @@
+dot-cat(1) -- Dump the contents of dotfile(s) to stdout
+=======================================================
+
+## SYNOPSIS
+
+`dot cat` [-h] <file>...
+
+## DESCRIPTION
+
+Dump the contents of the dotfile(s) to stdout, emulating the functionality of `cat`.
+
+Part of dot(1).
+
+## OPTIONS
+
+  * `-h`, `--h`:
+    Show command help.
+
+  * <file>:
+    One or more managed files. Paths are relative to the dotfile repo.

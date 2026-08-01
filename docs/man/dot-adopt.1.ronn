@@ -1,0 +1,25 @@
+dot-adopt(1) -- Copy local dotfile(s) to dotfile repo and link it
+=================================================================
+
+## SYNOPSIS
+
+`dot adopt` [-h] <file>...
+
+## DESCRIPTION
+
+Adopt one or more local dotfiles from the user's home folder into the dotfiles repository by:
+1. Moving it from $HOME to $DOTFILES_DIR
+2. Adding it to managed.files
+3. Linking it back to its destination in $HOME
+
+To simply mark a dotfile already present in the dotfiles repository as managed, see dot-manage(1).
+
+Part of dot(1).
+
+## OPTIONS
+
+  * `-h`, `--h`:
+    Show command help.
+
+  * <file>:
+    One or more local files. Paths are relative to the the user's $HOME folder.
