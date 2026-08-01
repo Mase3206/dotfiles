@@ -15,6 +15,10 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  DOCS_ROOT: '/'
+  DOTFILES_DIR: '.'
+
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
@@ -43,6 +47,14 @@ jobs:
           python-version: 3.9.6
       - name: Setup venv
         run: uv sync --locked --all-extras --dev
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+      - name: Install ronn-ng
+        run: gem install ronn-ng
+      - name: Compile HTML docs
+        run: |
+          cd docs/man
+          make html
       - name: Build the stuff
         run: uv run docs/makedocs.py
       - name: Upload artifact
