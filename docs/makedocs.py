@@ -176,7 +176,7 @@ idx_see_mods_end = idx_see_mods_start + len(_search_term_see_mods)
 # Grab the content slices
 readme_content = (
     c[idx_readme_start + len(_search_term_main) : idx_see_mods_start]
-    + "mods.md"
+    + "mods.html"
     + c[idx_see_mods_end:idx_mods_start]
 )
 

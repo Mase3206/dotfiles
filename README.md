@@ -29,7 +29,7 @@ The following package managers are supported:
 - pkg (FreeBSD)
 
 > [!WARNING]
-> I have tested ever package manager except Homebrew (despite my primary computer being a Mac). They work just fine.
+> I have tested every package manager except Homebrew (despite my primary computer being a Mac). They work just fine.
 
 > [!note]
 > If installing on macOS, you'll need to install the Xcode Command Line Tools, as this installs Git. It's also *highly* recommended to install [Homebrew](https://brew.sh), both because **dot mods** can make use of it to install packages, and because it's just awesome.
