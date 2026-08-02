@@ -5,8 +5,10 @@ import sys
 import time
 from os.path import getmtime
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
+import requests
+import yaml
 from frontmatter import Frontmatter
 from jinja2 import BaseLoader, Environment, TemplateNotFound, select_autoescape
 from watchdog.events import (
@@ -61,7 +63,9 @@ class TemplateLoader(BaseLoader):
             raise TemplateNotFound(template)
         mtime = getmtime(p)
         with open(p) as f:
-            source = f.read()
+            source, __ = extract_frontmatter(f.read())
+
+        # converted = markdown.markdown(source)
 
         return source, p, lambda: mtime == getmtime(p)
 
@@ -86,8 +90,41 @@ class RenderEventHandler(FileSystemEventHandler):
         #     return super().on_modified(event)
 
 
+def render_markdown(source: str):
+    """
+    Yes, this is just a wrapper around GitHub's Markdown rendering API. The `markdown` Python module sucked.
+    """
+    response = requests.post(
+        "https://api.github.com/markdown",
+        headers={
+            "Accept": "text/html",
+            "X-GitHub-Api-Version": "2026-03-10",
+        },
+        json={"text": source, "mode": "gfm"},
+    )
+    if response.status_code != 200:
+        raise Exception("Api request failed")
+    return str(response.content, encoding="utf-8")
+
+
+def extract_frontmatter(source: str, loads: Callable = yaml.safe_load) -> tuple[str, Optional[str]]:
+    if source.startswith("---\n"):
+        frontmatter_end = source.find("\n---\n", 4)
+        if frontmatter_end == -1:
+            frontmatter = source[4:]
+            source = ""
+        else:
+            frontmatter = source[4:frontmatter_end]
+            source = source[frontmatter_end + 5 :]
+        if loads:
+            frontmatter = loads(frontmatter)
+        return source, frontmatter
+    return source, None
+
+
+tl = TemplateLoader(DOCS_DIR)
 env = Environment(
-    loader=TemplateLoader(DOCS_DIR),
+    loader=tl,
     autoescape=select_autoescape(),
 )
 
@@ -149,24 +186,22 @@ mods_content = c[idx_mods_start + len(_search_term_mods) :].strip()
 def render():
     # Index template
     index_fm = Frontmatter.read_file(DOCS_DIR / "index.md.jinja")
-    (DOCS_DIR / "index.md").write_text(
-        env.get_template("index.md.jinja").render(
-            manpages="\n".join(manpages_text),
-            readme=readme_content,
-            root=ROOT,
-            page_title=index_fm["attributes"].get("page_title", "index.md"),
-        )
+    index_rendered = env.get_template("index.md.jinja").render(
+        manpages="\n".join(manpages_text),
+        readme=render_markdown(readme_content),
+        root=ROOT,
+        page_title=index_fm["attributes"].get("page_title", "index.md"),
     )
+    (DOCS_DIR / "index.html").write_text(index_rendered)
 
     # Mods template
     mods_fm = Frontmatter.read_file(DOCS_DIR / "mods.md.jinja")
-    (DOCS_DIR / "mods.md").write_text(
-        env.get_template("mods.md.jinja").render(
-            mods=mods_content,
-            root=ROOT,
-            page_title=mods_fm["attributes"].get("page_title", "mods.md"),
-        )
+    mods_rendered = env.get_template("mods.md.jinja").render(
+        mods=render_markdown(mods_content),
+        root=ROOT,
+        page_title=mods_fm["attributes"].get("page_title", "mods.md"),
     )
+    (DOCS_DIR / "mods.html").write_text(mods_rendered)
 
 
 def observe(observer):

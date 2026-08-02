@@ -182,6 +182,7 @@ docs/man/*.[0-9].html
 docs/*.[0-9]
 docs/man/*.[0-9]
 docs/*.md
+docs/*.html
 
 # Yes, really ignore requirements.txt. I promise I know what I'm doing.
 requirements.txt

@@ -1,6 +1,24 @@
-<style>
-{% include "components/style.css" %}
-</style>
-{% extends "components/header.html.jinja" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>{{ page_title }} | Noah's Dotfile Manager</title>
 
-{# {% include "components/footer.html.jinja" %} #}
+	<link rel="stylesheet" href="{{ root }}/components/style.css" />
+	<link rel="stylesheet" href="{{ root }}/components/github-markdown.css" />
+</head>
+<body data-theme="light">
+
+	{% include "components/header.html.jinja" %}
+
+	<h1>{{ page_title }}</h1>
+
+	<div class="markdown-body">
+		{% block body required %}{% endblock %}
+	</div>
+
+	<!-- <a class="github-fork-ribbon" href="https://github.com/sindresorhus/github-markdown-css" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a> -->
+</body>
+
+</html>

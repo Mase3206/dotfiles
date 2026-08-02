@@ -28,7 +28,7 @@ The following package managers are supported:
 - zypper
 - pkg (FreeBSD)
 
-> [!warning]
+> [!WARNING]
 > I have tested ever package manager except Homebrew (despite my primary computer being a Mac). They work just fine.
 
 > [!note]

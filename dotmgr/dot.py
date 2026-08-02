@@ -522,8 +522,10 @@ def main():
             from pkg import PackageManager, PkgMgrName
 
             # We don't need the package manager to install it, since we're using `brew bundle` here
-            msg = "ronn (https://github.com/apjanke/ronn-ng) is required to " \
-            "build man files but is not installed."
+            msg = (
+                "ronn (https://github.com/apjanke/ronn-ng) is required to "
+                "build man files but is not installed."
+            )
             if PackageManager().package_manager_name == PkgMgrName.HOMEBRW and outputs.confirm(
                 msg + " It can be installed through Homebrew. Install it?"
             ):
