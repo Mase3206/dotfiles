@@ -534,6 +534,7 @@ def main():
                         subprocess.run(
                             ["brew", "bundle", "install"],
                             cwd=dotdir,
+                            env={'HOMEBREW_NO_ENV_HINTS': '1'},
                             check=True,
                         )
                     except subprocess.CalledProcessError as cpe:
@@ -548,7 +549,7 @@ def main():
         man_folder = Path(os.environ.get("XDG_DATA_HOME", HOME / ".local/share")) / "man/man1"
         if not man_folder.exists():
             man_folder.mkdir(parents=True)
-        docs_folder = DOTFILES_DIR / "docs"
+        docs_folder = DOTFILES_DIR / "docs" / "man"
 
         ronns = list(docs_folder.glob("*.[0-9].ronn"))
         with cd(DOTFILES_DIR / "docs") as docsdir:
