@@ -94,7 +94,7 @@ echo "Saving stub script to ~/.local/bin/dot"
 
 cat <<EOF > ~/.local/bin/dot
 #!/bin/sh
-$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py \$@
+$PYTHON_BIN \$DOTFILES_DIR/dotmgr/dot.py "\$@"
 EOF
 chmod +x ~/.local/bin/dot
 
