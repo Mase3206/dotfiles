@@ -9,11 +9,17 @@ fi
 # Don't exit open casks
 # export HOMEBREW_NO_UPGRADE_QUIT_CASKS=1
 
+# Is this Variable Set and Not Empty?
+function vsne() {
+	[[ $(eval echo "\${${1}}") ]]
+}
+# Custom functions would normally be set down lower, but I need it here.
+
 # Set the XDG variables if they're not set -- looking at you macOS.
-(( ${XDG_DATA_HOME} )) || export XDG_DATA_HOME="$HOME/.local/share"
+vsne XDG_DATA_HOME || export XDG_DATA_HOME="$HOME/.local/share"
 
 # DotMgr stuff
-(( ${XDG_CONFIG_HOME} )) || export XDG_CONFIG_HOME="$HOME/.config"
+vsne XDG_CONFIG_HOME || export XDG_CONFIG_HOME="$HOME/.config"
 export DOTFILES_DIR="$XDG_CONFIG_HOME/dotfiles"
 export MANPATH="$XDG_DATA_HOME/man:$MANPATH"
 
