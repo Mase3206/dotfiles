@@ -2,7 +2,7 @@ import pickle
 from abc import ABC, abstractmethod
 from enum import Enum
 
-from dotmgr import DOTFILES_DIR
+from dotmgr import DOTFILES_DIR, outputs
 
 
 class InstallStatus(str, Enum):
@@ -18,6 +18,7 @@ class BaseMod(ABC):
         """
         The list of mod names this mod depends on. Mod names are the *names* of the classes.
         """
+        ...
 
     @property
     @abstractmethod
@@ -27,6 +28,7 @@ class BaseMod(ABC):
 
         **Note:** Directories must end in a forward slash to be correctly identified.
         """
+        ...
 
     @abstractmethod
     def detect(self, quiet: bool = False) -> bool:
@@ -36,15 +38,57 @@ class BaseMod(ABC):
         :param bool quiet: If true, do not print status to console. Defaults to False.
         :returns bool: True if mod was detected, False otherwise
         """
+        ...
 
     @abstractmethod
-    def install(self):
+    def install(self, force: bool = False):
         """
-        The runner of this mod is responsible for ensuring all dependencies of this mod are
-        satisfied *before* running `install()`.
+        Install this mod.
 
-        Exceptions during the installation process may be thrown and must be handled accordingly.
+        :param bool = False force: Force installation, regardless of whether or not 
+            this mod is already detected.
+
+        The runner of this mod is responsible for ensuring all dependencies of this mod are satisfied
+        *before* actually installing anything. The use of :meth:`_install_dependencies` is recommended, as
+        long as the mod's dependencies are properly defined in the mod's :attr:`dependencies`, as
+        _install_dependencies automatically installs every mod in that list (if auto-discovered, of course).
+
+        Exceptions during the installation process may be thrown and must be handled accordingly, like this:
+
+        ```python
+        try:
+            # do stuff
+        except Exception:
+            print(f"Mod failed to install")
+            self.status = InstallStatus.INSTALL_FAILED
+            raise
+        ```
         """
+        ...
+
+    def _install_dependencies(self):
+        """
+        Install all dependencies of this mod.
+        """
+        # Putting this here lets us avoid circular imports from partially
+        # imported modules. Idk man, blame Python.
+        from dotmgr.mods import __mods__
+
+        for dep_name in self.dependencies:
+            try:
+                dep = __mods__[dep_name]
+                if dep.detect(quiet=True):
+                    outputs.status_good(f"Dependency {dep_name}", "installed")
+                else:
+                    outputs.status_bad(f"Dependency {dep_name}", "NOT installed", end=" - ")
+                    print("installing now")
+                    dep.install()
+
+            except KeyError as e:
+                raise KeyError(
+                    f"This mod ({self.mod_name}) depends on {dep_name}, which either does not exist or was "
+                    "not automatically detected by the mod manager."
+                ) from e
 
     def update_status(self):
         """

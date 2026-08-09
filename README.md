@@ -54,7 +54,7 @@ dot mod install
 dot sync
 ```
 
-**dot** also supports autocompletions for Zsh, though you need to install Oh My Zsh first (hint: `dot mod install OhMyZsh`), as the destination path for the autocompletion definition is hardcoded to ~/.oh-my-zsh/custom/completions/_dot.
+**dot** also supports autocompletions for Zsh, which are generated and installed via a mod (`dotmgr.mods.meta.ZshCompletions`). It depends on (and automatically installs) Oh My Zsh, and the destination path for the autocompletion definition is hardcoded to ~/.oh-my-zsh/custom/completions/_dot.
 
 
 ### Usage
@@ -226,7 +226,7 @@ It's Zsh.
 dot mod install Zsh
 ```
 
-### Oh My Zsh
+### OhMyZsh
 
 - Source: omz.py
 - Files it manages: anything in .oh-my-zsh/
@@ -236,4 +236,28 @@ dot mod install Zsh
 
 ```shell
 dot mod install OhMyZsh
+```
+
+### ZshCompletions
+
+- Source: meta.py
+- Files it manages: none
+- Dependencies: Zsh, OhMyZsh
+
+Generates and installs Zsh completions to ~/.oh-my-zsh/custom/completions/_dot.
+
+```shell
+dot mod install ZshCompletions
+```
+
+### ManPages
+
+- Source: meta.py
+- Files it manages: none
+- Dependencies: none
+
+Installs the install man pages for **dot** into the user's local man pages store (set in .zshrc as ~/.local/share/man/man1).
+
+```shell
+dot mod install ManPages
 ```

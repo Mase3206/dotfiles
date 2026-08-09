@@ -1,0 +1,78 @@
+.\" generated with Ronn-NG/v0.10.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.10.1
+.TH "DOT" "1" "August 2026" ""
+.SH "NAME"
+\fBdot\fR \- a customizable, lightweight, install\-less, stdlib\-only dotfile manager
+.SH "SYNOPSIS"
+\fBdot\fR [\-h] \fIsubcommand\fR [\fIargs\fR]
+.SH "DESCRIPTION"
+\fBdot\fR is a customizable, lightweight, install\-less, stdlib\-only dotfile manager\. Written for Python 3\.9+, it supports macOS (because even macOS 26 is shipping with Python 3\.9\.6, which is from 2022) and older Linux distros, and, as Python 3 generally has excellent backwards compatibility, it is highly likely to work on later versions as well\.
+.SH "OPTIONS"
+Most options are part of subcommands, but there are two root\-level options:
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Show command help page
+.TP
+\fIsubcommand\fR
+See \fISUBCOMMANDS\fR\.
+.TP
+[\fIargs\fR]
+Argument(s) passed to \fIsubcommand\fR which may or may not be optional, depending on the subcommand\.
+.SH "SUBCOMMANDS"
+.TP
+dot\-ln(1)
+Link dotfiles
+.TP
+dot\-rm(1)
+Remove (unlink) dotfiles
+.TP
+dot\-sync(1)
+Sync dotfiles
+.TP
+dot\-manage(1)
+Add file(s) in dotfile repo to managed\.files
+.TP
+dot\-unmanage(1)
+Remove file(s) in dotfile repo from managed\.files
+.TP
+dot\-adopt(1)
+Adopt local dotfile to dotfile repo and link it
+.TP
+dot\-orphan(1)
+Convert a managed dotfile to a local\-only dotfile and unmanage it
+.TP
+dot\-list(1)
+List all managed dotfiles' relative paths and their statuses
+.TP
+dot\-edit(1)
+Edit or view a dotfile, respecting your chosen $EDITOR by default
+.TP
+dot\-cat(1)
+Dump the contents of the dotfile to stdout (i\.e\. \fBcat\fR the file)
+.TP
+dot\-mod(1)
+Manage and interact with known mods
+.TP
+dot\-git(1)
+Interact with the local dotfile Git repository
+.SH "ENVIRONMENT"
+.TP
+DOTFILES_DIR
+Absolute path to the dotfiles directory (sometimes called "dotfiles repository", "repository", or even just "repo")\. Must be set for \fBdot\fR to function\. By default, \.zshrc (managed) sets this to $XDG_CONFIG_HOME/dotfiles\.
+.IP
+A dotfile's "relative path" is relative to $DOTFILES_DIR \fIand\fR the user's $HOME folder\.
+.TP
+XDG_CONFIG_HOME
+\&\.zshrc (managed) sets this to $HOME/\.config (the default as specified by the Free Desktop project)\. macOS does not set this, so \.zshrc has to set it manually\.
+.SH "DEPENDENCIES"
+\fBdot\fR depends on Git and Python 3\.9+\.
+.SH "KNOWN BUGS"
+dot\-adopt(1), dot\-orphan(1), dot\-manage(1), and dot\-unmanage(1) sometimes have weird behavior with directories (which is 100% my fault)\. I'll fix it someday\.
+.SH "DEPRECATIONS"
+Calling \fBdot \-\-zsh\-completions\fR is no longer supported\. This functionality has been moved to the "ZshCompletions" mod\. Run "dot mod install ZshCompletions" to install it\.
+.SH "SECURITY CONSIDERATIONS"
+\fBdot\fR mods are Python 3 classes wrapping around basically anything, including shell and package manager commands\. Always review 3rd\-party mod definitions before installing\. The authors of \fBdot\fR are not responsible for any issues which may be caused by 3rd\-party mods\.
+.SH "AUTHOR"
+\fBdot\fR was created by Mase3206 \fIhttps://github\.com/Mase3206\fR as a fun side\-project to make managing dotfiles less frustrating\. Other solutions existed, but almost all required installing itself (also often with some dependencies), and he didn't want that\. That's why \fBdot\fR is a \fIscript\fR, not a program\.
+.SH "COPYRIGHT"
+\fBdot\fR, alongside any dotfiles in this repository, are in the public domain under the Unlicense\. See LICENSE \fIhttps://github\.com/Mase3206/dotfiles?tab=Unlicense\-1\-ov\-file\fR and Unlicense on tldr;legal \fIhttps://www\.tldrlegal\.com/license/unlicense\fR\.

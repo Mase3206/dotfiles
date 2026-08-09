@@ -1,0 +1,52 @@
+.\" generated with Ronn-NG/v0.10.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.10.1
+.TH "DOT\-GIT" "1" "August 2026" ""
+.SH "NAME"
+\fBdot\-git\fR \- Interact with the local dotfile Git repository
+.SH "SYNOPSIS"
+\fBdot git\fR [\-h] \fIaction\fR [\fIargs\fR]
+.SH "DESCRIPTION"
+Interact with the local dotfile Git repository\. As a general rule (unless specifically stated otherwise), this only interacts with managed dotfiles (i\.e\. those listed in managed\.files), not the actual source code of \fBdot\fR\. This is to make it very fast and easy to commit, push, and pull changes made to dotfiles\.
+.P
+Part of dot(1)\.
+.SH "OPTIONS"
+.TP
+\fB\-h\fR, \fB\-\-h\fR
+Show command help\.
+.TP
+\fIaction\fR
+See \fIACTIONS\fR\.
+.TP
+[\fIargs\fR]
+Argument(s) passed to \fIaction\fR which may or may not be optional, depending on the action\.
+.SH "ACTIONS"
+\fB\-h\fR always means "show command help"\.
+.TP
+\fBcommit\fR [\-h] [\-m \fImessage\fR]
+Commit the changes made to managed dotfiles\. Unless \fB\-m\fR is passed, the commit message will be automatically generated\. You will be asked to confirm the commit interactively\.
+.IP
+\fB\-m\fR \fImessage\fR: Optionally specify the commit message\. If not passed, a message will automatically generated\.
+.TP
+\fBpush\fR
+Push the changes made to remote\.
+.TP
+\fBpull\fR
+Stash changes in local repo, pull changes from remote, then unstash changes\.
+.IP
+\fINOTE:\fR This might be a bit finicky, so use with caution\. Also, it might exit non\-zero if there's nothing to stash (and then unstash), but that's okay\.
+.TP
+\fBundo\fR
+Undo the last commit and unstage the previously committed files\.
+.IP
+\fINOTE:\fR While this has been tested, it might be a bit finicky, so use with caution\.
+.TP
+\fBstatus\fR
+Get the current Git status of the managed dotfiles\. \~
+.TP
+\fBdiff\fR [\-h] [\-a] [\fIfile\fR\|\.\|\.\|\.]
+Get the current Git diff of the given files\.
+.IP
+\fB[\fIfile\fR\|\.\|\.\|\.]\fR: Relative path to the file(s) to diff (optional)\. If not given, the diff of all managed dotfiles will be shown\.
+.IP
+\fB\-a\fR, \fB\-\-all\fR: Include the diff of non\-dotfiles (i\.e\. source code and documentation)
+

@@ -1,0 +1,28 @@
+.\" generated with Ronn-NG/v0.10.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.10.1
+.TH "DOT\-ADOPT" "1" "August 2026" ""
+.SH "NAME"
+\fBdot\-adopt\fR \- Copy local dotfile(s) to dotfile repo and link it
+.SH "SYNOPSIS"
+\fBdot adopt\fR [\-h] \fIfile\fR\|\.\|\.\|\.
+.SH "DESCRIPTION"
+Adopt one or more local dotfiles from the user's home folder into the dotfiles repository by:
+.IP "1." 4
+Moving it from $HOME to $DOTFILES_DIR
+.IP "2." 4
+Adding it to managed\.files
+.IP "3." 4
+Linking it back to its destination in $HOME
+.IP "" 0
+.P
+To simply mark a dotfile already present in the dotfiles repository as managed, see dot\-manage(1)\.
+.P
+Part of dot(1)\.
+.SH "OPTIONS"
+.TP
+\fB\-h\fR, \fB\-\-h\fR
+Show command help\.
+.TP
+\fIfile\fR
+One or more local files\. Paths are relative to the the user's $HOME folder\.
+

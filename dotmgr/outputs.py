@@ -40,28 +40,46 @@ class AnsiColors(str, Enum):
         return self.value
 
 
-def big_header(content: str):
-    print("\n\n" + f"{AnsiColors.GREEN}======== {content} ========" + f"{AnsiColors.END}\n")
+def big_header(content: str, end="\n"):
+    print(
+        "\n\n" + f"{AnsiColors.GREEN}======== {content} ========" + f"{AnsiColors.END}\n",
+        end=end,
+    )
 
 
-def subheader(content: str):
-    print("\n" + f"{AnsiColors.BLUE}---- {content} ----" + f"{AnsiColors.END}")
+def subheader(content: str, end="\n"):
+    print(
+        "\n" + f"{AnsiColors.BLUE}---- {content} ----" + f"{AnsiColors.END}",
+        end=end,
+    )
 
 
-def step(content: str):
-    print(f"{AnsiColors.LIGHT_CYAN}- {content}{AnsiColors.END}")
+def step(content: str, end="\n"):
+    print(
+        f"{AnsiColors.LIGHT_CYAN}- {content}{AnsiColors.END}",
+        end=end,
+    )
 
 
-def status_bad(subject: str, message: str):
-    print(f"{subject}: {AnsiColors.RED}{message}{AnsiColors.END}")
+def status_bad(subject: str, message: str, end="\n"):
+    print(
+        f"{subject}: {AnsiColors.RED}{message}{AnsiColors.END}",
+        end=end,
+    )
 
 
-def status_good(subject: str, message: str):
-    print(f"{subject}: {message}")
+def status_good(subject: str, message: str, end="\n"):
+    print(
+        f"{subject}: {message}",
+        end=end,
+    )
 
 
-def skip(content: str):
-    print(f"{AnsiColors.LIGHT_RED}Skipping{AnsiColors.END} {content}")
+def skip(content: str, end="\n"):
+    print(
+        f"{AnsiColors.LIGHT_RED}Skipping{AnsiColors.END} {content}",
+        end=end,
+    )
 
 
 def confirm(message: str, default_yes: bool = True) -> bool:

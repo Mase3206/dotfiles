@@ -1,0 +1,31 @@
+.\" generated with Ronn-NG/v0.10.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.10.1
+.TH "DOT\-EDIT" "1" "August 2026" ""
+.SH "NAME"
+\fBdot\-edit\fR \- Edit or view a dotfile, respecting your chosen $EDITOR by default
+.SH "SYNOPSIS"
+\fBdot edit\fR [\-h] [\-cvnl] [\fIfile\fR]
+.SH "DESCRIPTION"
+Edit or view a dotfile, respecting the your chosen editor (set in $EDITOR) by default\.
+.P
+Part of dot(1)\.
+.SH "OPTIONS"
+.TP
+\fB\-h\fR, \fB\-\-h\fR
+Show command help\.
+.TP
+[\fIfile\fR]
+Relative path of the managed dotfile (optional)\. If no file is given, the dotfiles repository will be opened instead\.
+.TP
+\fB\-c\fR
+Open the file in Visual Studio Code
+.TP
+\fB\-v\fR
+Open the file in Vim
+.TP
+\fB\-n\fR
+Open the file in Nano
+.TP
+\fB\-l\fR
+Open the file in Less
+

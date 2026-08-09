@@ -3,7 +3,7 @@ dot(1) -- a customizable, lightweight, install-less, stdlib-only dotfile manager
 
 ## SYNOPSIS
 
-`dot` [-h] [--zsh-completions] <subcommand> [<args>]
+`dot` [-h] <subcommand> [<args>]
 
 ## DESCRIPTION
 
@@ -15,11 +15,6 @@ Most options are part of subcommands, but there are two root-level options:
 
   * `-h`, `--help`:
     Show command help page
-
-  * `--zsh-completions`:
-    Generate and save the Zsh completion definition for **dot**. Completions are saved in ~/.oh-my-zsh/custom/completions/dot, so make sure Oh My Zsh is installed first! (_hint:_ use `dot mod install OhMyZsh`).
-    
-    This option is exclusive, meaning **dot** will exit after creating and installing the autocompletion definition file.
   
   * <subcommand>:
     See [SUBCOMMANDS][].
@@ -82,6 +77,10 @@ Most options are part of subcommands, but there are two root-level options:
 ## KNOWN BUGS
 
 dot-adopt(1), dot-orphan(1), dot-manage(1), and dot-unmanage(1) sometimes have weird behavior with directories (which is 100% my fault). I'll fix it someday.
+
+## DEPRECATIONS
+
+Calling `dot --zsh-completions` is no longer supported. This functionality has been moved to the "ZshCompletions" mod. Run "dot mod install ZshCompletions" to install it.
 
 ## SECURITY CONSIDERATIONS
 

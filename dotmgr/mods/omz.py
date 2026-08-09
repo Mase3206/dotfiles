@@ -38,9 +38,9 @@ class OhMyZsh(BaseMod):
             self.status = InstallStatus.NOT_INSTALLED
             return False
 
-    def install(self):
+    def install(self, force: bool = False):
         outputs.subheader("Installing Oh My Zsh")
-        if self.detect():
+        if self.detect(quiet=True) and not force:
             outputs.skip("OMZ installation")
             return
 

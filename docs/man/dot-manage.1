@@ -1,0 +1,21 @@
+.\" generated with Ronn-NG/v0.10.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.10.1
+.TH "DOT\-MANAGE" "1" "August 2026" ""
+.SH "NAME"
+\fBdot\-manage\fR \- Add file(s) in dotfile repo to managed\.files
+.SH "SYNOPSIS"
+\fBdot manage\fR [\-h] \fIfile\fR\|\.\|\.\|\.
+.SH "DESCRIPTION"
+Mark one or more unmanaged dotfiles that are already present in the dotfiles repository as managed by adding its relative path to managed\.files\. The actual file itself is not moved, removed, or otherwise modified\.
+.P
+To import (or "adopt") a local dotfile into the dotfile repository, see dot\-adopt(1)\.
+.P
+Part of dot(1)\.
+.SH "OPTIONS"
+.TP
+\fB\-h\fR, \fB\-\-h\fR
+Show command help\.
+.TP
+\fIfile\fR
+One or more managed files\. Paths are relative to the dotfile repo\.
+

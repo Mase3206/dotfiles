@@ -8,7 +8,7 @@ import sys
 from collections import UserList
 from typing import Generic, Iterable, TypeVar
 
-from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, HOME, filelib, git, mods, outputs
+from dotmgr import DOTFILES_DIR, DOTFILES_MANAGED_FILE, filelib, git, mods, outputs
 from dotmgr.mods import InstallStatus
 
 
@@ -99,20 +99,9 @@ parser = argparse.ArgumentParser(
         generally has excellent backwards compatibility, it is highly likely to work on later
         versions as well.
     """,
+    epilog='NOTE: "relative paths" are relative to the dotfiles repository in $DOTFILES_DIR',
 )
 
-parser.add_argument(
-    "--zsh-completions",
-    action="store_true",
-    help="Generate and save the Zsh completion definition for dot",
-)
-
-# Generate and install manfiles
-parser.add_argument(
-    "--man",
-    action="store_true",
-    help="Generate and install man files to ~/.local/share/man",
-)
 
 sp_manager = parser.add_subparsers(required=False, metavar="command", dest="sp")
 
@@ -121,7 +110,6 @@ sp_ln = sp_manager.add_parser(
     "ln",
     help="Link dotfiles",
     description="Link dotfiles",
-    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_ln.add_argument(
     "file",
@@ -140,7 +128,7 @@ sp_rm = sp_manager.add_parser(
     "rm",
     help="Remove (unlink) dotfiles",
     description="Remove (unlink) dotfiles. The actual source file is not removed.",
-    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+    # epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_rm.add_argument(
     "file",
@@ -155,7 +143,7 @@ sp_sync = sp_manager.add_parser(
     "sync",
     help="Sync dotfiles",
     description="Sync dotfiles",
-    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+    # epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_sync.add_argument(
     "file",
@@ -174,7 +162,7 @@ sp_manage = sp_manager.add_parser(
     "manage",
     help="Add file(s) in $DOTFILES_DIR to managed.files",
     description=f"Add file(s) in $DOTFILES_DIR ({DOTFILES_DIR}) to managed.files",
-    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+    # epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_manage.add_argument(
     "file",
@@ -187,7 +175,7 @@ sp_unmanage = sp_manager.add_parser(
     "unmanage",
     help="Remove file(s) in $DOTFILES_DIR from managed.files",
     description=f"Remove file(s) in $DOTFILES_DIR ({DOTFILES_DIR}) from managed.files",
-    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+    # epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_unmanage.add_argument(
     "file",
@@ -202,7 +190,7 @@ sp_adopt = sp_manager.add_parser(
     "adopt",
     help="Adopt local dotfile to dotfile repo $DOTFILES_DIR",
     description=f"Adopt local dotfile to dotfile repo $DOTFILES_DIR ({DOTFILES_DIR})",
-    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+    # epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_adopt.add_argument(
     "file",
@@ -215,7 +203,7 @@ sp_orphan = sp_manager.add_parser(
     "orphan",
     help="Orphan one or more dotfiles. This converts a once synced dotfile to a local-only dotfile.",
     description="Orphan one or more dotfiles. This converts a once synced dotfile to a local-only dotfile.",
-    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+    # epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_orphan.add_argument(
     "file",
@@ -299,7 +287,7 @@ sp_edit = sp_manager.add_parser(
         Edit or view a dotfile, respecting the your chosen editor (set in $EDITOR) by default. Your current
         editor is {outputs.AnsiColors.UNDERLINE}{os.environ.get("EDITOR", "unset")}{outputs.AnsiColors.END}.
     """,
-    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+    # epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_edit.add_argument(
     "-c",
@@ -342,7 +330,7 @@ sp_cat = sp_manager.add_parser(
     "cat",
     help="Dump (cat) the contents of the dotfile to stdout.",
     description="Dump (cat) the contents of the dotfile to stdout.",
-    epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
+    # epilog='NOTE: "relative paths" are relative to the dotfiles directory $DOTFILES_DIR',
 )
 sp_cat.add_argument(
     "file",
@@ -363,11 +351,17 @@ sp_mod = sp_manager.add_parser(
     "mod",
     help="Manage and interact with known mods",
     description="Manage and interact with known mods",
+    epilog="",
     # aliases=["mods"],
 )
 sp_mod_manager = sp_mod.add_subparsers(required=True, metavar="mod_subcommand", dest="mod_sp")
 
 sp_mod_install = sp_mod_manager.add_parser("install", help="Install mod(s)")
+sp_mod_install.add_argument(
+    "-f", "--force",
+    help="Install these mod(s), regardless of whether or not they are already detected.",
+    action="store_true"
+)
 sp_mod_install.add_argument(
     "mod_name",
     choices=_choices_mods,
@@ -423,6 +417,7 @@ sp_git = sp_manager.add_parser(
     "git",
     help="Interact with the local dotfile Git repo",
     description="Interact with the local dotfile Git repo in $DOTFILES_DIR",
+    epilog="",
 )
 sp_git_manager = sp_git.add_subparsers(required=True, metavar="action", dest="action")
 
@@ -491,82 +486,6 @@ sp_git_diff.add_argument(
 def main():
     args = parser.parse_args()
     # args = parser.parse_args(['-h'])
-
-    if args.zsh_completions:
-        from dotmgr import compmaker  # noqa: I001
-
-        print("Generating Zsh completions")
-        compfile_path = HOME / ".oh-my-zsh/custom/completions/_dot"
-        if not compfile_path.parent.exists():
-            compfile_path.parent.mkdir()
-        commands = compmaker.convert_from_parser(parser, cmd_name="dot")
-        with open(compfile_path, "w+") as f:
-            f.write(compmaker.render_zsh(commands))
-        print(f"Saved completions to {compfile_path!s}. Reload shell to use them.")
-        exit()
-        return  # don't do anything after this
-    elif args.man:
-        from pathlib import Path
-
-        from dotmgr.utils import cd
-
-        try:
-            subprocess.run(
-                "command -v ronn",
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                check=True,
-                shell=True,
-            )
-        except subprocess.CalledProcessError:
-            from pkg import PackageManager, PkgMgrName
-
-            # We don't need the package manager to install it, since we're using `brew bundle` here
-            msg = (
-                "ronn (https://github.com/apjanke/ronn-ng) is required to "
-                "build man files but is not installed."
-            )
-            if PackageManager().package_manager_name == PkgMgrName.HOMEBRW and outputs.confirm(
-                msg + " It can be installed through Homebrew. Install it?"
-            ):
-                with cd(DOTFILES_DIR) as dotdir:
-                    try:
-                        subprocess.run(
-                            ["brew", "bundle", "install"],
-                            cwd=dotdir,
-                            env={'HOMEBREW_NO_ENV_HINTS': '1'},
-                            check=True,
-                        )
-                    except subprocess.CalledProcessError as cpe:
-                        exit(cpe.returncode)
-            else:
-                print(
-                    msg
-                    + " The only way to install it is through Homebrew, which is not installed. Exiting..."
-                )
-                exit(1)
-
-        man_folder = Path(os.environ.get("XDG_DATA_HOME", HOME / ".local/share")) / "man/man1"
-        if not man_folder.exists():
-            man_folder.mkdir(parents=True)
-        docs_folder = DOTFILES_DIR / "docs" / "man"
-
-        ronns = list(docs_folder.glob("*.[0-9].ronn"))
-        with cd(DOTFILES_DIR / "docs") as docsdir:
-            subprocess.run(
-                ["ronn", "--roff", *ronns],
-                cwd=docsdir,
-                check=True,
-            )
-
-        for r in ronns:
-            # if (man_folder / r.stem).exists():
-            print(r.stem, end=": ")
-            (man_folder / r.stem).unlink(missing_ok=True)
-            dest = shutil.move(docs_folder / r.stem, man_folder)
-            print(f"moved {r} into {dest}")
-
-        return
 
     if not args.sp:
         # print(parser.usage)
@@ -848,7 +767,7 @@ def main():
         sys.stdout.flush()
 
     # Interact with mods
-    elif args.sp in ["mod", "mods"]:
+    elif args.sp == "mod":
         # print(args)
         if args.mod_sp == "detect":
             for mod_name in args.mod_name:
@@ -888,7 +807,7 @@ def main():
                 selected_mod = mods.__mods__.get(mod_name)
                 if not selected_mod:
                     raise ValueError(f"Selected mod {mod_name} does not exist.")
-                selected_mod.install()
+                selected_mod.install(force = True if args.force else False)
 
         elif args.mod_sp == "list":
             list_installed = bool(args.installed)

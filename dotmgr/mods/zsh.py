@@ -42,10 +42,10 @@ class Zsh(BaseMod):
             self.status = InstallStatus.NOT_INSTALLED
             return False
 
-    def install(self):
+    def install(self, force: bool = False):
         outputs.subheader("Installing Zsh")
 
-        if self.detect():
+        if self.detect() and not force:
             outputs.skip("Zsh installation.")
             return
 

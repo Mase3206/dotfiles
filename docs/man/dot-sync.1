@@ -1,0 +1,26 @@
+.\" generated with Ronn-NG/v0.10.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.10.1
+.TH "DOT\-SYNC" "1" "August 2026" ""
+.SH "NAME"
+\fBdot\-sync\fR \- Sync managed dotfiles
+.SH "SYNOPSIS"
+\fBdot sync\fR [\-h] [\fIfile\fR\|\.\|\.\|\.]
+.SH "DESCRIPTION"
+Sync one or more managed dotfiles from the dotfile repository\. See the ENVIRONMENT section of dot(1) for details\.
+.P
+"Syncing" means linking, re\-linking, or fixing broken links of dotfiles\.
+.IP "\(bu" 4
+If the dotfile is not present, link it\.
+.IP "\(bu" 4
+If the dotfile \fIis\fR present, remove and re\-link it, regardless of where it's linked to\.
+.IP "" 0
+.P
+Part of dot(1)\.
+.SH "OPTIONS"
+.TP
+\fB\-h\fR, \fB\-\-h\fR
+Show command help\.
+.TP
+[\fIfile\fR]
+One or more managed files (optional)\. Paths are relative to the dotfile repo\. If no files are passed, all managed files will be synced\.
+

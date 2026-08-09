@@ -169,6 +169,7 @@ cython_debug/
 **/**.DS_Store
 
 # Project-specific stuff
+dotmgr/meta/*
 mods.dat
 
 # Vim stuff
@@ -179,8 +180,8 @@ mods.dat
 docs/*.[0-9].html
 docs/man/*.[0-9].html
 # Rendered ROFF
-docs/*.[0-9]
-docs/man/*.[0-9]
+# docs/*.[0-9]
+# docs/man/*.[0-9]
 docs/*.md
 docs/*.html
 

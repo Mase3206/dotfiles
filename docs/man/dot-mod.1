@@ -1,0 +1,51 @@
+.\" generated with Ronn-NG/v0.10.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.10.1
+.TH "DOT\-MOD" "1" "August 2026" ""
+.SH "NAME"
+\fBdot\-mod\fR \- Manage dot mods
+.SH "SYNOPSIS"
+\fBdot mod\fR [\-h] \fIaction\fR [\fIargs\fR]
+.SH "DESCRIPTION"
+Manage and interact with known mods\.
+.P
+Mods are subclasses of \fBdotmgr\.mods\.BaseMod\fR defined in Python files in "dotmgr/mods"\. A dynamic importer in "dotmgr/mods/__init__\.py" searches for these files, imports the subclasses of \fBBaseMod\fR, and stores them in a dictionary for \fBdot\fR to use later\. Mods in this dictionary are considered "known" (or sometimes called "discovered")\.
+.P
+A mod can depend on zero or more other mods to install, which will be automatically installed before this one\.
+.P
+A mod can also mark zero or more dotfiles as "used by" it\. Any dotfile "used by" a mod which is not installed is considered "unavailable"\.
+.P
+For more details on what a mod is and how they are authored, see the Mods section of README\.md \fIhttps://github\.com/Mase3206/dotfiles/blob/main/README\.md#mods\fR and Authoring Mods\.md \fIhttps://github\.com/Mase3206/dotfiles/blob/main/dotmgr/mods/Authoring%20Mods\.md\fR
+.P
+Part of dot(1)\.
+.SH "OPTIONS"
+.TP
+\fB\-h\fR, \fB\-\-h\fR
+Show command help\.
+.TP
+\fIaction\fR
+See \fIACTIONS\fR\.
+.TP
+[\fIargs\fR]
+Argument(s) passed to \fIaction\fR which may or may not be optional, depending on the action\.
+.SH "ACTIONS"
+\fB\-h\fR always means "show command help"\.
+.TP
+\fBinstall\fR [\-h] [\-f] [\fImod_name\fR\|\.\|\.\|\.]
+Install the specified mod(s)\. If none are given, install all discovered mods\.
+.IP
+\fB\-f\fR, \fB\-\-force\fR: Install mod(s) regardless of whether or not they are already detected\.
+.TP
+\fBdetect\fR [\-h] [\-n] [\fImod_name\fR\|\.\|\.\|\.]
+Run the detection script of the specified mod(s)\. If none are given, install all discovered mods\.
+.IP
+\fB\-n\fR, \fB\-\-no\-color\fR: Prevents the use of ANSI colors to color the checkmarks/crosses signifying whether a mod is installed\.
+.TP
+\fBlist\fR [\-h] [\-0iu]
+List mods satisfying the requested conditions\. If no conditions are listed, all mods (regardless of status) are listed\. Conditions can be combined\.
+.IP
+\fB\-0\fR, \fB\-\-null\-sep\fR: List the mods with null separators\.
+.IP
+\fB\-i\fR, \fB\-\-installed\fR: List installed mods\.
+.IP
+\fB\-u\fR, \fB\-\-uninstalled\fR: List uninstalled mods\.
+

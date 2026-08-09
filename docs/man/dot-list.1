@@ -1,0 +1,43 @@
+.\" generated with Ronn-NG/v0.10.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.10.1
+.TH "DOT\-LIST" "1" "August 2026" ""
+.SH "NAME"
+\fBdot\-list\fR \- List all managed dotfiles' relative paths and their statuses
+.SH "SYNOPSIS"
+\fBdot list\fR [\-h] [\-nr0luaU]
+.SH "DESCRIPTION"
+List all managed files' relative paths\. If no arguments are given, a file's install status is distinguised with a check/cross, and unavailable files are greyed out\.
+.P
+This subcommand is especially helpful for scripting and is actually used by \fBdot\fR's Zsh completions (via \fBdotmgr\.dot\.DynamicChoices\fR and compmaker\.py) to dynamically determine the available choices within the completion itself\.
+.P
+Part of dot(1)\.
+.SH "OPTIONS"
+All output and query options can be combined\.
+.TP
+\fB\-h\fR, \fB\-\-h\fR
+Show command help\.
+.SS "Output options"
+.TP
+\fB\-n\fR, \fB\-\-no\-color\fR
+Avoid using colors\. File availibility is distinguished via a +/\- after the check/cross\.
+.TP
+\fB\-r\fR, \fB\-\-raw\fR
+Just list the files' relative paths\. Don't add checkmarks/crosses indicating file status or +/\- indicating file availability\. Implies \fB\-\-no\-color\fR\.
+.TP
+\fB\-0\fR, \fB\-\-null\-sep\fR
+List the files with null separators\. Without \fB\-\-raw\fR, this has no effect\.
+.SS "Query options"
+If none of these options are passed, all files (linked, unlinked, available, and unavailable) will be selected\. This is equivalent to passing \fB\-luaU\fR\.
+.TP
+\fB\-l\fR, \fB\-\-linked\fR
+List linked files\.
+.TP
+\fB\-u\fR, \fB\-\-unlinked\fR
+List unlinked files\.
+.TP
+\fB\-a\fR, \fB\-\-available\fR
+List available files\. A file is only "available" if it is not used by a mod (see dot\-mod(1)) or the mod(s) which use it are installed\.
+.TP
+\fB\-U\fR, \fB\-\-unavailable\fR
+List unavailable files\. A file is "unavailable" if it is used by a mod (or potentially multiple mods) which are not installed (see dot\-mod(1))\.
+

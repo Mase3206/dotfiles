@@ -29,7 +29,7 @@ Part of dot(1).
   * `commit` [-h] [-m <message>]:
     Commit the changes made to managed dotfiles. Unless `-m` is passed, the commit message will be automatically generated. You will be asked to confirm the commit interactively.
 
-    * `-m` <message>:
+      `-m` <message>:
       Optionally specify the commit message. If not passed, a message will automatically generated.
 
 
@@ -57,9 +57,9 @@ Part of dot(1).
   * `diff` [-h] [-a] [<file>...]:
     Get the current Git diff of the given files.
 
-    * [<file>...]:
+      **[<file>...]**:
       Relative path to the file(s) to diff (optional). If not given, the diff of all managed dotfiles will be shown.
 
-    * `-a`, `--all`:
+      `-a`, `--all`:
       Include the diff of non-dotfiles (i.e. source code and documentation)
 
