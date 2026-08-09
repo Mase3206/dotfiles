@@ -59,3 +59,6 @@ Part of dot(1).
 
       `-u`, `--uninstalled`:
       List uninstalled mods.
+
+      `-d`, `--no-desc`:
+      Hide the mod descriptions in listing.

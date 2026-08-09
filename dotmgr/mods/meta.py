@@ -10,20 +10,18 @@ from dotmgr.mods.base import BaseMod, InstallStatus
 
 class ZshCompletions(BaseMod):
     """
-    Detect and install Zsh completions for `dot`.
+    Detect and install Zsh completions for **dot**.
 
     - Dependencies: Zsh, OhMyZsh
     """
 
+    dependencies = ["Zsh", "OhMyZsh"]
+    dotfiles = []
+    pretty_name = "Zsh Completions"
+    description = "Generate and install Zsh completions for " \
+        + f"{outputs.AnsiColors.BOLD}dot{outputs.AnsiColors.END}"
+
     _compfile_path = HOME / ".oh-my-zsh/custom/completions/_dot"
-
-    @property
-    def dependencies(self) -> list[str]:
-        return ["Zsh", "OhMyZsh"]
-
-    @property
-    def dotfiles(self) -> list[str]:
-        return []
 
     def detect(self, quiet: bool = False) -> bool:
         if self._compfile_path.exists() and self._compfile_path.is_file():
@@ -69,20 +67,18 @@ class ZshCompletions(BaseMod):
 
 class ManPages(BaseMod):
     """
-    Detect and install man pages for `dot` into the user's local man pages store
+    Detect and install man pages for **dot** into the user's local man pages store
     (set in .zshrc as ~/.local/share/man/man1).
     """
 
+    dependencies = []
+    dotfiles = []
+    pretty_name = "Man Pages"
+    description = f"Install man pages for {outputs.AnsiColors.BOLD}dot" \
+        + f"{outputs.AnsiColors.END} into the user's local man pages store"
+
     _manpages_path = XDG_DATA_HOME / "man/man1"
     _docs_path = DOTFILES_DIR / "docs" / "man"
-
-    @property
-    def dependencies(self) -> list[str]:
-        return ["Zsh", "OhMyZsh"]
-
-    @property
-    def dotfiles(self) -> list[str]:
-        return []
 
     @property
     def _expected_manfiles(self) -> list[str]:

@@ -394,7 +394,7 @@ sp_mod_list = sp_mod_manager.add_parser(
 sp_mod_list.add_argument(
     "-0",
     "--null-sep",
-    help="List the mods with null separators.",
+    help="List the mods with null separators. Useful for scripting.",
     action="store_true",
     dest="null_sep",
 )
@@ -408,6 +408,11 @@ sp_mod_list.add_argument(
     "-u",
     "--uninstalled",
     help="List uninstalled mods",
+    action="store_true",
+)
+sp_mod_list.add_argument(
+    "-d", "--no-desc",
+    help="Hide the mod descriptions in listing",
     action="store_true",
 )
 
@@ -816,11 +821,19 @@ def main():
                 list_installed = True
                 list_uninstalled = True
 
+            # print their non-pretty names and their descriptions (if there and desired)
             for mod in mods.__mods__.values():
+                if args.null_sep or args.no_desc:
+                    desc = ''
+                else:
+                    try:
+                        desc = " - " + mod.description
+                    except AttributeError:
+                        desc = ''
                 if list_installed and mod.status == mods.InstallStatus.INSTALLED:
-                    print(mod.mod_name, end="\0" if args.null_sep else "\n")
+                    print(mod.mod_name + desc, end='\0' if args.null_sep else '\n')
                 if list_uninstalled and mod.status != mods.InstallStatus.INSTALLED:
-                    print(mod.mod_name, end="\0" if args.null_sep else "\n")
+                    print(mod.mod_name + desc, end='\0' if args.null_sep else '\n')
 
     # Interact with Git
     elif args.sp == "git":

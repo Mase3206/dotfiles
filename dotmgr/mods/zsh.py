@@ -16,13 +16,10 @@ class Zsh(BaseMod):
     - Dotfiles: .zshrc
     """
 
-    @property
-    def dependencies(self):
-        return []
-
-    @property
-    def dotfiles(self):
-        return [".zshrc"]
+    dependencies = []
+    dotfiles = [".zshrc"]
+    pretty_name = "Zsh"
+    description = "Install the Z-shell"
 
     def detect(self, quiet: bool = False) -> bool:
         out = subprocess.run(
@@ -44,6 +41,9 @@ class Zsh(BaseMod):
 
     def install(self, force: bool = False):
         outputs.subheader("Installing Zsh")
+
+        # No dependencies, but it's good practice to run it anyways.
+        self._install_dependencies()
 
         if self.detect() and not force:
             outputs.skip("Zsh installation.")

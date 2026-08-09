@@ -12,23 +12,27 @@ class InstallStatus(str, Enum):
 
 
 class BaseMod(ABC):
-    @property
-    @abstractmethod
-    def dependencies(self) -> list[str]:
-        """
-        The list of mod names this mod depends on. Mod names are the *names* of the classes.
-        """
-        ...
+    dependencies: list[str]
+    """
+    The list of mod names this mod depends on. Mod names are the *names* of the classes.
+    """
 
-    @property
-    @abstractmethod
-    def dotfiles(self) -> list[str]:
-        """
-        The list of relative paths of all dotfiles related to this mod.
+    dotfiles: list[str]
+    """
+    The list of relative paths of all dotfiles related to this mod.
 
-        **Note:** Directories must end in a forward slash to be correctly identified.
-        """
-        ...
+    **Note:** Directories must end in a forward slash to be correctly identified.
+    """
+
+    pretty_name: str
+    """
+    Pretty, human-formatted name to display to the user.
+    """
+
+    description: str
+    """
+    A brief description of this mod.
+    """
 
     @abstractmethod
     def detect(self, quiet: bool = False) -> bool:
@@ -45,7 +49,7 @@ class BaseMod(ABC):
         """
         Install this mod.
 
-        :param bool = False force: Force installation, regardless of whether or not 
+        :param bool = False force: Force installation, regardless of whether or not
             this mod is already detected.
 
         The runner of this mod is responsible for ensuring all dependencies of this mod are satisfied

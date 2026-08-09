@@ -9,6 +9,8 @@ dot(1) -- a customizable, lightweight, install-less, stdlib-only dotfile manager
 
 **dot** is a customizable, lightweight, install-less, stdlib-only dotfile manager. Written for Python 3.9+, it supports macOS (because even macOS 26 is shipping with Python 3.9.6, which is from 2022) and older Linux distros, and, as Python 3 generally has excellent backwards compatibility, it is highly likely to work on later versions as well.
 
+If you're reading this documentation from the website but want it locally through `man`, install the local documentation with `dot mod install ManFiles`.
+
 ## OPTIONS
 
 Most options are part of subcommands, but there are two root-level options:
@@ -66,6 +68,9 @@ Most options are part of subcommands, but there are two root-level options:
     Absolute path to the dotfiles directory (sometimes called "dotfiles repository", "repository", or even just "repo"). Must be set for **dot** to function. By default, .zshrc (managed) sets this to $XDG_CONFIG_HOME/dotfiles.
 
     A dotfile's "relative path" is relative to $DOTFILES_DIR _and_ the user's $HOME folder.
+
+  * DOTFILES_LOGLEVEL:
+    Sets the log level used by file operations. Defaults to "WARN" if unset.
 
   * XDG_CONFIG_HOME:
     .zshrc (managed) sets this to $HOME/.config (the default as specified by the Free Desktop project). macOS does not set this, so .zshrc has to set it manually.

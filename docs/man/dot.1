@@ -7,6 +7,8 @@
 \fBdot\fR [\-h] \fIsubcommand\fR [\fIargs\fR]
 .SH "DESCRIPTION"
 \fBdot\fR is a customizable, lightweight, install\-less, stdlib\-only dotfile manager\. Written for Python 3\.9+, it supports macOS (because even macOS 26 is shipping with Python 3\.9\.6, which is from 2022) and older Linux distros, and, as Python 3 generally has excellent backwards compatibility, it is highly likely to work on later versions as well\.
+.P
+If you're reading this documentation from the website but want it locally through \fBman\fR, install the local documentation with \fBdot mod install ManFiles\fR\.
 .SH "OPTIONS"
 Most options are part of subcommands, but there are two root\-level options:
 .TP
@@ -61,6 +63,9 @@ DOTFILES_DIR
 Absolute path to the dotfiles directory (sometimes called "dotfiles repository", "repository", or even just "repo")\. Must be set for \fBdot\fR to function\. By default, \.zshrc (managed) sets this to $XDG_CONFIG_HOME/dotfiles\.
 .IP
 A dotfile's "relative path" is relative to $DOTFILES_DIR \fIand\fR the user's $HOME folder\.
+.TP
+DOTFILES_LOGLEVEL
+Sets the log level used by file operations\. Defaults to "WARN" if unset\.
 .TP
 XDG_CONFIG_HOME
 \&\.zshrc (managed) sets this to $HOME/\.config (the default as specified by the Free Desktop project)\. macOS does not set this, so \.zshrc has to set it manually\.

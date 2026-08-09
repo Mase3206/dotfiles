@@ -68,13 +68,15 @@ dot sync
 
 All file paths from hereon out are *relative paths*, relative to the user's home directory (and thus also dotfiles repository).
 
+See documentation at [mase3206.github.io/dotfiles/man/dot.1.html](https://mase3206.github.io/dotfiles/man/dot.1.html) or with `man dot` (manfiles installed with `dot mod install ManFiles`) for all command documentation.
 
-#### Environment Variables
+**Environment Variables**
 
 - `$DOTFILES_DIR`: Points to the folder containing the dotfiles repo.
 - `$DOTFILES_LOGLEVEL`: Sets the log level. Defaults to "WARN" if unset.
 
 
+<!--
 #### Link managed files
 
 ```shell
@@ -198,6 +200,7 @@ The *git* subcommand provides an easy way to commit and push changes to dotfiles
 	- Note: this has not been tested very thoroughly, so use it at your own risk.
 - **status:** Get the current Git status of the local repo.
 - **diff:** Get the current Git diff of changed files
+-->
 
 
 ## Mods

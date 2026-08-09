@@ -11,5 +11,8 @@ html:
 man:
 	ronn --roff $(FILES)
 
+clean:
+	rm -f *.1 *.1.html
+
 # index:
 # 	uv run index.py

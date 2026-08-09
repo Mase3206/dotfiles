@@ -1,10 +1,11 @@
 import subprocess
 
 from dotmgr import HOME, USER, outputs
-from dotmgr.mods import __mods__
 from dotmgr.mods.base import BaseMod, InstallStatus
 from dotmgr.utils import cd, mktemp
 
+
+# from dotmgr.mods import __mods__
 
 class OhMyZsh(BaseMod):
     """
@@ -17,13 +18,10 @@ class OhMyZsh(BaseMod):
     - Dotfiles: .oh-my-zsh/themes/terse.zsh-theme
     """
 
-    @property
-    def dependencies(self) -> list[str]:
-        return ["Zsh"]
-
-    @property
-    def dotfiles(self) -> list[str]:
-        return [".oh-my-zsh/themes/terse.zsh-theme"]
+    dependencies = ["Zsh"]
+    dotfiles = [".oh-my-zsh/themes/terse.zsh-theme"]
+    pretty_name = "Oh My Zsh"
+    description = 'Install the Oh My Zsh "plugin" for Zsh'
 
     def detect(self, quiet: bool = False) -> bool:
         dest_path = HOME / ".oh-my-zsh"
@@ -44,10 +42,12 @@ class OhMyZsh(BaseMod):
             outputs.skip("OMZ installation")
             return
 
-        _zsh = __mods__["Zsh"]
-        if not _zsh.detect():
-            outputs.step("Zsh not detected, installing")
-            _zsh.install()
+        self._install_dependencies()
+
+        # _zsh = __mods__["Zsh"]
+        # if not _zsh.detect():
+        #     outputs.step("Zsh not detected, installing")
+        #     _zsh.install()
 
         try:
             with mktemp() as tempfolder, cd(tempfolder) as cwd:
