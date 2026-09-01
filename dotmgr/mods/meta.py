@@ -53,6 +53,8 @@ class ZshCompletions(BaseMod):
             render = compmaker.render_zsh(commands)
 
             outputs.step("Save Zsh completions")
+            if not self._compfile_path.parent.exists():
+                self._compfile_path.parent.mkdir(parents=True)
             with open(self._compfile_path, "w+") as f:
                 f.write(render)
 
