@@ -2,7 +2,10 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Do Homebrew stuff
-if [ -f /opt/homebrew/bin/brew ]; then
+if [ -f /opt/workbrew/bin/brew ]; then
+	export PATH="/opt/workbrew/bin:/opt/workbrew/sbin:$PATH"
+	eval "$(brew shellenv)"
+elif [ -f /opt/homebrew/bin/brew ]; then
 	export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 	eval "$(brew shellenv)"
 fi
