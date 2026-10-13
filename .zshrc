@@ -3,8 +3,7 @@
 
 # Do Homebrew stuff
 if [ -f /opt/workbrew/bin/brew ]; then
-	export PATH="/opt/workbrew/bin:/opt/workbrew/sbin:$PATH"
-	eval "$(brew shellenv)"
+	eval "$(/opt/workbrew/bin/brew shellenv)"
 elif [ -f /opt/homebrew/bin/brew ]; then
 	export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 	eval "$(brew shellenv)"
