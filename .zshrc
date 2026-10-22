@@ -137,18 +137,67 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-function venv-activate {
-	if [[ "$1" == "" ]]; then
-		echo "Please specify the folder of the virtual environment in your current working directory."
-	elif [ -d "$1" ]; then
-		source $1/bin/activate
-		#. ~/.zshrc
-	else
-		echo "Virtual Environment directory named '$1' not found in $(pwd)."
-	fi
-}
-
 [ -f ~/.aliases ] && source ~/.aliases
 
-alias vrun="vrun && terse_theme_prompt"
 alias gedit="gnome-text-editor"
+alias trim="sed 's/^[ \t]*//;s/[ \t]*$//'"
+
+
+# Helpful functions to find and search through macOS plist defaults.
+if [[ "$(uname)" == "Darwin" ]]; then
+    function fdom () {
+        # Help text (or missing args)
+        if [[ "$1" == "-h" ]]; then
+            echo 'usage: fdom [search_key]'
+            echo 'search_key - the optional (case-insensitive) key to search for via grep'
+            return 0
+        fi
+
+        local out="$(defaults domains | sed 's/, /\n/g')"
+        if [[ "$1" == "" ]]; then
+            echo -e "$out"
+        else
+            echo -e "$out" | grep -i "$1"
+        fi
+    }
+
+    function ddom () {
+        # Help text (or missing args)
+        if [[ "$1" == "" ]] || [[ "$1" == "-h" ]] || [[ "$2" == "" ]] || [[ "$2" == "-h" ]]; then
+            local valid_defaults_cmds="$(defaults -h | head -n 28 | tail -n 23 \
+                | awk '{ print $1 }' | awk '!seen[$0]++' | sed '/^[[:space:]]*$/d' \
+                | tr '\n' ' ' | trim)"
+
+            echo 'usage: ddom <defaults_cmd> <domain_search_key> [...defaults_args]'
+            echo ''
+            echo '<domain_search_key>" - The part of a domain to look for via grep (case-insensitive).'
+            echo '    If only one domain is found, all of its keys are dumped.'
+            echo '    If more than one domains are found, the domain names are listed and the function returns 1.'
+            echo ''
+            echo "<defaults_cmd> - Valid options are '$valid_defaults_cmds'"
+            echo '    See `defaults help` for details on each option and the parameters they accept.'
+
+            if [[ "$1" == "-h" ]] || [[ "$2" == "-h" ]]; then
+                return 0
+            else
+                return 2
+            fi
+        fi
+
+        local out_arr
+        declare -a out_arr=($(fdom "$2"))
+
+        if [[ "${#out_arr[@]}" != "1" ]]; then
+            echo "Found ${#out_arr[@]} domains:"
+            for d in ${out_arr[@]}; do
+                echo "- $d"
+            done
+            return 1
+        else
+            local key=$2
+            local defaults_cmd=$1
+            shift 2
+            fdom "$key" | xargs -I% defaults $defaults_cmd % $@
+        fi
+    }
+fi
