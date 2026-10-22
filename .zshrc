@@ -142,6 +142,12 @@ source $ZSH/oh-my-zsh.sh
 alias gedit="gnome-text-editor"
 alias trim="sed 's/^[ \t]*//;s/[ \t]*$//'"
 
+if [[ "$(dot git status)" != 'No changes to managed dotfiles detected.' ]]; then
+    echo 'The local dotfile repo is dirty. Check that before making or committing any changes to your dotfiles.'
+    dot git status
+fi
+
+
 
 # Helpful functions to find and search through macOS plist defaults.
 if [[ "$(uname)" == "Darwin" ]]; then
