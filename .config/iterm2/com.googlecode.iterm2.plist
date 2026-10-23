@@ -51,7 +51,7 @@
 			<key>Text</key>
 			<string></string>
 		</dict>
-		<key>0x2f-0x100000-0x2c</key>
+		<key>0x2f-0x100000-0x2c-0x1</key>
 		<dict>
 			<key>Action</key>
 			<integer>13</integer>
@@ -64,7 +64,7 @@
 			<key>Version</key>
 			<integer>2</integer>
 		</dict>
-		<key>0x63-0x100000-0x8</key>
+		<key>0x63-0x100000-0x8-0x1</key>
 		<dict>
 			<key>Action</key>
 			<integer>25</integer>
@@ -78,7 +78,7 @@ Copy</string>
 			<key>Version</key>
 			<integer>2</integer>
 		</dict>
-		<key>0x76-0x100000-0x9</key>
+		<key>0x76-0x100000-0x9-0x1</key>
 		<dict>
 			<key>Action</key>
 			<integer>25</integer>
@@ -99,7 +99,7 @@ Paste</string>
 			<key>Text</key>
 			<string></string>
 		</dict>
-		<key>0xd-0x100000-0x24</key>
+		<key>0xd-0x100000-0x24-0x1</key>
 		<dict>
 			<key>Action</key>
 			<integer>13</integer>
@@ -126,7 +126,7 @@ Paste</string>
 			<key>Text</key>
 			<string></string>
 		</dict>
-		<key>0xf702-0x280000-0x7b</key>
+		<key>0xf702-0x280000-0x7b-0x1</key>
 		<dict>
 			<key>Action</key>
 			<integer>10</integer>
@@ -153,7 +153,7 @@ Paste</string>
 			<key>Text</key>
 			<string></string>
 		</dict>
-		<key>0xf703-0x280000-0x7c</key>
+		<key>0xf703-0x280000-0x7c-0x1</key>
 		<dict>
 			<key>Action</key>
 			<integer>10</integer>
@@ -227,6 +227,10 @@ Paste</string>
 	<false/>
 	<key>HotkeyMigratedFromSingleToMulti</key>
 	<true/>
+	<key>NeverWarnAboutShortLivedSessions_678E0313-3802-40D8-9B8B-84798A425080</key>
+	<true/>
+	<key>NeverWarnAboutShortLivedSessions_678E0313-3802-40D8-9B8B-84798A425080_selection</key>
+	<integer>0</integer>
 	<key>New Bookmarks</key>
 	<array>
 		<dict>
@@ -1200,7 +1204,7 @@ Paste</string>
 			</array>
 			<key>Keyboard Map</key>
 			<dict>
-				<key>0x68-0x180000-0x4</key>
+				<key>0x68-0x180000-0x4-0x1</key>
 				<dict>
 					<key>Action</key>
 					<integer>28</integer>
@@ -1213,7 +1217,7 @@ Paste</string>
 					<key>Version</key>
 					<integer>2</integer>
 				</dict>
-				<key>0x76-0x180000-0x9</key>
+				<key>0x76-0x180000-0x9-0x1</key>
 				<dict>
 					<key>Action</key>
 					<integer>29</integer>
@@ -1378,6 +1382,8 @@ Paste</string>
 			<false/>
 			<key>Send Session Ended Alert</key>
 			<true/>
+			<key>Send Terminal Generated Alerts</key>
+			<true/>
 			<key>Shortcut</key>
 			<string></string>
 			<key>Show Status Bar</key>
@@ -1475,6 +1481,8 @@ Paste</string>
 					<string>\btelnet:([a-z0-9A-Z_]+@)?([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\b</string>
 				</dict>
 			</array>
+			<key>Suppress Alerts in Active Session</key>
+			<true/>
 			<key>Sync Title</key>
 			<false/>
 			<key>Tags</key>
