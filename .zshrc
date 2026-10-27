@@ -28,7 +28,7 @@ export MANPATH="$XDG_DATA_HOME/man:$MANPATH"
 # This line is needed to make the new Python-based dotfiles manager work,
 # since it does some dynamic import trickery.
 export PYTHONPATH="$DOTFILES_DIR:$PYTHONPATH"
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 export EDITOR='vim'
 
 # Path to your oh-my-zsh installation.
